@@ -1,6 +1,6 @@
 import { builder, type InferPothosObject } from '../builder.ts'
 import { ORDERS, incrementId } from '@coffee-shop/shared'
-import { z } from 'zod'
+import * as z from 'zod'
 import { GraphQLError } from 'graphql'
 import { userMap, UserRef } from './user.ts'
 import { menuMap, MenuItemRef } from './menu.ts'

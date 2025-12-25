@@ -1,0 +1,21 @@
+{
+  "name": "pothos",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.ts",
+    "print": "node src/print.ts",
+    "test": "node src/schema.test.ts"
+  },
+  "dependencies": {
+    "@coffee-shop/shared": "workspace:*",
+    "@pothos/core": "^4.10.0",
+    "@pothos/plugin-dataloader": "^4.4.3",
+    "@pothos/plugin-validation": "^4.2.0",
+    "dataloader": "^2.2.3",
+    "graphql": "^16.12.0",
+    "graphql-scalars": "^1.25.0",
+    "graphql-yoga": "^5.18.0",
+    "zod": "^4.2.1"
+  }
+}

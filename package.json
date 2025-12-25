@@ -12,7 +12,10 @@
     "test:pothos": "pnpm -F pothos test",
     "dev:typegraphql": "pnpm -F typegraphql dev",
     "print:typegraphql": "pnpm -F typegraphql print",
-    "test:typegraphql": "pnpm -F typegraphql test"
+    "test:typegraphql": "pnpm -F typegraphql test",
+    "dev:nexus": "pnpm -F nexus dev",
+    "print:nexus": "pnpm -F nexus print",
+    "test:nexus": "pnpm -F nexus test"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

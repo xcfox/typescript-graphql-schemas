@@ -149,9 +149,9 @@ export const orderResolver = resolver.of(Order, {
 
   createOrder: mutation(Order)
     .input({
-      userId: z.int().refine((id: number) => userMap.has(id)),
+      userId: z.int().refine((id: number) => userMap.has(id), 'User not found'),
       items: z
-        .array(z.int().refine((id: number) => menuMap.has(id)))
+        .array(z.int().refine((id: number) => menuMap.has(id), 'Menu item not found'))
         .min(1, 'At least one item is required'),
     })
     .resolve(({ userId, items }) => {

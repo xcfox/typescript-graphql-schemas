@@ -1,5 +1,23 @@
 import 'reflect-metadata'
-import { Resolver, Query, Mutation, Arg, FieldResolver, Root, Int } from 'type-graphql'
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Arg,
+  FieldResolver,
+  Root,
+  Int,
+  Args,
+  ArgsType,
+  Field,
+} from 'type-graphql'
+import {
+  ArrayNotEmpty,
+  registerDecorator,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator'
 import { GraphQLError } from 'graphql'
 import { ORDERS, incrementId } from '@coffee-shop/shared'
 import { Order, OrderStatus } from './order.type.ts'
@@ -7,6 +25,62 @@ import { User } from './user.type.ts'
 import { MenuItem } from './menu.type.ts'
 import { userMap } from './user.resolver.ts'
 import { menuMap } from './menu.resolver.ts'
+
+@ValidatorConstraint({ name: 'userExists', async: false })
+class UserExistsConstraint implements ValidatorConstraintInterface {
+  validate(userId: number) {
+    return userMap.has(userId)
+  }
+  defaultMessage() {
+    return 'User not found'
+  }
+}
+
+function UserExists(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: UserExistsConstraint,
+    })
+  }
+}
+
+@ValidatorConstraint({ name: 'menuItemsExist', async: false })
+class MenuItemsExistConstraint implements ValidatorConstraintInterface {
+  validate(items: number[]) {
+    return items.every((id) => menuMap.has(id))
+  }
+  defaultMessage() {
+    return 'Menu item not found'
+  }
+}
+
+function MenuItemsExist(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: MenuItemsExistConstraint,
+    })
+  }
+}
+
+@ArgsType()
+class CreateOrderArgs {
+  @Field(() => Int)
+  @UserExists()
+  userId!: number
+
+  @Field(() => [Int])
+  @ArrayNotEmpty({ message: 'At least one item is required' })
+  @MenuItemsExist()
+  items!: number[]
+}
 
 export const orderMap = new Map<number, Order>(
   ORDERS.map((o) => [
@@ -45,26 +119,7 @@ export class OrderResolver {
   }
 
   @Mutation(() => Order)
-  createOrder(
-    @Arg('userId', () => Int) userId: number,
-    @Arg('items', () => [Int]) items: number[],
-  ): Order {
-    // Validate userId exists
-    if (!userMap.has(userId)) {
-      throw new GraphQLError('User not found')
-    }
-
-    // Validate items exist and array is not empty
-    if (items.length === 0) {
-      throw new GraphQLError('At least one item is required')
-    }
-
-    for (const itemId of items) {
-      if (!menuMap.has(itemId)) {
-        throw new GraphQLError('Menu item not found')
-      }
-    }
-
+  createOrder(@Args(() => CreateOrderArgs) { userId, items }: CreateOrderArgs): Order {
     const id = incrementId()
     const newOrder = Object.assign(new Order(), {
       id,
@@ -96,4 +151,3 @@ export class OrderResolver {
     return order || null
   }
 }
-

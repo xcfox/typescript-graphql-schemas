@@ -1,4 +1,4 @@
-import { builder } from '../builder.ts'
+import { builder, type InferPothosObject } from '../builder.ts'
 import { ORDERS, incrementId } from '@coffee-shop/shared'
 import { z } from 'zod'
 import { GraphQLError } from 'graphql'
@@ -16,42 +16,39 @@ builder.enumType(OrderStatus, {
   name: 'OrderStatus',
 })
 
-export interface OrderShape {
-  id: number
-  createdAt: Date
-  status: OrderStatus
-  userId: number
-  itemIds: number[]
-}
-
-export const orderMap = new Map<number, OrderShape>(
-  ORDERS.map((o) => [o.id, { ...o, status: o.status as OrderStatus }]),
-)
-
-export const OrderRef = builder.objectRef<OrderShape>('Order')
-
-OrderRef.implement({
+export const OrderRef = builder.simpleObject('Order', {
   fields: (t) => ({
-    id: t.exposeInt('id'),
-    createdAt: t.expose('createdAt', { type: 'DateTime' }),
-    status: t.expose('status', { type: OrderStatus }),
-    userId: t.exposeInt('userId'),
-    itemIds: t.exposeIntList('itemIds'),
-    user: t.field({
-      type: UserRef,
-      nullable: true,
-      resolve: (order) => userMap.get(order.userId) || null,
-    }),
-    items: t.field({
-      type: [MenuItemRef],
-      resolve: (order) => {
-        return order.itemIds
-          .map((id) => menuMap.get(id))
-          .filter((item): item is NonNullable<typeof item> => !!item)
-      },
-    }),
+    id: t.int(),
+    createdAt: t.field({ type: 'DateTime' }),
+    status: t.field({ type: OrderStatus }),
+    userId: t.int(),
+    itemIds: t.intList(),
   }),
 })
+
+builder.objectFields(OrderRef, (t) => ({
+  user: t.field({
+    type: UserRef,
+    nullable: true,
+    resolve: (order) => userMap.get(order.userId) || null,
+  }),
+  items: t.field({
+    type: [MenuItemRef],
+    resolve: (order) => {
+      return order.itemIds
+        .map((id) => menuMap.get(id))
+        .filter((item): item is NonNullable<typeof item> => !!item)
+    },
+  }),
+}))
+
+// 移除 OrderShape，通过推导获取类型
+export const orderMap = new Map<number, InferPothosObject<typeof OrderRef>>(
+  ORDERS.map((o) => [
+    o.id,
+    { ...o, status: o.status as OrderStatus } as InferPothosObject<typeof OrderRef>,
+  ]),
+)
 
 builder.queryFields((t) => ({
   orders: t.field({
@@ -88,7 +85,7 @@ builder.mutationFields((t) => ({
     },
     resolve: (_parent, { userId, items }) => {
       const id = incrementId()
-      const newOrder: OrderShape = {
+      const newOrder = {
         id,
         userId,
         itemIds: items,

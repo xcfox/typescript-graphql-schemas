@@ -1,4 +1,4 @@
-import { builder } from '../builder.ts'
+import { builder, type InferPothosObject } from '../builder.ts'
 import { MENU_ITEMS, incrementId } from '@coffee-shop/shared'
 import { GraphQLError } from 'graphql'
 
@@ -13,27 +13,19 @@ builder.enumType(MenuCategory, {
   name: 'MenuCategory',
 })
 
-export interface MenuItemShape {
-  id: number
-  name: string
-  price: number
-  category: MenuCategory
-}
-
-export const menuMap = new Map<number, MenuItemShape>(
-  MENU_ITEMS.map((i) => [i.id, i as MenuItemShape]),
-)
-
-export const MenuItemRef = builder.objectRef<MenuItemShape>('Menu')
-
-MenuItemRef.implement({
+export const MenuItemRef = builder.simpleObject('Menu', {
   fields: (t) => ({
-    id: t.exposeInt('id'),
-    name: t.exposeString('name'),
-    price: t.exposeFloat('price'),
-    category: t.expose('category', { type: MenuCategory }),
+    id: t.int(),
+    name: t.string(),
+    price: t.float(),
+    category: t.field({ type: MenuCategory }),
   }),
 })
+
+// 移除 MenuItemShape，通过推导获取类型
+export const menuMap = new Map<number, InferPothosObject<typeof MenuItemRef>>(
+  MENU_ITEMS.map((i) => [i.id, i as InferPothosObject<typeof MenuItemRef>]),
+)
 
 builder.queryFields((t) => ({
   menu: t.field({

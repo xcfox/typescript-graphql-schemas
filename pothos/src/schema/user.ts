@@ -1,32 +1,30 @@
-import { builder } from '../builder.ts'
+import { builder, type InferPothosObject } from '../builder.ts'
 import { USERS, incrementId } from '@coffee-shop/shared'
 import { z } from 'zod'
 import { GraphQLError } from 'graphql'
 import { OrderRef, orderMap } from './order.ts'
 
-export interface UserShape {
-  id: number
-  name: string
-  email: string
-}
-
-export const userMap = new Map<number, UserShape>(USERS.map((u) => [u.id, u]))
-
-export const UserRef = builder.objectRef<UserShape>('User')
-
-UserRef.implement({
+export const UserRef = builder.simpleObject('User', {
   fields: (t) => ({
-    id: t.exposeInt('id'),
-    name: t.exposeString('name'),
-    email: t.exposeString('email'),
-    orders: t.field({
-      type: [OrderRef],
-      resolve: (user) => {
-        return Array.from(orderMap.values()).filter((o) => o.userId === user.id)
-      },
-    }),
+    id: t.int(),
+    name: t.string(),
+    email: t.string(),
   }),
 })
+
+builder.objectFields(UserRef, (t) => ({
+  orders: t.field({
+    type: [OrderRef],
+    resolve: (user) => {
+      return Array.from(orderMap.values()).filter((o) => o.userId === user.id)
+    },
+  }),
+}))
+
+// 从 UserRef 的泛型参数中提取 Shape，不再手写 interface
+export const userMap = new Map<number, InferPothosObject<typeof UserRef>>(
+  USERS.map((u) => [u.id, u as InferPothosObject<typeof UserRef>]),
+)
 
 builder.queryFields((t) => ({
   users: t.field({

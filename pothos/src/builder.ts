@@ -1,6 +1,7 @@
 import SchemaBuilder from '@pothos/core'
 import ValidationPlugin from '@pothos/plugin-validation'
 import DataloaderPlugin from '@pothos/plugin-dataloader'
+import SimpleObjectsPlugin from '@pothos/plugin-simple-objects'
 import { DateTimeResolver } from 'graphql-scalars'
 import { GraphQLError } from 'graphql'
 
@@ -20,7 +21,7 @@ export interface SchemaTypes {
 }
 
 const builder = new SchemaBuilder<SchemaTypes>({
-  plugins: [ValidationPlugin, DataloaderPlugin],
+  plugins: [ValidationPlugin, DataloaderPlugin, SimpleObjectsPlugin],
   defaultFieldNullability: false,
   validation: {
     validationError: (validationResult) => {
@@ -34,5 +35,8 @@ builder.addScalarType('DateTime', DateTimeResolver, {})
 
 builder.queryType({})
 builder.mutationType({})
+
+export type InferPothosObject<T> =
+  T extends PothosSchemaTypes.ObjectRef<any, infer Shape> ? Shape : never
 
 export { builder }

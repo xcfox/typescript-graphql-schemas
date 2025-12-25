@@ -1,0 +1,23 @@
+{
+  "name": "typegraphql",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "print": "tsx src/print.ts",
+    "test": "tsx src/schema.test.ts"
+  },
+  "dependencies": {
+    "@coffee-shop/shared": "workspace:*",
+    "class-validator": "^0.14.1",
+    "graphql": "^16.12.0",
+    "graphql-scalars": "^1.25.0",
+    "graphql-yoga": "^5.18.0",
+    "reflect-metadata": "^0.2.2",
+    "type-graphql": "^2.0.0-beta.3",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}

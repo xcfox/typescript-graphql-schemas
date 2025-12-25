@@ -24,7 +24,7 @@
 
 ## 📚 GraphQL Schema 库列表
 
-- [ ] **[TypeGraphQL](https://typegraphql.com/)**
+- [x] **[TypeGraphQL](https://typegraphql.com/)**
 - [ ] **[Nexus](https://nexus.js.org/)**
 - [x] **[Pothos](https://pothos-graphql.dev/)**
 - [ ] **[Grats](https://grats.capt.dev/)**

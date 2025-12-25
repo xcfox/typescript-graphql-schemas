@@ -29,8 +29,8 @@
 - [x] **[Pothos](https://pothos-graphql.dev/)**
 - [ ] **[Grats](https://grats.capt.dev/)**
 - [ ] **[gqtx](https://github.com/sikanhe/gqtx)**
-- [ ] **[Pylon](https://pylon.cronit.io/)**
 - [x] **[GQLoom](https://gqloom.dev/)**
+- [ ] **[Pylon](https://pylon.cronit.io/)**
 - [ ] **[garph](https://garph.dev/)**
 
 ## ☕ 业务模型：咖啡点餐系统

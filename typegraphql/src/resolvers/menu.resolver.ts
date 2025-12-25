@@ -58,4 +58,3 @@ export class MenuResolver {
     return item || null
   }
 }
-

@@ -10,13 +10,16 @@ import {
   Args,
   ArgsType,
   Field,
+  Ctx,
 } from 'type-graphql'
 import { IsEmail, IsOptional } from 'class-validator'
 import { GraphQLError } from 'graphql'
 import { USERS, incrementId } from '@coffee-shop/shared'
 import { User } from './user.type.ts'
 import { Order } from './order.type.ts'
-import { orderMap } from './order.resolver.ts'
+import { MyContext } from '../context.ts'
+
+export const userMap = new Map<number, User>(USERS.map((u) => [u.id, Object.assign(new User(), u)]))
 
 @ArgsType()
 class CreateUserArgs {
@@ -40,8 +43,6 @@ class UpdateUserArgs {
   email?: string
 }
 
-export const userMap = new Map<number, User>(USERS.map((u) => [u.id, Object.assign(new User(), u)]))
-
 @Resolver(() => User)
 export class UserResolver {
   @Query(() => [User])
@@ -57,8 +58,8 @@ export class UserResolver {
   }
 
   @FieldResolver(() => [Order])
-  orders(@Root() user: User): Order[] {
-    return Array.from(orderMap.values()).filter((o) => o.userId === user.id)
+  async orders(@Root() user: User, @Ctx() { loaders }: MyContext): Promise<Order[]> {
+    return loaders.userOrders.load(user.id)
   }
 
   @Mutation(() => User)

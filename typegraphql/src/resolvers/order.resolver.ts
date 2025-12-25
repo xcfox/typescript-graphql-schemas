@@ -26,6 +26,16 @@ import { MenuItem } from './menu.type.ts'
 import { userMap } from './user.resolver.ts'
 import { menuMap } from './menu.resolver.ts'
 
+export const orderMap = new Map<number, Order>(
+  ORDERS.map((o) => [
+    o.id,
+    Object.assign(new Order(), {
+      ...o,
+      status: o.status as OrderStatus,
+    }),
+  ]),
+)
+
 @ValidatorConstraint({ name: 'userExists', async: false })
 class UserExistsConstraint implements ValidatorConstraintInterface {
   validate(userId: number) {
@@ -81,16 +91,6 @@ class CreateOrderArgs {
   @MenuItemsExist()
   items!: number[]
 }
-
-export const orderMap = new Map<number, Order>(
-  ORDERS.map((o) => [
-    o.id,
-    Object.assign(new Order(), {
-      ...o,
-      status: o.status as OrderStatus,
-    }),
-  ]),
-)
 
 @Resolver(() => Order)
 export class OrderResolver {

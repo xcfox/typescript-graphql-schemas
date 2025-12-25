@@ -22,6 +22,17 @@
 └── pnpm-workspace.yaml
 ```
 
+## 📚 GraphQL Schema 库列表
+
+- [ ] **[TypeGraphQL](https://typegraphql.com/)**
+- [ ] **[Nexus](https://nexus.js.org/)**
+- [x] **[Pothos](https://pothos-graphql.dev/)**
+- [ ] **[Grats](https://grats.capt.dev/)**
+- [ ] **[Pylon](https://pylon.cronit.io/)**
+- [x] **[GQLoom](https://gqloom.dev/)**
+- [ ] **[gqtx](https://github.com/sikanhe/gqtx)**
+- [ ] **[garph](https://garph.dev/)**
+
 ## ☕ 业务模型：咖啡点餐系统
 
 每个库都必须实现以下核心领域模型和逻辑：

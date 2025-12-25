@@ -1,0 +1,39 @@
+type Query {
+  menu: [Menu!]!
+  user(id: String!): User!
+}
+
+type Menu {
+  id: String!
+  name: String!
+  price: Float!
+  category: MenuCategory!
+}
+
+enum MenuCategory {
+  COFFEE
+  FOOD
+}
+
+type User {
+  id: String!
+  name: String!
+  email: String!
+}
+
+type Mutation {
+  createOrder(userId: String!, items: [String!]!): CreateOrder!
+}
+
+type CreateOrder {
+  id: String!
+  createdAt: String!
+  status: CreateOrderStatus!
+  userId: String!
+  itemIds: [String!]!
+}
+
+enum CreateOrderStatus {
+  PENDING
+  COMPLETED
+}

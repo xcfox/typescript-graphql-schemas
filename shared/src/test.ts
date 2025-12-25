@@ -1,17 +1,17 @@
 import { describe, it } from 'node:test'
 import * as assert from 'node:assert'
-import { type GraphQLSchema, execute as executeGraphQL, parse } from 'graphql'
+import { type ExecutionResult, type GraphQLSchema, execute as executeGraphQL, parse } from 'graphql'
 import { USERS, MENU_ITEMS, ORDERS } from './index.ts'
 
 export function runTests(schema: GraphQLSchema) {
-  const execute = async (query: string, variables?: Record<string, any>) => {
+  const execute = async <TData = any>(query: string, variables?: Record<string, any>) => {
     const document = parse(query)
     const result = await executeGraphQL({
       schema,
       document,
       variableValues: variables,
     })
-    return result
+    return result as ExecutionResult<TData>
   }
 
   const initialUserIds = USERS.map((u) => u.id)
@@ -29,7 +29,7 @@ export function runTests(schema: GraphQLSchema) {
         }
       `)
       assert.strictEqual(result.errors, undefined)
-      const users = (result.data?.users as any[]).filter((u) => initialUserIds.includes(u.id))
+      const users = result.data?.users.filter((u: any) => initialUserIds.includes(u.id))
       assert.deepEqual(users, USERS)
     })
 
@@ -82,7 +82,7 @@ export function runTests(schema: GraphQLSchema) {
         { id: user.id },
       )
       assert.strictEqual(result.errors, undefined)
-      const userOrders = (result.data?.user as any).orders
+      const userOrders = result.data?.user?.orders
       assert.ok(Array.isArray(userOrders))
       userOrders.forEach((o: any) => assert.strictEqual(o.userId, user.id))
     })
@@ -129,7 +129,7 @@ export function runTests(schema: GraphQLSchema) {
         { id: user.id },
       )
       assert.strictEqual(result.errors, undefined)
-      assert.strictEqual((result.data?.updateUser as any).name, 'Updated Bob')
+      assert.strictEqual(result.data?.updateUser?.name, 'Updated Bob')
     })
 
     it('should delete a user (using a newly created one)', async () => {
@@ -140,7 +140,7 @@ export function runTests(schema: GraphQLSchema) {
           }
         }
       `)
-      const newUserId = (createRes.data?.createUser as any).id
+      const newUserId = createRes.data?.createUser?.id
 
       const deleteRes = await execute(
         /* GraphQL */ `
@@ -180,7 +180,7 @@ export function runTests(schema: GraphQLSchema) {
         }
       `)
       assert.strictEqual(result.errors, undefined)
-      const menu = (result.data?.menu as any[]).filter((i) => initialMenuItemIds.includes(i.id))
+      const menu = result.data?.menu.filter((i: any) => initialMenuItemIds.includes(i.id))
       assert.deepEqual(menu, MENU_ITEMS)
     })
 
@@ -198,7 +198,7 @@ export function runTests(schema: GraphQLSchema) {
         { id: item.id },
       )
       assert.strictEqual(result.errors, undefined)
-      assert.strictEqual((result.data?.menuItem as any).name, item.name)
+      assert.strictEqual(result.data?.menuItem?.name, item.name)
     })
 
     it('should create a menu item', async () => {
@@ -233,7 +233,7 @@ export function runTests(schema: GraphQLSchema) {
         { id: item.id },
       )
       assert.strictEqual(result.errors, undefined)
-      assert.strictEqual((result.data?.updateMenuItem as any).price, 4.0)
+      assert.strictEqual(result.data?.updateMenuItem?.price, 4.0)
     })
 
     it('should delete a menu item', async () => {
@@ -244,7 +244,7 @@ export function runTests(schema: GraphQLSchema) {
           }
         }
       `)
-      const newItemId = (createRes.data?.createMenuItem as any).id
+      const newItemId = createRes.data?.createMenuItem?.id
 
       const result = await execute(
         /* GraphQL */ `
@@ -295,11 +295,11 @@ export function runTests(schema: GraphQLSchema) {
         { id: order.id },
       )
       assert.strictEqual(result.errors, undefined)
-      const data = result.data?.order as any
-      assert.ok(data.user, 'Order user should be resolved')
-      assert.strictEqual(data.user.id, order.userId)
-      assert.ok(Array.isArray(data.items))
-      assert.strictEqual(data.items.length, order.itemIds.length)
+      const data = result.data?.order
+      assert.ok(data?.user, 'Order user should be resolved')
+      assert.strictEqual(data?.user.id, order.userId)
+      assert.ok(Array.isArray(data?.items))
+      assert.strictEqual(data?.items.length, order.itemIds.length)
     })
 
     it('should create an order with valid userId and items', async () => {
@@ -396,7 +396,7 @@ export function runTests(schema: GraphQLSchema) {
         { id: order.id },
       )
       assert.strictEqual(result.errors, undefined)
-      assert.strictEqual((result.data?.updateOrder as any).status, 'COMPLETED')
+      assert.strictEqual(result.data?.updateOrder?.status, 'COMPLETED')
     })
 
     it('should delete an order', async () => {
@@ -411,7 +411,7 @@ export function runTests(schema: GraphQLSchema) {
         { userId: USERS[0].id, items: [MENU_ITEMS[0].id] },
       )
       assert.ok(createRes.data?.createOrder, 'Order should be created')
-      const newOrderId = (createRes.data?.createOrder as any).id
+      const newOrderId = createRes.data?.createOrder?.id
 
       const result = await execute(
         /* GraphQL */ `

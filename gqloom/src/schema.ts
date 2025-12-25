@@ -1,6 +1,5 @@
 import * as z from 'zod'
-import { GraphQLError, printSchema } from 'graphql'
-import { writeFileSync } from 'node:fs'
+import { GraphQLError } from 'graphql'
 import { resolver, query, mutation, field, weave } from '@gqloom/core'
 import { ZodWeaver } from '@gqloom/zod'
 import { USERS, MENU_ITEMS, ORDERS, incrementId } from '@coffee-shop/shared'
@@ -200,6 +199,3 @@ export const orderResolver = resolver.of(Order, {
 // --- Schema Weaving ---
 
 export const schema = weave(ZodWeaver, userResolver, menuResolver, orderResolver)
-
-const sdl = printSchema(schema)
-writeFileSync(new URL('../schema.graphql', import.meta.url), sdl)

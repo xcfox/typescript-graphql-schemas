@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "gql": "tsx src/schema.ts"
+    "dev": "node --watch src/index.ts",
+    "print": "node src/print.ts"
   },
   "dependencies": {
     "@coffee-shop/shared": "workspace:*",

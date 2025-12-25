@@ -5,12 +5,11 @@
   "scripts": {
     "format": "prettier --write .",
     "dev:gqloom": "pnpm -F gqloom dev",
-    "gql:gqloom": "pnpm -F gqloom gql"
+    "print:gqloom": "pnpm -F gqloom print"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
     "prettier": "^3.4.2",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
 }

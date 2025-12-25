@@ -85,8 +85,15 @@ export const userResolver = resolver.of(User, {
       return userMap.delete(id)
     }),
 
-  orders: field(z.array(Order)).resolve((user) => {
-    return Array.from(orderMap.values()).filter((o) => o.userId === user.id)
+  orders: field(z.array(Order)).load((users) => {
+    const userOrders = new Map<number, z.infer<typeof Order>[]>()
+    for (const user of users) {
+      userOrders.set(
+        user.id,
+        Array.from(orderMap.values()).filter((o) => o.userId === user.id),
+      )
+    }
+    return users.map((user) => userOrders.get(user.id) ?? [])
   }),
 })
 
@@ -186,14 +193,16 @@ export const orderResolver = resolver.of(Order, {
       return orderMap.delete(id)
     }),
 
-  user: field(z.nullish(User)).resolve((order) => {
-    return userMap.get(order.userId)
+  user: field(z.nullish(User)).load((orders) => {
+    const userOrders = new Map<number, z.infer<typeof Order>>()
+    for (const order of orders) {
+      userOrders.set(order.userId, order)
+    }
+    return orders.map((order) => userMap.get(order.userId))
   }),
 
   items: field(z.array(MenuItem)).resolve((order) => {
-    return order.itemIds
-      .map((itemId) => menuMap.get(itemId))
-      .filter((i): i is any => i !== undefined)
+    return order.itemIds.map((itemId) => menuMap.get(itemId)).filter((i) => i != null)
   }),
 })
 

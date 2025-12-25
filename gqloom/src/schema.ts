@@ -193,13 +193,7 @@ export const orderResolver = resolver.of(Order, {
       return orderMap.delete(id)
     }),
 
-  user: field(z.nullish(User)).load((orders) => {
-    const userOrders = new Map<number, z.infer<typeof Order>>()
-    for (const order of orders) {
-      userOrders.set(order.userId, order)
-    }
-    return orders.map((order) => userMap.get(order.userId))
-  }),
+  user: field(z.nullish(User)).resolve((order) => userMap.get(order.userId)),
 
   items: field(z.array(MenuItem)).resolve((order) => {
     return order.itemIds.map((itemId) => menuMap.get(itemId)).filter((i) => i != null)

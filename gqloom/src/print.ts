@@ -4,4 +4,3 @@ import { schema } from './schema.ts'
 
 const sdl = printSchema(schema)
 writeFileSync(new URL('../schema.graphql', import.meta.url), sdl)
-

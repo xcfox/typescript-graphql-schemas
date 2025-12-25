@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/index.ts",
-    "print": "node src/print.ts"
+    "print": "node src/print.ts",
+    "test": "node src/schema.test.ts"
   },
   "dependencies": {
     "@coffee-shop/shared": "workspace:*",

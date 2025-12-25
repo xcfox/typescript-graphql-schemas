@@ -1,30 +1,13 @@
-type User {
-  id: Int!
-  name: String!
-  email: String!
-  orders: [Order!]!
-}
-
-type Order {
-  id: Int!
-  createdAt: String!
-  status: OrderStatus!
-  userId: Int!
-  itemIds: [Int!]!
-  user: User
-  items: [Menu!]!
-}
-
-enum OrderStatus {
-  PENDING
-  COMPLETED
-}
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
 
 type Menu {
+  category: MenuCategory!
   id: Int!
   name: String!
   price: Float!
-  category: MenuCategory!
 }
 
 enum MenuCategory {
@@ -32,23 +15,45 @@ enum MenuCategory {
   FOOD
 }
 
-type Query {
-  users: [User!]!
-  user(id: Int!): User!
-  menu: [Menu!]!
-  menuItem(id: Int!): Menu!
-  orders: [Order!]!
-  order(id: Int!): Order!
+type Mutation {
+  createMenuItem(category: MenuCategory!, name: String!, price: Float!): Menu!
+  createOrder(items: [Int!]!, userId: Int!): Order!
+  createUser(email: String!, name: String!): User!
+  deleteMenuItem(id: Int!): Boolean!
+  deleteOrder(id: Int!): Boolean!
+  deleteUser(id: Int!): Boolean!
+  updateMenuItem(category: MenuCategory, id: Int!, name: String, price: Float): Menu!
+  updateOrder(id: Int!, status: OrderStatus!): Order!
+  updateUser(email: String, id: Int!, name: String): User!
 }
 
-type Mutation {
-  createUser(name: String!, email: String!): User!
-  updateUser(id: Int!, name: String, email: String): User!
-  deleteUser(id: Int!): Boolean!
-  createMenuItem(name: String!, price: Float!, category: MenuCategory!): Menu!
-  updateMenuItem(id: Int!, name: String, price: Float, category: MenuCategory): Menu!
-  deleteMenuItem(id: Int!): Boolean!
-  createOrder(userId: Int!, items: [Int!]!): Order!
-  updateOrder(id: Int!, status: OrderStatus!): Order!
-  deleteOrder(id: Int!): Boolean!
+type Order {
+  createdAt: DateTime!
+  id: Int!
+  itemIds: [Int!]!
+  items: [Menu!]!
+  status: OrderStatus!
+  user: User
+  userId: Int!
+}
+
+enum OrderStatus {
+  COMPLETED
+  PENDING
+}
+
+type Query {
+  menu: [Menu!]!
+  menuItem(id: Int!): Menu!
+  order(id: Int!): Order!
+  orders: [Order!]!
+  user(id: Int!): User!
+  users: [User!]!
+}
+
+type User {
+  email: String!
+  id: Int!
+  name: String!
+  orders: [Order!]!
 }

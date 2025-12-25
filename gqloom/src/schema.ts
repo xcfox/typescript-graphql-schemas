@@ -1,5 +1,6 @@
 import * as z from 'zod'
 import { GraphQLError } from 'graphql'
+import { GraphQLDateTime, GraphQLJSON, GraphQLJSONObject } from 'graphql-scalars'
 import { resolver, query, mutation, field, weave } from '@gqloom/core'
 import { ZodWeaver } from '@gqloom/zod'
 import { USERS, MENU_ITEMS, ORDERS, incrementId } from '@coffee-shop/shared'
@@ -198,4 +199,12 @@ export const orderResolver = resolver.of(Order, {
 
 // --- Schema Weaving ---
 
-export const schema = weave(ZodWeaver, userResolver, menuResolver, orderResolver)
+export const zodWeaverConfig = ZodWeaver.config({
+  presetGraphQLType: (schema) => {
+    if (schema instanceof z.ZodDate) return GraphQLDateTime
+    if (schema instanceof z.ZodAny) return GraphQLJSON
+    if (schema instanceof z.ZodRecord) return GraphQLJSONObject
+  },
+})
+
+export const schema = weave(ZodWeaver, zodWeaverConfig, userResolver, menuResolver, orderResolver)

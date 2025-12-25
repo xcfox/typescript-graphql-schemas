@@ -13,11 +13,13 @@ export const User = builder.simpleObject('User', {
 })
 
 builder.objectFields(User, (t) => ({
-  orders: t.field({
-    type: [Order],
-    resolve: (user) => {
-      return Array.from(orderMap.values()).filter((o) => o.userId === user.id)
+  orders: t.loadableGroup({
+    type: Order,
+    load: async (userIds: number[]) => {
+      return Array.from(orderMap.values()).filter((o) => userIds.includes(o.userId))
     },
+    group: (order) => order.userId,
+    resolve: (user) => user.id,
   }),
 }))
 

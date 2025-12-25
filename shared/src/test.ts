@@ -3,13 +3,14 @@ import * as assert from 'node:assert'
 import { type ExecutionResult, type GraphQLSchema, execute as executeGraphQL, parse } from 'graphql'
 import { USERS, MENU_ITEMS, ORDERS } from './index.ts'
 
-export function runTests(schema: GraphQLSchema) {
+export function runTests(schema: GraphQLSchema, createContext?: () => any) {
   const execute = async <TData = any>(query: string, variables?: Record<string, any>) => {
     const document = parse(query)
     const result = await executeGraphQL({
       schema,
       document,
       variableValues: variables,
+      contextValue: createContext?.(),
     })
     return result as ExecutionResult<TData>
   }

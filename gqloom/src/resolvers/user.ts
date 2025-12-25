@@ -8,6 +8,17 @@ import { orderMap } from './order.ts'
 export const userMap = new Map<number, z.infer<typeof User>>(USERS.map((u) => [u.id, u]))
 
 export const userResolver = resolver.of(User, {
+  orders: field(z.array(Order)).load((users) => {
+    const userOrders = new Map<number, z.infer<typeof Order>[]>()
+    for (const user of users) {
+      userOrders.set(
+        user.id,
+        Array.from(orderMap.values()).filter((o) => o.userId === user.id),
+      )
+    }
+    return users.map((user) => userOrders.get(user.id) ?? [])
+  }),
+
   users: query(z.array(User)).resolve(() => Array.from(userMap.values())),
 
   user: query(User)
@@ -51,15 +62,4 @@ export const userResolver = resolver.of(User, {
       if (user) userMap.delete(id)
       return user
     }),
-
-  orders: field(z.array(Order)).load((users) => {
-    const userOrders = new Map<number, z.infer<typeof Order>[]>()
-    for (const user of users) {
-      userOrders.set(
-        user.id,
-        Array.from(orderMap.values()).filter((o) => o.userId === user.id),
-      )
-    }
-    return users.map((user) => userOrders.get(user.id) ?? [])
-  }),
 })

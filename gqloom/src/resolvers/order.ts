@@ -9,6 +9,12 @@ import { menuMap } from './menu.ts'
 export const orderMap = new Map<number, z.infer<typeof Order>>(ORDERS.map((o) => [o.id, o]))
 
 export const orderResolver = resolver.of(Order, {
+  user: field(z.nullish(User)).resolve((order) => userMap.get(order.userId)),
+
+  items: field(z.array(MenuItem)).resolve((order) => {
+    return order.itemIds.map((itemId) => menuMap.get(itemId)).filter((i) => i != null)
+  }),
+
   orders: query(z.array(Order)).resolve(() => Array.from(orderMap.values())),
 
   order: query(Order)
@@ -58,10 +64,4 @@ export const orderResolver = resolver.of(Order, {
       if (order) orderMap.delete(id)
       return order
     }),
-
-  user: field(z.nullish(User)).resolve((order) => userMap.get(order.userId)),
-
-  items: field(z.array(MenuItem)).resolve((order) => {
-    return order.itemIds.map((itemId) => menuMap.get(itemId)).filter((i) => i != null)
-  }),
 })

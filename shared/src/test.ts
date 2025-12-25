@@ -145,13 +145,15 @@ export function runTests(schema: GraphQLSchema) {
       const deleteRes = await execute(
         /* GraphQL */ `
           mutation ($id: Int!) {
-            deleteUser(id: $id)
+            deleteUser(id: $id) {
+              id
+            }
           }
         `,
         { id: newUserId },
       )
       assert.strictEqual(deleteRes.errors, undefined)
-      assert.strictEqual(deleteRes.data?.deleteUser, true)
+      assert.strictEqual(deleteRes.data?.deleteUser?.id, newUserId)
 
       const checkResult = await execute(
         /* GraphQL */ `
@@ -249,13 +251,15 @@ export function runTests(schema: GraphQLSchema) {
       const result = await execute(
         /* GraphQL */ `
           mutation ($id: Int!) {
-            deleteMenuItem(id: $id)
+            deleteMenuItem(id: $id) {
+              id
+            }
           }
         `,
         { id: newItemId },
       )
       assert.strictEqual(result.errors, undefined)
-      assert.strictEqual(result.data?.deleteMenuItem, true)
+      assert.strictEqual(result.data?.deleteMenuItem?.id, newItemId)
     })
   })
 
@@ -416,13 +420,15 @@ export function runTests(schema: GraphQLSchema) {
       const result = await execute(
         /* GraphQL */ `
           mutation ($id: Int!) {
-            deleteOrder(id: $id)
+            deleteOrder(id: $id) {
+              id
+            }
           }
         `,
         { id: newOrderId },
       )
       assert.strictEqual(result.errors, undefined)
-      assert.strictEqual(result.data?.deleteOrder, true)
+      assert.strictEqual(result.data?.deleteOrder?.id, newOrderId)
     })
   })
 }

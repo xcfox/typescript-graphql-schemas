@@ -46,9 +46,11 @@ export const menuResolver = resolver({
       return item
     }),
 
-  deleteMenuItem: mutation(z.boolean())
+  deleteMenuItem: mutation(z.nullish(MenuItem))
     .input({ id: z.int() })
     .resolve(({ id }) => {
-      return menuMap.delete(id)
+      const item = menuMap.get(id)
+      if (item) menuMap.delete(id)
+      return item
     }),
 })

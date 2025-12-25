@@ -19,9 +19,9 @@ type Mutation {
   createMenuItem(category: MenuCategory!, name: String!, price: Float!): Menu!
   createOrder(items: [Int!]!, userId: Int!): Order!
   createUser(email: String!, name: String!): User!
-  deleteMenuItem(id: Int!): Boolean!
-  deleteOrder(id: Int!): Boolean!
-  deleteUser(id: Int!): Boolean!
+  deleteMenuItem(id: Int!): Menu
+  deleteOrder(id: Int!): Order
+  deleteUser(id: Int!): User
   updateMenuItem(category: MenuCategory, id: Int!, name: String, price: Float): Menu!
   updateOrder(id: Int!, status: OrderStatus!): Order!
   updateUser(email: String, id: Int!, name: String): User!

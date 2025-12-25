@@ -51,10 +51,12 @@ export const orderResolver = resolver.of(Order, {
       return order
     }),
 
-  deleteOrder: mutation(z.boolean())
+  deleteOrder: mutation(z.nullish(Order))
     .input({ id: z.int() })
     .resolve(({ id }) => {
-      return orderMap.delete(id)
+      const order = orderMap.get(id)
+      if (order) orderMap.delete(id)
+      return order
     }),
 
   user: field(z.nullish(User)).resolve((order) => userMap.get(order.userId)),

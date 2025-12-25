@@ -27,11 +27,11 @@ importers:
         specifier: workspace:*
         version: link:../shared
       '@gqloom/core':
-        specifier: latest
+        specifier: ^0.15.0
         version: 0.15.0(graphql@16.12.0)
       '@gqloom/zod':
-        specifier: latest
-        version: 0.14.0(@gqloom/core@0.15.0(graphql@16.12.0))(graphql@16.12.0)(zod@4.2.1)
+        specifier: ^0.15.0
+        version: 0.15.0(@gqloom/core@0.15.0(graphql@16.12.0))(graphql@16.12.0)(zod@4.2.1)
       graphql:
         specifier: ^16.10.0
         version: 16.12.0
@@ -262,8 +262,8 @@ packages:
     peerDependencies:
       graphql: '>= 16.8.0'
 
-  '@gqloom/zod@0.14.0':
-    resolution: {integrity: sha512-WEbd76Lyz1Y4Gwyry1WuVpc3KDQFvuRFKoQ7dAlGAJ74+5oC8DHPgD4J78PIfKKAiuFj5vQtGGPmxWDJy4QxiQ==}
+  '@gqloom/zod@0.15.0':
+    resolution: {integrity: sha512-nHaeKPwMpk8FUbm05WdV6mv62GhytOzRHYXt5/59Cz7Iqp6I3RgDx51Xpnaa9GxJf1xsndYzEOjrqmFumkY7yQ==}
     peerDependencies:
       '@gqloom/core': '>= 0.12.0'
       graphql: '>= 16.8.0'
@@ -536,7 +536,7 @@ snapshots:
     dependencies:
       graphql: 16.12.0
 
-  '@gqloom/zod@0.14.0(@gqloom/core@0.15.0(graphql@16.12.0))(graphql@16.12.0)(zod@4.2.1)':
+  '@gqloom/zod@0.15.0(@gqloom/core@0.15.0(graphql@16.12.0))(graphql@16.12.0)(zod@4.2.1)':
     dependencies:
       '@gqloom/core': 0.15.0(graphql@16.12.0)
       graphql: 16.12.0

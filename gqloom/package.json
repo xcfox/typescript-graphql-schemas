@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@coffee-shop/shared": "workspace:*",
-    "@gqloom/core": "latest",
-    "@gqloom/zod": "latest",
+    "@gqloom/core": "^0.15.0",
+    "@gqloom/zod": "^0.15.0",
     "graphql": "^16.10.0",
     "graphql-scalars": "^1.25.0",
     "graphql-yoga": "^5.10.10",

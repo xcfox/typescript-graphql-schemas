@@ -6,7 +6,7 @@ import { MENU_ITEMS, incrementId } from '@coffee-shop/shared'
 export const Category = z.enum(['COFFEE', 'FOOD'])
 
 export const MenuItem = z.object({
-  __typename: z.literal('Menu').nullish(),
+  __typename: z.literal('MenuItem').nullish(),
   id: z.int(),
   name: z.string(),
   price: z.number(),

@@ -3,26 +3,26 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
-type Menu {
-  category: MenuCategory!
+type MenuItem {
+  category: MenuItemCategory!
   id: Int!
   name: String!
   price: Float!
 }
 
-enum MenuCategory {
+enum MenuItemCategory {
   COFFEE
   FOOD
 }
 
 type Mutation {
-  createMenuItem(category: MenuCategory!, name: String!, price: Float!): Menu!
+  createMenuItem(category: MenuItemCategory!, name: String!, price: Float!): MenuItem!
   createOrder(items: [Int!]!, userId: Int!): Order!
   createUser(email: String!, name: String!): User!
-  deleteMenuItem(id: Int!): Menu
+  deleteMenuItem(id: Int!): MenuItem
   deleteOrder(id: Int!): Order
   deleteUser(id: Int!): User
-  updateMenuItem(category: MenuCategory, id: Int!, name: String, price: Float): Menu!
+  updateMenuItem(category: MenuItemCategory, id: Int!, name: String, price: Float): MenuItem!
   updateOrder(id: Int!, status: OrderStatus!): Order!
   updateUser(email: String, id: Int!, name: String): User!
 }
@@ -31,7 +31,7 @@ type Order {
   createdAt: DateTime!
   id: Int!
   itemIds: [Int!]!
-  items: [Menu!]!
+  items: [MenuItem!]!
   status: OrderStatus!
   user: User
   userId: Int!
@@ -43,8 +43,8 @@ enum OrderStatus {
 }
 
 type Query {
-  menu: [Menu!]!
-  menuItem(id: Int!): Menu!
+  menu: [MenuItem!]!
+  menuItem(id: Int!): MenuItem!
   order(id: Int!): Order!
   orders: [Order!]!
   user(id: Int!): User!

@@ -2,13 +2,19 @@ import * as z from 'zod'
 import { GraphQLError } from 'graphql'
 import { resolver, query, mutation, field } from '@gqloom/core'
 import { USERS, incrementId } from '@coffee-shop/shared'
-import { User, Order } from '../type.ts'
-import { orderMap } from './order.ts'
+import { Order, orderMap } from './order.ts'
+
+export const User = z.object({
+  __typename: z.literal('User').nullish(),
+  id: z.int(),
+  name: z.string(),
+  email: z.email(),
+})
 
 export const userMap = new Map<number, z.infer<typeof User>>(USERS.map((u) => [u.id, u]))
 
 export const userResolver = resolver.of(User, {
-  orders: field(z.array(Order)).load((users) => {
+  orders: field(z.array(z.lazy(() => Order))).load((users) => {
     const userOrders = new Map<number, z.infer<typeof Order>[]>()
     for (const user of users) {
       userOrders.set(

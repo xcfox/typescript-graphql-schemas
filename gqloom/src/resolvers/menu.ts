@@ -2,7 +2,16 @@ import * as z from 'zod'
 import { GraphQLError } from 'graphql'
 import { resolver, query, mutation } from '@gqloom/core'
 import { MENU_ITEMS, incrementId } from '@coffee-shop/shared'
-import { MenuItem, Category } from '../type.ts'
+
+export const Category = z.enum(['COFFEE', 'FOOD'])
+
+export const MenuItem = z.object({
+  __typename: z.literal('Menu').nullish(),
+  id: z.int(),
+  name: z.string(),
+  price: z.number(),
+  category: Category,
+})
 
 export const menuMap = new Map<number, z.infer<typeof MenuItem>>(MENU_ITEMS.map((i) => [i.id, i]))
 

@@ -4,7 +4,6 @@ import { writeFileSync } from 'node:fs'
 import { printSchema } from 'graphql'
 import { schema } from './schema.js'
 
-// 自动保存 schema.graphql
 const sdl = printSchema(schema)
 writeFileSync(new URL('../schema.graphql', import.meta.url), sdl)
 
@@ -15,4 +14,3 @@ const server = createServer(yoga)
 server.listen(4000, () => {
   console.info('Server is running on http://localhost:4000/graphql')
 })
-

@@ -1,42 +1,46 @@
+export const incrementId = (() => {
+  let id = 0
+  return () => ++id
+})()
+
 export interface User {
-  id: string
+  id: number
   name: string
   email: string
 }
 
 export interface MenuItem {
-  id: string
+  id: number
   name: string
   price: number
   category: 'COFFEE' | 'FOOD'
 }
 
 export interface Order {
-  id: string
-  userId: string
-  itemIds: string[]
+  id: number
+  userId: number
+  itemIds: number[]
   status: 'PENDING' | 'COMPLETED'
   createdAt: Date
 }
 
 export const USERS: User[] = [
-  { id: 'u1', name: 'Alice', email: 'alice@example.com' },
-  { id: 'u2', name: 'Bob', email: 'bob@example.com' },
+  { id: incrementId(), name: 'Alice', email: 'alice@example.com' },
+  { id: incrementId(), name: 'Bob', email: 'bob@example.com' },
 ]
 
 export const MENU_ITEMS: MenuItem[] = [
-  { id: 'm1', name: 'Latte', price: 4.5, category: 'COFFEE' },
-  { id: 'm2', name: 'Americano', price: 3.5, category: 'COFFEE' },
-  { id: 'm3', name: 'Croissant', price: 3.0, category: 'FOOD' },
+  { id: incrementId(), name: 'Latte', price: 4.5, category: 'COFFEE' },
+  { id: incrementId(), name: 'Americano', price: 3.5, category: 'COFFEE' },
+  { id: incrementId(), name: 'Croissant', price: 3.0, category: 'FOOD' },
 ]
 
 export const ORDERS: Order[] = [
   {
-    id: 'o1',
-    userId: '1',
-    itemIds: ['m1', 'm3'],
+    id: incrementId(),
+    userId: USERS[0].id,
+    itemIds: [MENU_ITEMS[0].id, MENU_ITEMS[2].id],
     status: 'COMPLETED',
     createdAt: new Date('2025-12-25T10:00:00Z'),
   },
 ]
-

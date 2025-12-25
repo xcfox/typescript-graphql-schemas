@@ -1,10 +1,27 @@
-type Query {
-  menu: [Menu!]!
-  user(id: String!): User!
+type User {
+  id: Int!
+  name: String!
+  email: String!
+  orders: [Order!]!
+}
+
+type Order {
+  id: Int!
+  createdAt: String!
+  status: OrderStatus!
+  userId: Int!
+  itemIds: [Int!]!
+  user: User
+  items: [Menu!]!
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
 }
 
 type Menu {
-  id: String!
+  id: Int!
   name: String!
   price: Float!
   category: MenuCategory!
@@ -15,25 +32,23 @@ enum MenuCategory {
   FOOD
 }
 
-type User {
-  id: String!
-  name: String!
-  email: String!
+type Query {
+  users: [User!]!
+  user(id: Int!): User!
+  menu: [Menu!]!
+  menuItem(id: Int!): Menu!
+  orders: [Order!]!
+  order(id: Int!): Order!
 }
 
 type Mutation {
-  createOrder(userId: String!, items: [String!]!): CreateOrder!
-}
-
-type CreateOrder {
-  id: String!
-  createdAt: String!
-  status: CreateOrderStatus!
-  userId: String!
-  itemIds: [String!]!
-}
-
-enum CreateOrderStatus {
-  PENDING
-  COMPLETED
+  createUser(name: String!, email: String!): User!
+  updateUser(id: Int!, name: String, email: String): User!
+  deleteUser(id: Int!): Boolean!
+  createMenuItem(name: String!, price: Float!, category: MenuCategory!): Menu!
+  updateMenuItem(id: Int!, name: String, price: Float, category: MenuCategory): Menu!
+  deleteMenuItem(id: Int!): Boolean!
+  createOrder(userId: Int!, items: [Int!]!): Order!
+  updateOrder(id: Int!, status: OrderStatus!): Order!
+  deleteOrder(id: Int!): Boolean!
 }

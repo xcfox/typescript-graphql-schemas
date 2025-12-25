@@ -13,7 +13,7 @@ builder.enumType(MenuCategory, {
   name: 'MenuCategory',
 })
 
-export const MenuItemRef = builder.simpleObject('Menu', {
+export const MenuItem = builder.simpleObject('MenuItem', {
   fields: (t) => ({
     id: t.int(),
     name: t.string(),
@@ -23,17 +23,17 @@ export const MenuItemRef = builder.simpleObject('Menu', {
 })
 
 // 移除 MenuItemShape，通过推导获取类型
-export const menuMap = new Map<number, InferPothosObject<typeof MenuItemRef>>(
-  MENU_ITEMS.map((i) => [i.id, i as InferPothosObject<typeof MenuItemRef>]),
+export const menuMap = new Map<number, InferPothosObject<typeof MenuItem>>(
+  MENU_ITEMS.map((i) => [i.id, i as InferPothosObject<typeof MenuItem>]),
 )
 
 builder.queryFields((t) => ({
   menu: t.field({
-    type: [MenuItemRef],
+    type: [MenuItem],
     resolve: () => Array.from(menuMap.values()),
   }),
   menuItem: t.field({
-    type: MenuItemRef,
+    type: MenuItem,
     args: {
       id: t.arg.int({ required: true }),
     },
@@ -47,7 +47,7 @@ builder.queryFields((t) => ({
 
 builder.mutationFields((t) => ({
   createMenuItem: t.field({
-    type: MenuItemRef,
+    type: MenuItem,
     args: {
       name: t.arg.string({ required: true }),
       price: t.arg.float({ required: true }),
@@ -61,7 +61,7 @@ builder.mutationFields((t) => ({
     },
   }),
   updateMenuItem: t.field({
-    type: MenuItemRef,
+    type: MenuItem,
     args: {
       id: t.arg.int({ required: true }),
       name: t.arg.string(),
@@ -78,7 +78,7 @@ builder.mutationFields((t) => ({
     },
   }),
   deleteMenuItem: t.field({
-    type: MenuItemRef,
+    type: MenuItem,
     nullable: true,
     args: {
       id: t.arg.int({ required: true }),

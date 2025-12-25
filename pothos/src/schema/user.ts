@@ -2,9 +2,9 @@ import { builder, type InferPothosObject } from '../builder.ts'
 import { USERS, incrementId } from '@coffee-shop/shared'
 import * as z from 'zod'
 import { GraphQLError } from 'graphql'
-import { OrderRef, orderMap } from './order.ts'
+import { Order, orderMap } from './order.ts'
 
-export const UserRef = builder.simpleObject('User', {
+export const User = builder.simpleObject('User', {
   fields: (t) => ({
     id: t.int(),
     name: t.string(),
@@ -12,9 +12,9 @@ export const UserRef = builder.simpleObject('User', {
   }),
 })
 
-builder.objectFields(UserRef, (t) => ({
+builder.objectFields(User, (t) => ({
   orders: t.field({
-    type: [OrderRef],
+    type: [Order],
     resolve: (user) => {
       return Array.from(orderMap.values()).filter((o) => o.userId === user.id)
     },
@@ -22,17 +22,17 @@ builder.objectFields(UserRef, (t) => ({
 }))
 
 // 从 UserRef 的泛型参数中提取 Shape，不再手写 interface
-export const userMap = new Map<number, InferPothosObject<typeof UserRef>>(
-  USERS.map((u) => [u.id, u as InferPothosObject<typeof UserRef>]),
+export const userMap = new Map<number, InferPothosObject<typeof User>>(
+  USERS.map((u) => [u.id, u as InferPothosObject<typeof User>]),
 )
 
 builder.queryFields((t) => ({
   users: t.field({
-    type: [UserRef],
+    type: [User],
     resolve: () => Array.from(userMap.values()),
   }),
   user: t.field({
-    type: UserRef,
+    type: User,
     args: {
       id: t.arg.int({ required: true }),
     },
@@ -46,7 +46,7 @@ builder.queryFields((t) => ({
 
 builder.mutationFields((t) => ({
   createUser: t.field({
-    type: UserRef,
+    type: User,
     args: {
       name: t.arg.string({ required: true }),
       email: t.arg.string({
@@ -62,7 +62,7 @@ builder.mutationFields((t) => ({
     },
   }),
   updateUser: t.field({
-    type: UserRef,
+    type: User,
     args: {
       id: t.arg.int({ required: true }),
       name: t.arg.string(),
@@ -79,7 +79,7 @@ builder.mutationFields((t) => ({
     },
   }),
   deleteUser: t.field({
-    type: UserRef,
+    type: User,
     nullable: true,
     args: {
       id: t.arg.int({ required: true }),

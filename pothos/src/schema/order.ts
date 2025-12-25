@@ -2,8 +2,8 @@ import { builder, type InferPothosObject } from '../builder.ts'
 import { ORDERS, incrementId } from '@coffee-shop/shared'
 import * as z from 'zod'
 import { GraphQLError } from 'graphql'
-import { userMap, UserRef } from './user.ts'
-import { menuMap, MenuItemRef } from './menu.ts'
+import { userMap, User } from './user.ts'
+import { menuMap, MenuItem } from './menu.ts'
 
 export const OrderStatus = {
   PENDING: 'PENDING',
@@ -16,7 +16,7 @@ builder.enumType(OrderStatus, {
   name: 'OrderStatus',
 })
 
-export const OrderRef = builder.simpleObject('Order', {
+export const Order = builder.simpleObject('Order', {
   fields: (t) => ({
     id: t.int(),
     createdAt: t.field({ type: 'DateTime' }),
@@ -26,14 +26,14 @@ export const OrderRef = builder.simpleObject('Order', {
   }),
 })
 
-builder.objectFields(OrderRef, (t) => ({
+builder.objectFields(Order, (t) => ({
   user: t.field({
-    type: UserRef,
+    type: User,
     nullable: true,
     resolve: (order) => userMap.get(order.userId) || null,
   }),
   items: t.field({
-    type: [MenuItemRef],
+    type: [MenuItem],
     resolve: (order) => {
       return order.itemIds
         .map((id) => menuMap.get(id))
@@ -43,20 +43,20 @@ builder.objectFields(OrderRef, (t) => ({
 }))
 
 // 移除 OrderShape，通过推导获取类型
-export const orderMap = new Map<number, InferPothosObject<typeof OrderRef>>(
+export const orderMap = new Map<number, InferPothosObject<typeof Order>>(
   ORDERS.map((o) => [
     o.id,
-    { ...o, status: o.status as OrderStatus } as InferPothosObject<typeof OrderRef>,
+    { ...o, status: o.status as OrderStatus } as InferPothosObject<typeof Order>,
   ]),
 )
 
 builder.queryFields((t) => ({
   orders: t.field({
-    type: [OrderRef],
+    type: [Order],
     resolve: () => Array.from(orderMap.values()),
   }),
   order: t.field({
-    type: OrderRef,
+    type: Order,
     args: {
       id: t.arg.int({ required: true }),
     },
@@ -70,7 +70,7 @@ builder.queryFields((t) => ({
 
 builder.mutationFields((t) => ({
   createOrder: t.field({
-    type: OrderRef,
+    type: Order,
     args: {
       userId: t.arg.int({
         required: true,
@@ -97,7 +97,7 @@ builder.mutationFields((t) => ({
     },
   }),
   updateOrder: t.field({
-    type: OrderRef,
+    type: Order,
     args: {
       id: t.arg.int({ required: true }),
       status: t.arg({ type: OrderStatus, required: true }),
@@ -110,7 +110,7 @@ builder.mutationFields((t) => ({
     },
   }),
   deleteOrder: t.field({
-    type: OrderRef,
+    type: Order,
     nullable: true,
     args: {
       id: t.arg.int({ required: true }),

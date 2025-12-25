@@ -1,12 +1,14 @@
 import * as z from 'zod'
+import { GraphQLError, printSchema } from 'graphql'
+import { writeFileSync } from 'node:fs'
 import { resolver, query, mutation, field, weave } from '@gqloom/core'
 import { ZodWeaver } from '@gqloom/zod'
 import { USERS, MENU_ITEMS, ORDERS, incrementId } from '@coffee-shop/shared'
 
 // --- In-Memory Maps ---
-const userMap = new Map(USERS.map((u) => [u.id, u]))
-const menuMap = new Map(MENU_ITEMS.map((i) => [i.id, i]))
-const orderMap = new Map(ORDERS.map((o) => [o.id, o]))
+const userMap = new Map<number, z.infer<typeof User>>(USERS.map((u) => [u.id, u]))
+const menuMap = new Map<number, z.infer<typeof MenuItem>>(MENU_ITEMS.map((i) => [i.id, i]))
+const orderMap = new Map<number, z.infer<typeof Order>>(ORDERS.map((o) => [o.id, o]))
 
 // --- Types ---
 
@@ -14,7 +16,7 @@ export const User = z.object({
   __typename: z.literal('User').nullish(),
   id: z.int(),
   name: z.string(),
-  email: z.string().email(),
+  email: z.email(),
 })
 
 export const Category = z.enum(['COFFEE', 'FOOD'])
@@ -47,14 +49,14 @@ export const userResolver = resolver.of(User, {
     .input({ id: z.int() })
     .resolve(({ id }) => {
       const user = userMap.get(id)
-      if (!user) throw new Error('User not found')
+      if (!user) throw new GraphQLError('User not found')
       return user
     }),
 
   createUser: mutation(User)
     .input({
       name: z.string(),
-      email: z.string().email(),
+      email: z.email(),
     })
     .resolve(({ name, email }) => {
       const id = incrementId()
@@ -66,14 +68,14 @@ export const userResolver = resolver.of(User, {
   updateUser: mutation(User)
     .input({
       id: z.int(),
-      name: z.string().optional(),
-      email: z.string().email().optional(),
+      name: z.string().nullish(),
+      email: z.email().nullish(),
     })
     .resolve(({ id, name, email }) => {
       const user = userMap.get(id)
-      if (!user) throw new Error('User not found')
-      if (name) user.name = name
-      if (email) user.email = email
+      if (!user) throw new GraphQLError('User not found')
+      if (name != null) user.name = name
+      if (email != null) user.email = email
       return user
     }),
 
@@ -95,7 +97,7 @@ export const menuResolver = resolver({
     .input({ id: z.int() })
     .resolve(({ id }) => {
       const item = menuMap.get(id)
-      if (!item) throw new Error('Menu item not found')
+      if (!item) throw new GraphQLError('Menu item not found')
       return item
     }),
 
@@ -115,16 +117,16 @@ export const menuResolver = resolver({
   updateMenuItem: mutation(MenuItem)
     .input({
       id: z.int(),
-      name: z.string().optional(),
-      price: z.number().optional(),
-      category: Category.optional(),
+      name: z.string().nullish(),
+      price: z.number().nullish(),
+      category: Category.nullish(),
     })
     .resolve(({ id, name, price, category }) => {
       const item = menuMap.get(id)
-      if (!item) throw new Error('Menu item not found')
-      if (name) item.name = name
-      if (price !== undefined) item.price = price
-      if (category) item.category = category
+      if (!item) throw new GraphQLError('Menu item not found')
+      if (name != null) item.name = name
+      if (price != null) item.price = price
+      if (category != null) item.category = category
       return item
     }),
 
@@ -142,14 +144,16 @@ export const orderResolver = resolver.of(Order, {
     .input({ id: z.int() })
     .resolve(({ id }) => {
       const order = orderMap.get(id)
-      if (!order) throw new Error('Order not found')
+      if (!order) throw new GraphQLError('Order not found')
       return order
     }),
 
   createOrder: mutation(Order)
     .input({
-      userId: z.int(),
-      items: z.array(z.int()).min(1, 'At least one item is required'),
+      userId: z.int().refine((id: number) => userMap.has(id)),
+      items: z
+        .array(z.int().refine((id: number) => menuMap.has(id)))
+        .min(1, 'At least one item is required'),
     })
     .resolve(({ userId, items }) => {
       const id = incrementId()
@@ -171,7 +175,7 @@ export const orderResolver = resolver.of(Order, {
     })
     .resolve(({ id, status }) => {
       const order = orderMap.get(id)
-      if (!order) throw new Error('Order not found')
+      if (!order) throw new GraphQLError('Order not found')
       order.status = status
       return order
     }),
@@ -196,3 +200,6 @@ export const orderResolver = resolver.of(Order, {
 // --- Schema Weaving ---
 
 export const schema = weave(ZodWeaver, userResolver, menuResolver, orderResolver)
+
+const sdl = printSchema(schema)
+writeFileSync(new URL('../schema.graphql', import.meta.url), sdl)

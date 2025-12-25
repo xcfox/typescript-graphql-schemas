@@ -4,7 +4,8 @@
   "description": "Comparison of TypeScript GraphQL schema builders",
   "scripts": {
     "format": "prettier --write .",
-    "dev:gqloom": "pnpm -F gqloom dev"
+    "dev:gqloom": "pnpm -F gqloom dev",
+    "gql:gqloom": "pnpm -F gqloom gql"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

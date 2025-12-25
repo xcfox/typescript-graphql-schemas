@@ -3,44 +3,23 @@ export const incrementId = (() => {
   return () => ++id
 })()
 
-export interface User {
-  id: number
-  name: string
-  email: string
-}
-
-export interface MenuItem {
-  id: number
-  name: string
-  price: number
-  category: 'COFFEE' | 'FOOD'
-}
-
-export interface Order {
-  id: number
-  userId: number
-  itemIds: number[]
-  status: 'PENDING' | 'COMPLETED'
-  createdAt: Date
-}
-
-export const USERS: User[] = [
+export const USERS = [
   { id: incrementId(), name: 'Alice', email: 'alice@example.com' },
   { id: incrementId(), name: 'Bob', email: 'bob@example.com' },
-]
+] as const
 
-export const MENU_ITEMS: MenuItem[] = [
+export const MENU_ITEMS = [
   { id: incrementId(), name: 'Latte', price: 4.5, category: 'COFFEE' },
   { id: incrementId(), name: 'Americano', price: 3.5, category: 'COFFEE' },
   { id: incrementId(), name: 'Croissant', price: 3.0, category: 'FOOD' },
-]
+] as const
 
-export const ORDERS: Order[] = [
+export const ORDERS = [
   {
     id: incrementId(),
     userId: USERS[0].id,
-    itemIds: [MENU_ITEMS[0].id, MENU_ITEMS[2].id],
+    itemIds: [MENU_ITEMS[0].id, MENU_ITEMS[2].id] as number[],
     status: 'COMPLETED',
     createdAt: new Date('2025-12-25T10:00:00Z'),
   },
-]
+] as const

@@ -16,16 +16,15 @@ export const userMap = new Map<number, z.infer<typeof User>>(USERS.map((u) => [u
 export const userResolver = resolver.of(User, {
   orders: field(z.array(z.lazy(() => Order))).load((users) => {
     const userOrders = new Map<number, z.infer<typeof Order>[]>()
-    for (const user of users) {
-      userOrders.set(
-        user.id,
-        Array.from(orderMap.values()).filter((o) => o.userId === user.id),
-      )
+    for (const order of orderMap.values()) {
+      const orders = userOrders.get(order.userId) ?? []
+      orders.push(order)
+      userOrders.set(order.userId, orders)
     }
     return users.map((user) => userOrders.get(user.id) ?? [])
   }),
 
-  users: query(z.array(User)).resolve(() => Array.from(userMap.values())),
+  users: query(z.array(User), () => Array.from(userMap.values())),
 
   user: query(User)
     .input({ id: z.int() })

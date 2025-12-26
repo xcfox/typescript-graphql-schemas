@@ -1,0 +1,828 @@
+# TypeScript GraphQL Schema 构建库对比分析
+
+本文档是对 8 个主流 TypeScript GraphQL Schema 构建库在 7 个核心维度上的详细对比分析。
+
+## 📐 评估标准
+
+优秀的架构模式应当在提供足够灵活性的同时，最小化运行时开销，并保持代码的纯净与可测试性。避免过度的元数据反射（Reflection）和全局副作用是现代库的趋势。构建过程应当简单、配置集中，支持模块化构建以便于大型项目的拆分与协作。
+
+评级标准：
+- 🏅顶级：只允许一个库，在某些功能上领先其他所有库；
+- 🥈完善：功能完善，够用了；
+- 🥉凑合：有这个功能，但不完善；
+- ❌ 不内置：不内置对某些功能的支持，但可以通过奇技淫巧实现；
+- 🪦 没有：不支持某些功能，完全不可用；
+
+## 1. 架构模式对比分析
+
+### 各库架构模式总览
+
+| 库名称      | 架构模式              | 核心特点               | 运行时开销 | 代码生成 | 构建复杂度 |
+| ----------- | --------------------- | ---------------------- | ---------- | -------- | ---------- |
+| TypeGraphQL | Decorator（装饰器）   | 类+装饰器+反射元数据   | 高         | 运行时   | 低         |
+| Nexus       | Builder（构建器）     | 函数式API+类型生成     | 低         | 开发时   | 中         |
+| Pothos      | Builder（构建器）     | SchemaBuilder+插件系统 | 低         | 无       | 中         |
+| Grats       | Inference（自动推断） | 静态分析+JSDoc注释     | 无         | 构建时   | 中         |
+| gqtx        | Builder（构建器）     | 函数式API+类型推断     | 低         | 无       | 中         |
+| GQLoom      | Weaving（编织）       | 验证库Schema+编织      | 低         | 无       | 中         |
+| Pylon       | Inference（自动推断） | 静态分析+零配置        | 无         | 构建时   | 低         |
+| garph       | Builder（构建器）     | 链式API+泛型推断       | 低         | 无       | 中         |
+
+### 详细分析
+
+#### TypeGraphQL (Decorator模式)
+**核心机制**：使用类和装饰器来定义类型，依赖反射元数据（Reflect Metadata），通过 `buildSchema()` 构建 Schema。
+
+**优势**：
+- ✅ 声明式语法：使用装饰器语法，代码清晰直观
+- ✅ 类为基础：充分利用 TypeScript 的类特性，适合面向对象开发
+- ✅ 类型与实现分离：类型定义（Type）和解析器（Resolver）可以分离，便于组织代码
+- ✅ 成熟稳定：作为最早的 TypeScript GraphQL 库之一，生态成熟
+
+**劣势**：
+- ❌ 依赖反射元数据：必须引入 `reflect-metadata` 并在入口文件导入，运行时开销较大
+- ❌ 装饰器限制：需要启用 TypeScript 的装饰器支持（`experimentalDecorators`），配置相对复杂
+- ❌ 运行时构建：Schema 构建发生在运行时，需要等待所有装饰器元数据加载完成
+- ❌ 全局副作用：装饰器会在类定义时产生副作用，可能影响测试和模块化
+
+**评级**：🥉凑合
+
+#### Nexus (Builder模式)
+**核心机制**：使用函数式 API 显式构建 GraphQL Schema，通过 `makeSchema()` 函数组装。
+
+**优势**：
+- ✅ 无运行时反射：不依赖反射元数据，运行时开销小
+- ✅ 代码纯净：纯函数式 API，易于测试和调试
+- ✅ 类型生成：支持自动生成 TypeScript 类型定义文件（`nexus-typegen.d.ts`）
+- ✅ 模块化构建：每个类型定义独立，支持大型项目的模块化组织
+- ✅ 类型安全：通过类型生成提供完整的类型安全
+
+**劣势**：
+- ⚠️ 需要手动定义：需要显式调用函数定义每个类型，相比自动推断的方式需要更多代码
+- ⚠️ 构建步骤：需要显式调用 `makeSchema()` 进行构建，需要配置输出路径和类型生成选项
+- ⚠️ 类型生成依赖：需要运行代码生成步骤才能获得完整的类型安全
+
+**评级**：🥈完善
+
+#### Pothos (Builder模式)
+**核心机制**：通过 `SchemaBuilder` 实例显式构建类型定义，最后通过 `builder.toSchema()` 构建 GraphQL Schema。
+
+**优势**：
+- ✅ 无运行时反射：不依赖反射元数据，运行时开销小
+- ✅ 显式构建：所有类型定义都是显式的，代码清晰易懂
+- ✅ 类型安全：充分利用 TypeScript 的类型系统，提供完整的类型推导
+- ✅ 插件系统：通过插件系统扩展功能，核心库保持轻量
+- ✅ 模块化构建：支持将类型定义分散到多个文件中，通过导入自动注册
+
+**劣势**：
+- ⚠️ 需要显式定义：所有类型都需要通过 builder API 显式定义，代码量相对较多
+- ⚠️ 构建步骤：需要显式调用 `builder.toSchema()` 进行构建
+
+**评级**：🥈完善
+
+#### Grats (Inference模式)
+**核心机制**：通过静态分析 TypeScript 代码和 JSDoc 注释来生成 GraphQL Schema，生成的代码是纯 `graphql-js`。
+
+**优势**：
+- ✅ 零运行时开销：生成的 Schema 是纯 `graphql-js` 代码，运行时完全独立，无任何 Grats 依赖
+- ✅ 代码纯净：源代码使用纯 TypeScript，无装饰器、无元数据、无运行时反射
+- ✅ 类型安全：完全基于 TypeScript 类型系统，编译时类型检查
+- ✅ 标准兼容：生成标准的 `graphql-js` Schema，与整个 GraphQL 生态完美兼容
+- ✅ 单一数据源：TypeScript 类型定义是单一数据源，同时生成 GraphQL Schema 和类型定义
+
+**劣势**：
+- ⚠️ 需要代码生成步骤：必须在构建时运行 `grats` CLI 工具生成 Schema 代码
+- ⚠️ 生成代码不可手动编辑：生成的 `schema.ts` 文件会被自动覆盖，不能手动修改
+- ⚠️ JSDoc 注释依赖：必须使用 JSDoc 注释标记类型和函数，增加了代码量
+
+**评级**：🏅顶级
+
+#### gqtx (Builder模式)
+**核心机制**：通过函数式 API 显式构建类型定义，如 `Gql.Object<T>()`、`Gql.Field()` 等。
+
+**优势**：
+- ✅ 无运行时反射：不依赖反射元数据，运行时开销小
+- ✅ 代码纯净：纯函数式 API，易于测试和调试
+- ✅ 模块化构建：Schema 定义和 Resolver 可以分离，支持大型项目的模块化组织
+- ✅ 轻量级：API 简洁，学习曲线平缓
+
+**劣势**：
+- ⚠️ 类型安全有限：在 Schema 组装层面需要使用 `unknown` 类型和类型断言，失去了部分类型安全
+- ⚠️ 显式定义：需要手动定义每个字段，代码量较多
+- ⚠️ 类型重复：TypeScript 类型定义和 GraphQL Schema 定义需要分别维护
+
+**评级**：🥉凑合
+
+#### GQLoom (Weaving模式)
+**核心机制**：通过组合独立的 Resolver 和 Schema 定义来构建，使用验证库的 Schema（如 Zod）作为单一数据源，通过 `weave()` 函数编织成最终 Schema。
+
+**优势**：
+- ✅ 无运行时反射：不依赖反射元数据，运行时开销小
+- ✅ 代码纯净：纯函数式 API，易于测试和调试
+- ✅ 模块化构建：每个 Resolver 模块独立，支持大型项目的模块化组织
+- ✅ 单一数据源：验证库的 Schema 同时作为验证逻辑和 GraphQL Schema 的来源
+- ✅ 类型安全：通过 TypeScript 和验证库提供完整的类型安全
+
+**劣势**：
+- ⚠️ 需要选择 Weaver：必须选择一个 Weaver（如 `ZodWeaver`、`ValibotWeaver` 等）来转换 Schema
+- ⚠️ 编织步骤：需要显式调用 `weave()` 进行构建，需要配置 Weaver
+
+**评级**：🥈完善
+
+#### Pylon (Inference模式)
+**核心机制**：通过静态分析 TypeScript 代码自动生成 GraphQL Schema，开发者只需编写普通的 TypeScript 类和函数。
+
+**优势**：
+- ✅ 零配置：无需显式定义 Schema，直接使用 TypeScript 类型即可
+- ✅ 单一数据源：TypeScript 类型定义是唯一的数据源，自动生成 GraphQL Schema
+- ✅ 类型安全：充分利用 TypeScript 的类型系统，编译时检查类型
+- ✅ 无运行时开销：Schema 在构建时生成，运行时无额外开销
+- ✅ 代码简洁：代码看起来就像普通的 TypeScript 代码，学习成本低
+
+**劣势**：
+- ⚠️ 需要构建步骤：必须运行 `pylon build` 才能生成 Schema
+- ⚠️ 静态分析限制：依赖静态分析，某些复杂的类型推断可能受限
+- ⚠️ 调试困难：Schema 是自动生成的，调试时需要查看生成的 Schema 文件
+
+**评级**：🥈完善
+
+#### garph (Builder模式)
+**核心机制**：通过链式 API 显式构建类型定义，如 `g.type()`、`g.int()` 等，通过 `buildSchema()` 组装。
+
+**优势**：
+- ✅ 无运行时反射：不依赖反射元数据，运行时开销小
+- ✅ 代码纯净：纯函数式 API，易于测试和调试
+- ✅ 模块化构建：Schema 定义和 Resolver 可以分离，支持大型项目的模块化组织
+- ✅ 类型安全：通过 TypeScript 泛型和类型推断提供完整的类型安全
+
+**劣势**：
+- ⚠️ 显式定义：需要手动定义每个字段，相比自动推断模式代码量稍多
+- ⚠️ 构建步骤：需要显式调用 `buildSchema()` 进行构建
+
+**评级**：🥈完善
+
+### 架构模式分组
+
+| 架构模式      | 库名称                     | 特点                                 |
+| ------------- | -------------------------- | ------------------------------------ |
+| **Decorator** | TypeGraphQL                | 类+装饰器+反射元数据，运行时构建     |
+| **Builder**   | Nexus, Pothos, gqtx, garph | 函数式API显式构建，无运行时反射      |
+| **Weaving**   | GQLoom                     | 验证库Schema+编织，单一数据源        |
+| **Inference** | Grats, Pylon               | 静态分析自动生成，零配置或构建时生成 |
+
+**顶级评选理由**：Grats 在架构模式上领先于其他所有库。它实现了真正的零运行时开销（生成的代码是纯 graphql-js），并且通过单一数据源原则消除了类型定义的重复。同时避免了反射元数据和全局副作用，是最符合现代 TypeScript 开发理念的方案。
+
+## 2. 依赖复杂度对比分析
+
+基于以下4个关键评估维度：
+1. **特殊魔法依赖**：是否依赖装饰器、代码生成等特殊机制（扣分项）
+2. **服务器适配器兼容性**：能否适配Yoga、Apollo、Mercurius等主流服务器
+3. **测试和打包易用性**：是否易于测试、自定义打包（rspack、vite等）
+4. **运行时环境适配**：是否适配node、deno、bun、浏览器等环境
+
+### 详细评估
+
+#### TypeGraphQL (🥉凑合)
+**特殊魔法依赖**：重度依赖装饰器和reflect-metadata
+- ❌ **装饰器强制**：必须启用experimentalDecorators
+- ❌ **反射元数据**：必须引入reflect-metadata，运行时开销大
+- ❌ **全局副作用**：装饰器产生全局副作用，影响测试
+
+**服务器适配器兼容性**：✅ 优秀
+- ✅ 支持Apollo Server、GraphQL Yoga
+- ✅ 支持Federation、Cache Control等高级功能
+
+**测试和打包易用性**：✅ 标准
+- ✅ 纯TypeScript，无特殊构建要求
+- ⚠️ 装饰器可能影响测试隔离
+
+**运行时环境适配**：⚠️ 有限
+- ✅ Node.js：完全支持
+- ❌ 其他环境：无特别支持
+
+#### Nexus (🥉凑合)
+**特殊魔法依赖**：需要代码生成
+- ⚠️ **类型生成**：需要运行nexus-typegen生成类型文件
+- ⚠️ **构建步骤**：需要额外的代码生成步骤
+
+**服务器适配器兼容性**：✅ 优秀
+- ✅ 支持Apollo Server、GraphQL Yoga、express-graphql
+- ✅ 无服务器框架绑定
+
+**测试和打包易用性**：✅ 标准
+- ✅ 纯函数式API，易于测试
+- ✅ 无特殊打包要求
+
+**运行时环境适配**：⚠️ 有限
+- ✅ Node.js：完全支持
+- ⚠️ 其他环境：可以通过Yoga适配
+
+#### Pothos (🥈完善)
+**特殊魔法依赖**：较少依赖
+- ✅ **纯TypeScript**：无装饰器、无反射元数据
+- ✅ **插件化扩展**：功能通过插件提供，无强制特殊机制
+
+**服务器适配器兼容性**：✅ 优秀
+- ✅ 支持Yoga、Apollo Server、Mercurius
+- ✅ 支持Fastify、Express、Next.js等Web框架
+
+**测试和打包易用性**：✅ 标准
+- ✅ 纯函数式，易于测试和mock
+- ✅ 无特殊构建要求
+
+**运行时环境适配**：⚠️ 有限
+- ✅ Node.js：完全支持
+- ⚠️ 其他环境：可以通过Yoga适配
+
+#### Grats (🏅顶级)
+**特殊魔法依赖**：需要代码生成
+- ⚠️ **构建时生成**：需要运行grats CLI生成Schema代码
+- ✅ **运行时干净**：生成的代码是纯graphql-js，无任何Grats依赖
+
+**服务器适配器兼容性**：✅ 良好
+- ✅ GraphQL Yoga：示例中使用
+- ✅ Apollo Server：理论兼容（标准graphql-js Schema）
+
+**测试和打包易用性**：✅ 标准
+- ✅ 生成纯代码，易于测试
+- ✅ 无特殊构建要求
+
+**运行时环境适配**：⚠️ 有限
+- ✅ Node.js：完全支持
+- ⚠️ 其他环境：生成的标准Schema可以适配
+
+#### gqtx (🥈完善)
+**特殊魔法依赖**：较少依赖
+- ✅ **纯函数式**：无装饰器、无代码生成
+- ⚠️ **类型断言**：在某些地方需要类型断言
+
+**服务器适配器兼容性**：✅ 良好
+- ✅ GraphQL Yoga：示例中使用
+- ✅ Apollo Server：理论兼容（标准Schema）
+
+**测试和打包易用性**：✅ 标准
+- ✅ 纯函数式，易于测试
+- ✅ 无特殊构建要求
+
+**运行时环境适配**：⚠️ 有限
+- ✅ Node.js：完全支持
+- ⚠️ 其他环境：标准Schema适配
+
+#### GQLoom (🥈完善)
+**特殊魔法依赖**：较少依赖
+- ✅ **纯TypeScript**：无装饰器、无强制代码生成
+- ⚠️ **Weaver选择**：需要选择验证库Weaver
+
+**服务器适配器兼容性**：✅ 优秀
+- ✅ 支持Yoga、Apollo Server、Mercurius
+- ✅ 支持Fastify等Web框架
+
+**测试和打包易用性**：✅ 标准
+- ✅ 模块化设计，易于测试
+- ✅ 无特殊构建要求
+
+**运行时环境适配**：⚠️ 有限
+- ✅ Node.js：完全支持
+- ⚠️ 其他环境：可以通过Yoga适配
+
+#### Pylon (🥉凑合)
+**特殊魔法依赖**：重度依赖装饰器
+- ❌ **装饰器强制**：依赖装饰器实现中间件功能（[createDecorator](https://pylon.cronit.io/docs/core-concepts/decorators)）
+- ❌ **框架绑定**：与Hono深度耦合，无法独立使用
+- ⚠️ **构建时生成**：需要运行pylon build生成Schema
+
+**服务器适配器兼容性**：❌ 深度Hono绑定
+- ❌ **自由度极低**：深度绑定Hono，连schema对象都拿不到
+- ❌ **无法适配**：无法使用Yoga、Apollo、Mercurius等主流服务器
+- ⚠️ **Hono生态**：仅限于Hono框架生态
+
+**测试和打包易用性**：❌ 特殊
+- ❌ **测试启动代码特殊**：测试代码与其他库截然不同
+- ❌ **打包复杂**：深度框架绑定影响自定义打包
+
+**运行时环境适配**：❌ 有限
+- ❌ **无法直接运行**：不像Pothos、gqtx、GQLoom、garph这类无魔法schema可在node,deno,bun,浏览器直接运行
+- ⚠️ **环境受限**：运行时环境支持受Hono框架限制
+
+#### garph (🥈完善)
+**特殊魔法依赖**：较少依赖
+- ✅ **纯TypeScript**：无装饰器、无代码生成
+- ✅ **泛型推断**：充分利用TypeScript类型系统
+
+**服务器适配器兼容性**：✅ 优秀
+- ✅ 支持Yoga、Apollo Server、Mercurius
+- ✅ 支持Fastify等Web框架
+
+**测试和打包易用性**：✅ 标准
+- ✅ 链式API，易于测试
+- ✅ 无特殊构建要求
+
+**运行时环境适配**：⚠️ 有限
+- ✅ Node.js：完全支持
+- ⚠️ 其他环境：可以通过Yoga适配
+
+### 各库依赖复杂度综合评估
+
+| 库名称      | 特殊魔法依赖                   | 服务器适配     |
+| ----------- | ------------------------------ | -------------- |
+| Pothos      | 无魔法 ✅                       | ✅ 全兼容       |
+| GQLoom      | 无魔法 ✅                       | ✅ 全兼容       |
+| garph       | 无魔法 ✅                       | ✅ 全兼容       |
+| gqtx        | 无魔法 ✅                       | ✅ 全兼容       |
+| Nexus       | 可选代码生成 ⚠️                 | ✅ 全兼容       |
+| Grats       | 需要代码生成 ⚠️                 | ✅ 全兼容       |
+| TypeGraphQL | 重度依赖装饰器 ❌               | ✅ 全兼容       |
+| Pylon       | 需要代码生成，重度依赖装饰器 ❌ | ❌ Hono深度绑定 |
+
+## 3. 类型定义对比分析
+
+类型定义是各个 GraphQL Schema 构建库的核心差异所在，直接决定了开发体验、维护成本和类型安全。理想的类型定义应当实现 **单一数据源** 原则，从一份 TypeScript 定义同时生成 GraphQL Schema、类型安全和运行时验证。
+
+### 对象类型定义对比
+
+对象定义是 GraphQL Schema 的基础。我们将通过各库如何定义 `User` 和 `Order` 模型（包含基本字段和关联查询）来进行对比。
+
+#### TypeGraphQL (Decorator模式)
+使用类和装饰器，关联查询通常通过 `@FieldResolver` 或在类中定义字段实现。
+
+```typescript
+@ObjectType()
+export class User {
+  @Field(() => Int)
+  id!: number
+
+  @Field(() => String)
+  name!: string
+
+  @Field(() => String)
+  email!: string
+
+  @Field(() => [Order])
+  orders!: Order[]
+}
+
+@ObjectType()
+export class Order {
+  @Field(() => Int)
+  id!: number
+
+  @Field(() => GraphQLDateTime)
+  createdAt!: Date
+
+  @Field(() => User, { nullable: true })
+  user?: User | null
+  
+  // 关联查询通常在 Resolver 类中定义
+}
+```
+
+#### Nexus (Builder模式)
+显式函数式 API，代码较为冗长但结构清晰。
+
+```typescript
+export const User = objectType({
+  name: 'User',
+  definition(t) {
+    t.nonNull.int('id')
+    t.nonNull.string('name')
+    t.nonNull.string('email')
+    t.nonNull.list.nonNull.field('orders', {
+      type: Order,
+      resolve(parent) {
+        return Array.from(orderMap.values()).filter(o => o.userId === parent.id)
+      },
+    })
+  },
+})
+```
+
+#### Pothos (Builder模式)
+插件化构建器，支持链式调用，类型推导非常强大。
+
+```typescript
+export const User = builder.simpleObject('User', {
+  fields: (t) => ({
+    id: t.int(),
+    name: t.string(),
+    email: t.string(),
+  }),
+})
+
+builder.objectFields(User, (t) => ({
+  orders: t.field({
+    type: [Order],
+    resolve: (user) => Array.from(orderMap.values()).filter(o => o.userId === user.id),
+  }),
+}))
+```
+
+#### Grats (Inference模式)
+直接使用 TypeScript 类型 + JSDoc 注释，完全无侵入。
+
+```typescript
+/**
+ * User information
+ * @gqlType
+ */
+export type User = {
+  /** @gqlField */
+  id: Int
+  /** @gqlField */
+  name: string
+  /** @gqlField */
+  email: string
+}
+
+/** @gqlField */
+export function orders(user: User): Order[] {
+  return getOrdersByUserId(user.id)
+}
+```
+
+#### gqtx (Builder模式)
+轻量级构建器，需要手动标注类型泛型。
+
+```typescript
+export const UserType = Gql.Object<User>({
+  name: 'User',
+  fields: () => [
+    Gql.Field({ name: 'id', type: Gql.NonNull(Gql.Int) }),
+    Gql.Field({ name: 'name', type: Gql.NonNull(Gql.String) }),
+    Gql.Field({ name: 'email', type: Gql.NonNull(Gql.String) }),
+    Gql.Field({
+      name: 'orders',
+      type: Gql.NonNull(Gql.List(Gql.NonNull(OrderType))),
+      resolve: (user) => Array.from(orderMap.values()).filter(o => o.userId === user.id),
+    }),
+  ],
+})
+```
+
+#### GQLoom (Weaving模式)
+使用 Zod Schema 作为单一数据源，自动推导 GraphQL 类型。
+
+```typescript
+export const User = z.object({
+  id: z.int(),
+  name: z.string(),
+  email: z.email(),
+})
+
+export const userResolver = resolver.of(User, {
+  orders: field(z.array(z.lazy(() => Order))).resolve((user) => {
+    return Array.from(orderMap.values()).filter(o => o.userId === user.id)
+  }),
+})
+```
+
+#### Pylon (Inference模式)
+使用原生 TypeScript 类，方法即 Resolver。
+
+```typescript
+export class User {
+  constructor(
+    public id: Int,
+    public name: string,
+    public email: string,
+  ) {}
+
+  async orders(): Promise<Order[]> {
+    return loaders.userOrders.load(this.id)
+  }
+}
+```
+
+#### garph (Builder模式)
+简洁的链式 API，支持 Infer 导出 TypeScript 类型。
+
+```typescript
+export const UserType = g.type('User', {
+  id: g.int(),
+  name: g.string(),
+  email: g.string(),
+  orders: g.ref(() => OrderType).list().optional(),
+})
+
+export type User = Infer<typeof UserType>
+```
+
+---
+
+### 联合类型定义对比
+
+联合类型（Union）用于表示一个字段可以是多种类型之一。对比各库对 `MenuItem = Coffee | Dessert` 的定义。
+
+#### TypeGraphQL (Decorator模式)
+需要手动创建 union，并提供 `resolveType`。
+
+```typescript
+export const MenuItem = createUnionType({
+  name: 'MenuItem',
+  types: () => [Coffee, Dessert] as const,
+  resolveType: (value) => {
+    if ('__typename' in value && value.__typename === 'Coffee') return 'Coffee'
+    if ('__typename' in value && value.__typename === 'Dessert') return 'Dessert'
+    return null
+  },
+})
+```
+
+#### Nexus (Builder模式)
+显式定义成员和类型解析逻辑。
+
+```typescript
+export const MenuItem = unionType({
+  name: 'MenuItem',
+  definition(t) {
+    t.members('Coffee', 'Dessert')
+  },
+  resolveType(item) {
+    return item?.__typename === 'Coffee' ? 'Coffee' : 'Dessert'
+  },
+})
+```
+
+#### Pothos (Builder模式)
+支持 `unionType` 定义。
+
+```typescript
+export const MenuItem = builder.unionType('MenuItem', {
+  types: [Coffee, Dessert],
+  resolveType: (item) => {
+    if (item && typeof item === 'object' && '__typename' in item) {
+      return item.__typename === 'Coffee' ? Coffee : Dessert
+    }
+    return null
+  },
+})
+```
+
+#### Grats (Inference模式)
+直接使用 TypeScript 联合类型。
+
+```typescript
+/** @gqlUnion */
+export type MenuItem = Coffee | Dessert
+```
+
+#### gqtx (Builder模式)
+需要手动 resolve 类型。
+
+```typescript
+export const MenuItemType = Gql.Union({
+  name: 'MenuItem',
+  types: [CoffeeType, DessertType],
+  resolveType: (value: MenuItem) => {
+    return value.__typename === 'Coffee' ? 'Coffee' : 'Dessert'
+  },
+})
+```
+
+#### GQLoom (Weaving模式)
+直接使用 Zod 联合。
+
+```typescript
+export const MenuItem = z.union([Coffee, Dessert])
+```
+
+#### Pylon (Inference模式)
+原生 TypeScript 联合类型，自动识别。
+
+```typescript
+export type MenuItem = Coffee | Dessert
+```
+
+#### garph (Builder模式)
+简洁的联合类型定义。
+
+```typescript
+export const MenuItemType = g.unionType('MenuItem', {
+  Coffee: CoffeeType,
+  Dessert: DessertType,
+})
+```
+
+---
+
+### 接口类型定义对比
+
+接口（Interface）定义公共字段。对比各库对 `Food` 接口（id, name, price）的定义和实现。
+
+#### TypeGraphQL (Decorator模式)
+使用 `@InterfaceType`，但 **实现类必须重复定义所有字段**（TS/TypeGraphQL 限制）。
+
+```typescript
+@InterfaceType()
+export abstract class Food {
+  @Field(() => Int) id!: number
+  @Field(() => String) name!: string
+  @Field(() => Float) price!: number
+}
+
+@ObjectType({ implements: Food })
+export class Coffee implements Food {
+  @Field(() => Int) id!: number // 重复定义
+  @Field(() => String) name!: string // 重复定义
+  @Field(() => Float) price!: number // 重复定义
+  @Field(() => SugarLevel) sugarLevel!: SugarLevel
+}
+```
+
+#### Nexus (Builder模式)
+需要 `implements` 接口。
+
+```typescript
+export const Food = interfaceType({
+  name: 'Food',
+  definition(t) {
+    t.nonNull.int('id')
+    t.nonNull.string('name')
+    t.nonNull.float('price')
+  },
+})
+
+export const Coffee = objectType({
+  name: 'Coffee',
+  definition(t) {
+    t.implements('Food')
+    t.nonNull.field('sugarLevel', { type: SugarLevel })
+  },
+})
+```
+
+#### Pothos (Builder模式)
+通过 `interfaceRef` 定义，支持更好的类型继承。
+
+```typescript
+export const Food = builder.interfaceRef<IFood>('Food').implement({
+  fields: (t) => ({
+    id: t.int(),
+    name: t.string(),
+    price: t.float(),
+  }),
+})
+
+export const Coffee = builder.objectRef<ICoffee>('Coffee').implement({
+  interfaces: [Food],
+  fields: (t) => ({
+    sugarLevel: t.field({ type: SugarLevel, resolve: (p) => p.sugarLevel }),
+  }),
+})
+```
+
+#### Grats (Inference模式)
+使用原生 `interface`，配合注释。
+
+```typescript
+/** @gqlInterface */
+export interface Food {
+  /** @gqlField */
+  id: Int
+  /** @gqlField */
+  name: string
+  /** @gqlField */
+  price: Float
+}
+
+/** @gqlType */
+export class Coffee implements Food {
+  // 正常类定义
+}
+```
+
+#### gqtx (Builder模式)
+需要手动定义抽象字段。
+
+```typescript
+export const FoodInterface = Gql.InterfaceType({
+  name: 'Food',
+  fields: () => [
+    Gql.AbstractField({ name: 'id', type: Gql.NonNull(Gql.Int) }),
+    Gql.AbstractField({ name: 'name', type: Gql.NonNull(Gql.String) }),
+    Gql.AbstractField({ name: 'price', type: Gql.NonNull(Gql.Float) }),
+  ],
+})
+```
+
+#### GQLoom (Weaving模式)
+Zod Schema 扩展，天然支持接口模式。
+
+```typescript
+export const Food = z.object({
+  id: z.int(),
+  name: z.string(),
+  price: z.number(),
+})
+
+export const Coffee = Food.extend({
+  sugarLevel: SugarLevel,
+}).register(asObjectType, { interfaces: [Food] })
+```
+
+#### Pylon (Inference模式)
+使用原生 TypeScript 类继承。
+
+```typescript
+export interface Food {
+  id: Int
+  name: string
+  price: number
+}
+
+export class Coffee implements Food {
+  // 构造函数初始化
+}
+```
+
+#### garph (Builder模式)
+支持 `.implements()`。
+
+```typescript
+export const FoodInterface = g.interface('Food', {
+  id: g.int(),
+  name: g.string(),
+  price: g.float(),
+})
+
+export const CoffeeType = g.type('Coffee', {
+  sugarLevel: g.ref(SugarLevelEnum),
+}).implements(FoodInterface)
+```
+
+---
+
+### 枚举类型定义对比
+
+#### TypeGraphQL
+必须先有 TS 枚举，再调用 `registerEnumType`。
+
+```typescript
+export enum SugarLevel { NONE, LOW, MEDIUM, HIGH }
+registerEnumType(SugarLevel, { name: 'SugarLevel' })
+```
+
+#### Nexus / Pothos / garph / gqtx
+使用专门的枚举构建函数。
+
+```typescript
+// Nexus
+export const SugarLevel = enumType({ name: 'SugarLevel', members: ['NONE', 'LOW', 'MEDIUM', 'HIGH'] })
+
+// Pothos
+export const SugarLevel = builder.enumType('SugarLevel', { values: ['NONE', 'LOW', 'MEDIUM', 'HIGH'] as const })
+
+// garph
+export const SugarLevelEnum = g.enumType('SugarLevel', ['NONE', 'LOW', 'MEDIUM', 'HIGH'] as const)
+```
+
+#### Grats / GQLoom / Pylon
+直接使用 TypeScript 的 `enum` 或 `union`（GQLoom 使用 `z.enum`）。
+
+```typescript
+// Grats
+/** @gqlEnum */
+export type SugarLevel = 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH'
+
+// GQLoom
+const SugarLevel = z.enum(['NONE', 'LOW', 'MEDIUM', 'HIGH'])
+
+// Pylon
+export type SugarLevel = 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH'
+```
+
+---
+
+### 类型定义整体点评
+
+1. **TypeGraphQL**: 装饰器模式虽然经典，但**类型重复定义**问题在接口实现时非常突出，维护成本较高。
+2. **Nexus**: 显式构建，对 TS 的利用率不如现代库，代码量大且稍显过时。
+3. **Pothos**: 极强的类型推导，插件生态丰富，但 Builder API 有一定的学习曲线。
+4. **Grats**: **最纯净的 TS 体验**，几乎零侵入，但在处理复杂逻辑时可能需要额外的 resolver 函数。
+5. **gqtx**: 过于底层，缺乏现代化的推断机制，不建议在新项目中使用。
+6. **GQLoom**: **单一数据源的典范**，将验证、类型和 GraphQL Schema 完美合一，DX 极佳。
+7. **Pylon**: 推断能力极强，写代码最快，但**缺乏 Schema 对象**导致灵活性受限。
+8. **garph**: 简洁现代，性能好，Infer 功能非常实用。
+
+---
+
+### 综合比较与评级
+
+| 库名称      | 类型安全 | 代码重复率 | 代码量 | DX (开发体验) | 综合评级 |
+| ----------- | -------- | ---------- | ------ | ------------- | -------- |
+| Grats       | 🏆 顶级   | ✅ 极低     | ✅ 极少 | 🏆 顶级        | 🏅顶级    |
+| GQLoom      | 🏆 顶级   | ✅ 极低     | ✅ 极少 | 🏆 顶级        | 🏅顶级    |
+| Pylon       | ✅ 优秀   | ✅ 极低     | 🏆 极少 | ✅ 良好        | 🥈完善    |
+| Pothos      | ✅ 优秀   | ⚠️ 中等     | ⚠️ 中等 | ✅ 良好        | 🥈完善    |
+| garph       | ✅ 良好   | ⚠️ 中等     | ⚠️ 中等 | ✅ 良好        | 🥈完善    |
+| Nexus       | ⚠️ 中等   | ❌ 较高     | ❌ 较多 | ⚠️ 一般        | 🥉凑合    |
+| TypeGraphQL | ⚠️ 中等   | ❌ 极高     | ❌ 较多 | ⚠️ 一般        | 🥉凑合    |
+| gqtx        | ❌ 较低   | ❌ 极高     | ❌ 较多 | ❌ 较差        | 🪦 没有   |
+
+**顶级评选理由**：
+- **Grats** 和 **GQLoom** 分别代表了"纯 TS 注释推断"和"验证库驱动编织"的最高水平。
+- Grats 实现了**真正的零侵入**，代码就是普通的 TypeScript。
+- GQLoom 实现了**三位一体**（验证+类型+Schema），极大减少了业务代码同步的痛苦。
+
+**关键洞察**：
+接口（Interface）的实现是敲门砖。凡是要求在子类/实现类中手动重复定义接口字段的库（如 TypeGraphQL、Nexus、gqtx），在大型项目中都会带来沉重的维护负担。而能实现自动继承或通过单一数据源推导的库，才是现代 GraphQL 开发的首选。
+

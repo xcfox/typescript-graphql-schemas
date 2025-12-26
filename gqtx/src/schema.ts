@@ -8,7 +8,7 @@ type FieldArray = readonly Field<unknown, unknown>[]
 
 const Query = Gql.Query({
   fields: () =>
-    ([...userQueryFields, ...menuQueryFields, ...orderQueryFields] as FieldArray) as [
+    [...userQueryFields, ...menuQueryFields, ...orderQueryFields] as FieldArray as [
       Field<unknown, unknown>,
       ...Field<unknown, unknown>[],
     ],
@@ -16,7 +16,7 @@ const Query = Gql.Query({
 
 const Mutation = Gql.Mutation({
   fields: () =>
-    ([...userMutationFields, ...menuMutationFields, ...orderMutationFields] as FieldArray) as [
+    [...userMutationFields, ...menuMutationFields, ...orderMutationFields] as FieldArray as [
       Field<unknown, unknown>,
       ...Field<unknown, unknown>[],
     ],

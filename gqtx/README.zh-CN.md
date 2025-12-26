@@ -46,7 +46,7 @@ GQTX 采用典型的 **Builder（构建器）模式**，通过函数式 API 显�
 
 #### 劣势
 
-- ⚠️ **类型安全不足**：大量使用 `unknown` 类型和类型断言，类型推断不够完善
+- ⚠️ **类型安全有限**：在 Schema 组装层面（如合并多个字段数组时）需要使用 `unknown` 类型和类型断言，失去了部分类型安全。但在单个 resolver 内部，类型推断是完善的
 - ⚠️ **显式定义**：需要手动定义每个字段，代码量较多
 - ⚠️ **类型重复**：TypeScript 类型定义和 GraphQL Schema 定义需要分别维护
 
@@ -154,7 +154,7 @@ export const UserType = Gql.Object<User>({
 })
 ```
 
-- ⚠️ **类型安全不足**：虽然使用了泛型 `Gql.Object<User>`，但字段定义与 TypeScript 类型之间缺乏编译时检查
+- ⚠️ **类型安全有限**：虽然使用了泛型 `Gql.Object<User>`，但字段定义与 TypeScript 类型之间缺乏编译时检查。gqtx 的类型安全主要体现在 resolver 的参数和返回值层面，而不是 Schema 定义层面
 - ⚠️ **类型重复**：需要同时维护 TypeScript 类型定义（如 `type User`）和 GraphQL Schema 定义
 
 #### 联合类型 (Union)
@@ -236,8 +236,8 @@ export const SugarLevelEnum = Gql.Enum({
 
 #### 类型推断
 
-- ❌ **不支持类型推断**：无法从 Schema 定义自动推断 TypeScript 类型
-- ❌ **单一数据源缺失**：TypeScript 类型定义和 GraphQL Schema 定义需要分别维护，容易出现不同步问题
+- ⚠️ **部分支持类型推断**：在 resolver 函数内部，参数类型和上下文类型是自动推断的（这是 gqtx 的核心优势）。但无法从 Schema 定义反向推断 TypeScript 类型（即无法从 `UserType` 推断出 `User` 类型）
+- ❌ **单一数据源缺失**：TypeScript 类型定义和 GraphQL Schema 定义需要分别维护，容易出现不同步问题。需要先定义 TypeScript 类型（如 `type User`），再定义 GraphQL 类型（如 `Gql.Object<User>`）
 
 ---
 
@@ -274,7 +274,7 @@ export const userQueryFields = [
 
 - ✅ **模块化组织**：支持按领域模块化组织（user、menu、order）
 - ✅ **高内聚**：每个模块包含完整的 Query、Mutation 和关联 Resolver
-- ⚠️ **类型安全不足**：参数和返回值类型需要手动维护，缺乏编译时类型检查
+- ⚠️ **类型安全有限**：在单个 resolver 内部，参数和返回值类型是自动推断的（这是 gqtx 的亮点）。但在 Schema 组装层面，由于使用了 `unknown` 类型和类型断言，失去了部分类型安全
 
 #### Schema 组装
 
@@ -284,7 +284,7 @@ export const userQueryFields = [
 // gqtx/src/schema.ts (lines 9-15)
 const Query = Gql.Query({
   fields: () =>
-    ([...userQueryFields, ...menuQueryFields, ...orderQueryFields] as FieldArray) as [
+    [...userQueryFields, ...menuQueryFields, ...orderQueryFields] as FieldArray as [
       Field<unknown, unknown>,
       ...Field<unknown, unknown>[],
     ],
@@ -323,7 +323,7 @@ Gql.Field({
 ```
 
 - ✅ **支持关联查询**：可以方便地定义关联字段的 resolver
-- ⚠️ **类型安全不足**：parent 参数类型（如 `order`）需要手动维护，缺乏编译时类型检查
+- ⚠️ **类型安全有限**：parent 参数类型（如 `order`）在 resolver 内部是自动推断的，但需要确保 TypeScript 类型定义与 GraphQL Schema 定义保持一致
 
 ---
 
@@ -378,7 +378,7 @@ Gql.Field({
 ```
 
 - ✅ **参数定义清晰**：使用 `Gql.Arg()` 定义参数，支持可选参数（不传 `Gql.NonNullInput` 即为可选）
-- ⚠️ **类型推导不足**：参数类型需要手动定义，缺乏自动类型推导，IDE 提示不够完善
+- ⚠️ **类型推导有限**：需要手动定义 GraphQL 类型（如 `Gql.NonNullInput(Gql.String)`），但在 resolver 函数中，参数类型是自动推断的（如 `{ name, email }` 的类型）。IDE 提示在 resolver 内部是完善的，但在 Schema 定义层面需要手动维护
 
 #### 格式验证
 

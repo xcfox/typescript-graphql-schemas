@@ -3,17 +3,25 @@ import * as assert from 'node:assert'
 import { type ExecutionResult, type GraphQLSchema, execute as executeGraphQL, parse } from 'graphql'
 import { USERS, MENU_ITEMS, ORDERS } from './index.ts'
 
-export function runTests(schema: GraphQLSchema, createContext?: () => any) {
-  const execute = async <TData = any>(query: string, variables?: Record<string, any>) => {
-    const document = parse(query)
-    const result = await executeGraphQL({
-      schema,
-      document,
-      variableValues: variables,
-      contextValue: createContext?.(),
-    })
-    return result as ExecutionResult<TData>
-  }
+export type ExecuteFn = <TData = any>(
+  query: string,
+  variables?: Record<string, any>,
+) => Promise<ExecutionResult<TData>>
+
+export function runTests(schemaOrExecute: GraphQLSchema | ExecuteFn, createContext?: () => any) {
+  const execute: ExecuteFn =
+    typeof schemaOrExecute === 'function'
+      ? schemaOrExecute
+      : async <TData = any>(query: string, variables?: Record<string, any>) => {
+          const document = parse(query)
+          const result = await executeGraphQL({
+            schema: schemaOrExecute,
+            document,
+            variableValues: variables,
+            contextValue: createContext?.(),
+          })
+          return result as ExecutionResult<TData>
+        }
 
   const initialUserIds = USERS.map((u) => u.id)
   const initialMenuItemIds = MENU_ITEMS.map((i) => i.id)

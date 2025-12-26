@@ -2,6 +2,7 @@ packages:
   - "gqloom"
   - "shared"
   - "pothos"
+  - "pylon"
   - "grats"
   - "typegraphql"
   - "nexus"

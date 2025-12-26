@@ -24,7 +24,10 @@
     "test:gqtx": "pnpm -F gqtx test",
     "dev:garph": "pnpm -F garph dev",
     "print:garph": "pnpm -F garph print",
-    "test:garph": "pnpm -F garph test"
+    "test:garph": "pnpm -F garph test",
+    "dev:pylon": "pnpm -F pylon dev",
+    "print:pylon": "pnpm -F pylon print",
+    "test:pylon": "pnpm -F pylon test"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

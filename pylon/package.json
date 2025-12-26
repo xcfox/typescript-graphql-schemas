@@ -1,0 +1,27 @@
+{
+  "name": "pylon",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Generated with `npm create pylon`",
+  "scripts": {
+    "dev": "pylon dev",
+    "build": "pylon build",
+    "print": "pylon build && node src/print.ts",
+    "test": "pylon build && node src/schema.test.ts"
+  },
+  "dependencies": {
+    "@coffee-shop/shared": "workspace:*",
+    "@getcronit/pylon": "^2.4.2",
+    "@hono/node-server": "^1.13.7",
+    "graphql": "^16.12.0"
+  },
+  "devDependencies": {
+    "@getcronit/pylon-dev": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/getcronit/pylon.git"
+  },
+  "homepage": "https://pylon.cronit.io"
+}

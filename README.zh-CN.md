@@ -15,20 +15,95 @@
 
 ## ☕ 业务模型：咖啡点餐系统
 
-每个库都必须实现以下核心领域模型和逻辑：
+每个库都必须实现以下核心领域模型和完整的 CRUD 操作：
+
+### 领域模型
 
 - **User**: 用户信息（id, name, email）。
-- **Food**: 菜单项接口，定义公共字段（id, name, price）。
-- **Coffee**: 咖啡类型，实现 `Food`，特有属性 `sugarLevel`（含糖量：NONE | LOW | MEDIUM | HIGH）和 `origin`（产地，如 "Colombia", "Ethiopia"）。
-- **Dessert**: 点心类型，实现 `Food`，特有属性 `calories`（卡路里）。
+- **Food**: 菜单项接口（Interface），定义公共字段（id, name, price）。
+- **Coffee**: 咖啡类型，实现 `Food` 接口，特有属性：
+  - `sugarLevel`（含糖量枚举：NONE | LOW | MEDIUM | HIGH）
+  - `origin`（产地字符串，如 "Colombia", "Ethiopia"）
+- **Dessert**: 点心类型，实现 `Food` 接口，特有属性：
+  - `calories`（卡路里，浮点数）
 - **MenuItem**: 联合类型（Union），`MenuItem = Coffee | Dessert`，用于展示各库对 Union 类型的支持。
-- **Order**: 订单（id, createdAt, status, userId, itemIds）。
-- **关联查询**:
-  - `User.orders`: 获取用户的所有订单。
-  - `Order.user`: 获取订单的下单人信息。
-  - `Order.items`: 获取订单内的商品详情（返回 `MenuItem` Union 类型，需支持内联片段查询特有字段）。
-- **业务验证**:
-  - 下单时校验 `userId` 和 `itemIds` 必须在内存数据库中存在。
+- **Order**: 订单信息（id, createdAt, status, userId, itemIds）。
+  - `status` 枚举：PENDING | COMPLETED | CANCELLED
+  - 创建时默认状态为 `PENDING`
+
+### Query（查询）
+
+#### User 模块
+- `users: [User!]!` - 查询所有用户
+- `user(id: Int!): User!` - 根据 ID 查询用户，用户不存在时返回错误信息 "User not found"
+- `User.orders: [Order!]!` - 关联查询：获取用户的所有订单（通过 userId 关联）
+
+#### Menu 模块
+- `menu: [MenuItem!]!` - 查询所有菜单项（返回 Union 类型）
+  - 必须支持内联片段（Inline Fragments）查询特有字段：
+    - `... on Coffee { sugarLevel, origin }`
+    - `... on Dessert { calories }`
+  - 返回的数据必须包含 `__typename` 字段用于类型区分
+- `menuItem(id: Int!): MenuItem` - 根据 ID 查询菜单项（返回 Union 类型，支持内联片段）
+
+#### Order 模块
+- `orders: [Order!]!` - 查询所有订单
+- `order(id: Int!): Order` - 根据 ID 查询订单
+- `Order.user: User` - 关联查询：获取订单的下单人信息（通过 userId 关联）
+- `Order.items: [MenuItem!]!` - 关联查询：获取订单内的商品详情
+  - 返回 Union 类型，必须支持内联片段查询特有字段
+  - 通过 itemIds 数组关联查询对应的菜单项
+
+### Mutation（变更）
+
+#### User 模块
+- `createUser(name: String!, email: String!): User!` - 创建用户
+  - 邮箱格式验证：email 必须包含 `@` 符号，否则返回错误信息（包含 "email" 关键词）
+- `updateUser(id: Int!, name: String, email: String): User!` - 更新用户
+  - `name` 和 `email` 为可选参数
+- `deleteUser(id: Int!): User` - 删除用户，返回被删除的用户信息
+
+#### Menu 模块
+- `createCoffee(name: String!, price: Float!, sugarLevel: SugarLevel!, origin: String!): Coffee!` - 创建咖啡
+  - 返回的 Coffee 对象必须包含 `__typename: "Coffee"` 字段
+- `updateCoffee(id: Int!, name: String, price: Float, sugarLevel: SugarLevel, origin: String): Coffee` - 更新咖啡
+  - 所有字段均为可选参数
+  - 如果 ID 对应的不是 Coffee 类型，应返回 null 或错误
+- `createDessert(name: String!, price: Float!, calories: Float!): Dessert!` - 创建点心
+  - 返回的 Dessert 对象必须包含 `__typename: "Dessert"` 字段
+- `updateDessert(id: Int!, name: String, price: Float, calories: Float): Dessert` - 更新点心
+  - 所有字段均为可选参数
+  - 如果 ID 对应的不是 Dessert 类型，应返回 null 或错误
+- `deleteMenuItem(id: Int!): MenuItem` - 删除菜单项（返回 Union 类型）
+
+#### Order 模块
+- `createOrder(userId: Int!, items: [Int!]!): Order!` - 创建订单
+  - 业务验证（必须全部通过）：
+    1. `items` 数组不能为空，否则返回错误信息（包含 "At least one item is required"）
+    2. `userId` 必须在数据库中存在，否则返回错误信息（包含 "User not found"）
+    3. `items` 数组中的所有 `itemId` 都必须在数据库中存在，否则返回错误信息（包含 "Menu item not found"）
+  - 创建成功时，订单状态默认为 `PENDING`
+- `updateOrder(id: Int!, status: OrderStatus!): Order` - 更新订单状态
+- `deleteOrder(id: Int!): Order` - 删除订单，返回被删除的订单信息
+
+### 技术要求
+
+1. **Union 类型支持**：
+   - 必须正确返回 `__typename` 字段
+   - 必须支持内联片段查询特有字段
+   - 在 resolver 中需要根据 `__typename` 进行类型区分
+
+2. **Interface 支持**：
+   - `Coffee` 和 `Dessert` 必须实现 `Food` 接口
+   - 接口的公共字段（id, name, price）会自动继承，无需重复定义
+
+3. **关联查询**：
+   - 支持通过关联字段（如 `User.orders`、`Order.user`、`Order.items`）进行关联查询
+   - 关联查询应能正确处理 Union 类型
+
+4. **错误处理**：
+   - 查询不存在的资源时应返回明确的错误信息
+   - 业务验证失败时应返回描述性的错误信息
 
 ## 🛠️ 快速开始
 

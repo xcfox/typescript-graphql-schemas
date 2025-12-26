@@ -133,13 +133,10 @@ export const User = builder.simpleObject('User', {
 ```
 
 ```typescript
-// pothos/src/schema/menu.ts (lines 46-58)
-export const Coffee = builder.objectRef<CoffeeItem>('Coffee').implement({
+// pothos/src/schema/menu.ts (lines 39-48)
+export const Coffee = builder.objectRef<ICoffee>('Coffee').implement({
   interfaces: [Food],
   fields: (t) => ({
-    id: t.int({ resolve: (parent) => parent.id }),
-    name: t.string({ resolve: (parent) => parent.name }),
-    price: t.float({ resolve: (parent) => parent.price }),
     sugarLevel: t.field({
       type: SugarLevel,
       resolve: (parent) => parent.sugarLevel,
@@ -158,7 +155,7 @@ export const Coffee = builder.objectRef<CoffeeItem>('Coffee').implement({
 支持 Union 类型定义，通过 `builder.unionType()` 定义：
 
 ```typescript
-// pothos/src/schema/menu.ts (lines 72-80)
+// pothos/src/schema/menu.ts (lines 59-67)
 export const MenuItem = builder.unionType('MenuItem', {
   types: [Coffee, Dessert],
   resolveType: (item) => {
@@ -179,37 +176,47 @@ export const MenuItem = builder.unionType('MenuItem', {
 支持 Interface 定义和实现，通过 `builder.interfaceRef()` 定义接口：
 
 ```typescript
-// pothos/src/schema/menu.ts (lines 31-43)
-export const Food = builder
-  .interfaceRef<{
-    id: number
-    name: string
-    price: number
-  }>('Food')
-  .implement({
-    fields: (t) => ({
-      id: t.int(),
-      name: t.string(),
-      price: t.float(),
-    }),
-  })
+// pothos/src/schema/menu.ts (lines 30-36)
+export const Food = builder.interfaceRef<IFood>('Food').implement({
+  fields: (t) => ({
+    id: t.int(),
+    name: t.string(),
+    price: t.float(),
+  }),
+})
 ```
 
-实现接口时需要在类型定义中指定 `interfaces`：
+实现接口时需要在类型定义中指定 `interfaces`，并且**只需要定义特有字段**：
 
 ```typescript
-// pothos/src/schema/menu.ts (lines 46-58)
-export const Coffee = builder.objectRef<CoffeeItem>('Coffee').implement({
+// pothos/src/schema/menu.ts (lines 39-48)
+export const Coffee = builder.objectRef<ICoffee>('Coffee').implement({
   interfaces: [Food],  // 实现 Food 接口
   fields: (t) => ({
-    // 字段定义
+    // 只需定义特有字段，接口字段自动继承
+    sugarLevel: t.field({
+      type: SugarLevel,
+      resolve: (parent) => parent.sugarLevel,
+    }),
+    origin: t.string({ resolve: (parent) => parent.origin }),
+  }),
+})
+```
+
+```typescript
+// pothos/src/schema/menu.ts (lines 51-56)
+export const Dessert = builder.objectRef<IDessert>('Dessert').implement({
+  interfaces: [Food],
+  fields: (t) => ({
+    // 只需定义特有字段
+    calories: t.float({ resolve: (parent) => parent.calories }),
   }),
 })
 ```
 
 - ✅ **直观的实现方式**：通过 `interfaces` 数组实现接口
-- ⚠️ **需要显式定义接口字段**：实现接口的类型需要在 `fields` 中显式定义所有字段，包括接口的公共字段
-- ⚠️ **需要重复定义**：实现接口的类型需要重复定义接口的字段（如 `id`, `name`, `price`）
+- ✅ **自动继承接口字段**：实现接口的类型只需要定义特有字段，接口的公共字段（如 `id`, `name`, `price`）会自动继承，无需重复定义
+- ✅ **代码简洁**：避免了重复定义接口字段，代码更简洁
 
 #### 枚举类型 (Enum)
 
@@ -422,9 +429,9 @@ email: t.arg.string({
 }),
 ```
 
-- ✅ **声明式验证**：验证逻辑在参数定义阶段完成
+- ✅ **声明式验证**：验证逻辑在参数定义阶段通过 `validate` 选项完成
 - ✅ **Zod 集成**：充分利用 Zod 的验证能力（如 `.email()`, `.min()`, `.max()` 等）
-- ✅ **类型定义与验证结合**：验证逻辑与类型定义紧密结合
+- ⚠️ **类型与验证分离**：GraphQL 类型通过 builder API 显式定义，验证通过 `validate` 选项添加，两者需要手动保持一致
 
 #### 自定义验证
 
@@ -696,7 +703,7 @@ Pothos 支持通过插件系统实现中间件功能，可以在 Resolver 执行
 
 **评估结果：生态集成优秀，支持多种 ORM 和验证库**
 
-Pothos 与 TypeScript 生态中的主流工具都有深度集成，能够构建端到端的类型安全链路。
+Pothos 与 TypeScript 生态中的主流工具都有良好的集成支持。
 
 #### ORM 集成
 
@@ -792,7 +799,7 @@ const UserRef = builder.drizzleObject('users', {
 
 #### 验证库集成
 
-Pothos 通过 `@pothos/plugin-validation` 插件支持多种验证库，实现从字段验证到类型推导的无缝链接。
+Pothos 通过 `@pothos/plugin-validation` 插件支持多种验证库，用于对输入参数进行验证。
 
 **支持的验证库**：
 - ✅ **Zod**：通过 `@pothos/plugin-validation` 支持，示例主要使用 Zod
@@ -808,7 +815,7 @@ Pothos 通过 `@pothos/plugin-validation` 插件支持多种验证库，实现�
 // pothos/src/schema/user.ts (lines 54-57)
 email: t.arg.string({
   required: true,
-  validate: z.email(),
+  validate: z.email(),  // GraphQL 类型是 String!，验证通过 Zod 进行
 }),
 
 // pothos/src/schema/order.ts (lines 69-78)
@@ -818,10 +825,10 @@ userId: t.arg.int({
 }),
 ```
 
-- ✅ **深度集成**：验证逻辑与类型定义紧密结合
-- ✅ **多种支持**：支持多种验证库（Zod、Valibot、ArkType 等）
-- ✅ **声明式验证**：验证逻辑在参数定义阶段完成
-- ✅ **类型推导**：验证库的类型自动推导到 GraphQL Schema
+- ✅ **类型与验证分离**：GraphQL Schema 的类型通过 builder API 显式定义（如 `t.arg.string()`），验证库只用于添加验证逻辑
+- ✅ **多种支持**：支持多种验证库（Zod、Valibot、ArkType 等）进行输入验证
+- ✅ **声明式验证**：验证逻辑在参数定义阶段通过 `validate` 选项完成
+- ⚠️ **需要手动同步**：GraphQL 类型和验证库的 Schema 需要手动保持一致，验证库不会自动推导 GraphQL 类型
 
 #### Server 兼容性
 
@@ -861,9 +868,9 @@ server.listen(4000, () => {
 #### 总结
 
 - ✅ **ORM 集成优秀**：提供 Prisma 和 Drizzle 的深度集成插件，能够直接复用数据库模型定义，自动优化查询
-- ✅ **验证库集成完善**：支持多种验证库（Zod、Valibot、ArkType），实现从字段验证到类型推导的无缝链接
+- ✅ **验证库集成完善**：支持多种验证库（Zod、Valibot、ArkType）进行输入验证，验证逻辑通过插件系统集成
 - ✅ **Server 兼容性好**：与主流 GraphQL Server（Yoga、Apollo Server）和 Web 框架（Next.js、Fastify、Express、Hono）都有良好的兼容性
-- ✅ **消除胶水代码**：通过插件系统消除"胶水代码"，构建端到端的类型安全链路
-- ✅ **轻量且非侵入式**：集成是轻量且非侵入式的，允许开发者根据业务需求自由组合最佳实践工具栈
+- ✅ **插件化设计**：通过插件系统提供各种功能，减少重复代码，保持核心库轻量
+- ✅ **类型安全**：通过 TypeScript 泛型和插件系统提供完整的类型安全支持
 - ✅ **企业级验证**：被 Airbnb、Netflix 等大型企业使用，经过生产环境验证
 

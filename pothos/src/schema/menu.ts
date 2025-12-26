@@ -7,48 +7,38 @@ export const SugarLevel = builder.enumType('SugarLevel', {
   values: ['NONE', 'LOW', 'MEDIUM', 'HIGH'] as const,
 })
 
-// 类型定义
-type CoffeeItem = {
-  __typename: 'Coffee'
+interface IFood {
   id: number
   name: string
   price: number
+}
+// 类型定义
+interface ICoffee extends IFood {
+  __typename: 'Coffee'
   sugarLevel: typeof SugarLevel.$inferType
   origin: string
 }
 
-type DessertItem = {
+interface IDessert extends IFood {
   __typename: 'Dessert'
-  id: number
-  name: string
-  price: number
   calories: number
 }
 
-type MenuItemType = CoffeeItem | DessertItem
+type MenuItemType = ICoffee | IDessert
 
 // Food Interface（公共字段）
-export const Food = builder
-  .interfaceRef<{
-    id: number
-    name: string
-    price: number
-  }>('Food')
-  .implement({
-    fields: (t) => ({
-      id: t.int(),
-      name: t.string(),
-      price: t.float(),
-    }),
-  })
+export const Food = builder.interfaceRef<IFood>('Food').implement({
+  fields: (t) => ({
+    id: t.int(),
+    name: t.string(),
+    price: t.float(),
+  }),
+})
 
 // Coffee 类型，实现 Food 接口
-export const Coffee = builder.objectRef<CoffeeItem>('Coffee').implement({
+export const Coffee = builder.objectRef<ICoffee>('Coffee').implement({
   interfaces: [Food],
   fields: (t) => ({
-    id: t.int({ resolve: (parent) => parent.id }),
-    name: t.string({ resolve: (parent) => parent.name }),
-    price: t.float({ resolve: (parent) => parent.price }),
     sugarLevel: t.field({
       type: SugarLevel,
       resolve: (parent) => parent.sugarLevel,
@@ -58,12 +48,9 @@ export const Coffee = builder.objectRef<CoffeeItem>('Coffee').implement({
 })
 
 // Dessert 类型，实现 Food 接口
-export const Dessert = builder.objectRef<DessertItem>('Dessert').implement({
+export const Dessert = builder.objectRef<IDessert>('Dessert').implement({
   interfaces: [Food],
   fields: (t) => ({
-    id: t.int({ resolve: (parent) => parent.id }),
-    name: t.string({ resolve: (parent) => parent.name }),
-    price: t.float({ resolve: (parent) => parent.price }),
     calories: t.float({ resolve: (parent) => parent.calories }),
   }),
 })
@@ -113,7 +100,7 @@ builder.mutationFields((t) => ({
     },
     resolve: (_parent, { name, price, sugarLevel, origin }) => {
       const id = incrementId()
-      const newItem: CoffeeItem = {
+      const newItem: ICoffee = {
         __typename: 'Coffee',
         id,
         name,
@@ -155,7 +142,7 @@ builder.mutationFields((t) => ({
     },
     resolve: (_parent, { name, price, calories }) => {
       const id = incrementId()
-      const newItem: DessertItem = {
+      const newItem: IDessert = {
         __typename: 'Dessert',
         id,
         name,

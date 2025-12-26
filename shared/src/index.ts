@@ -9,9 +9,29 @@ export const USERS = [
 ] as const
 
 export const MENU_ITEMS = [
-  { id: incrementId(), name: 'Latte', price: 4.5, category: 'COFFEE' },
-  { id: incrementId(), name: 'Americano', price: 3.5, category: 'COFFEE' },
-  { id: incrementId(), name: 'Croissant', price: 3.0, category: 'FOOD' },
+  {
+    __typename: 'Coffee',
+    id: incrementId(),
+    name: 'Latte',
+    price: 4.5,
+    sugarLevel: 'MEDIUM' as const,
+    origin: 'Colombia',
+  },
+  {
+    __typename: 'Coffee',
+    id: incrementId(),
+    name: 'Americano',
+    price: 3.5,
+    sugarLevel: 'NONE' as const,
+    origin: 'Ethiopia',
+  },
+  {
+    __typename: 'Dessert',
+    id: incrementId(),
+    name: 'Croissant',
+    price: 3.0,
+    calories: 272,
+  },
 ] as const
 
 export const ORDERS = [

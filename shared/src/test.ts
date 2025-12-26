@@ -179,30 +179,59 @@ export function runTests(schemaOrExecute: GraphQLSchema | ExecuteFn, createConte
   })
 
   describe('Menu Module', () => {
-    it('should return all menu items', async () => {
+    it('should return all menu items with Union type', async () => {
       const result = await execute(/* GraphQL */ `
         query {
           menu {
+            __typename
             id
             name
             price
-            category
+            ... on Coffee {
+              sugarLevel
+              origin
+            }
+            ... on Dessert {
+              calories
+            }
           }
         }
       `)
       assert.strictEqual(result.errors, undefined)
       const menu = result.data?.menu.filter((i: any) => initialMenuItemIds.includes(i.id))
-      assert.deepEqual(menu, MENU_ITEMS)
+      // 验证返回的数据结构
+      assert.ok(Array.isArray(menu))
+      menu.forEach((item: any) => {
+        assert.ok(item.__typename === 'Coffee' || item.__typename === 'Dessert')
+        assert.ok(item.id)
+        assert.ok(item.name)
+        assert.ok(typeof item.price === 'number')
+        if (item.__typename === 'Coffee') {
+          assert.ok(item.sugarLevel)
+          assert.ok(item.origin)
+        } else if (item.__typename === 'Dessert') {
+          assert.ok(typeof item.calories === 'number')
+        }
+      })
     })
 
-    it('should return a menu item by id', async () => {
+    it('should return a menu item by id with Union type', async () => {
       const item = MENU_ITEMS[0]
       const result = await execute(
         /* GraphQL */ `
           query ($id: Int!) {
             menuItem(id: $id) {
+              __typename
               id
               name
+              price
+              ... on Coffee {
+                sugarLevel
+                origin
+              }
+              ... on Dessert {
+                calories
+              }
             }
           }
         `,
@@ -210,57 +239,103 @@ export function runTests(schemaOrExecute: GraphQLSchema | ExecuteFn, createConte
       )
       assert.strictEqual(result.errors, undefined)
       assert.strictEqual(result.data?.menuItem?.name, item.name)
+      assert.strictEqual(result.data?.menuItem?.__typename, item.__typename)
     })
 
-    it('should create a menu item', async () => {
+    it('should create a coffee', async () => {
       const result = await execute(/* GraphQL */ `
         mutation {
-          createMenuItem(name: "Espresso", price: 2.5, category: COFFEE) {
+          createCoffee(name: "Espresso", price: 2.5, sugarLevel: NONE, origin: "Brazil") {
+            __typename
             name
             price
-            category
+            sugarLevel
+            origin
           }
         }
       `)
       assert.strictEqual(result.errors, undefined)
-      assert.deepEqual(result.data?.createMenuItem, {
+      assert.deepEqual(result.data?.createCoffee, {
+        __typename: 'Coffee',
         name: 'Espresso',
         price: 2.5,
-        category: 'COFFEE',
+        sugarLevel: 'NONE',
+        origin: 'Brazil',
       })
     })
 
-    it('should update a menu item', async () => {
-      const item = MENU_ITEMS[1]
+    it('should create a dessert', async () => {
+      const result = await execute(/* GraphQL */ `
+        mutation {
+          createDessert(name: "Chocolate Cake", price: 5.0, calories: 350) {
+            __typename
+            name
+            price
+            calories
+          }
+        }
+      `)
+      assert.strictEqual(result.errors, undefined)
+      assert.deepEqual(result.data?.createDessert, {
+        __typename: 'Dessert',
+        name: 'Chocolate Cake',
+        price: 5.0,
+        calories: 350,
+      })
+    })
+
+    it('should update a coffee', async () => {
+      const item = MENU_ITEMS[0]
       const result = await execute(
         /* GraphQL */ `
           mutation ($id: Int!) {
-            updateMenuItem(id: $id, price: 4.0) {
+            updateCoffee(id: $id, price: 4.0) {
               id
               price
+              sugarLevel
             }
           }
         `,
         { id: item.id },
       )
       assert.strictEqual(result.errors, undefined)
-      assert.strictEqual(result.data?.updateMenuItem?.price, 4.0)
+      assert.strictEqual(result.data?.updateCoffee?.price, 4.0)
+    })
+
+    it('should update a dessert', async () => {
+      const item = MENU_ITEMS[2] // Croissant is a Dessert
+      const result = await execute(
+        /* GraphQL */ `
+          mutation ($id: Int!) {
+            updateDessert(id: $id, price: 3.5) {
+              id
+              price
+              calories
+            }
+          }
+        `,
+        { id: item.id },
+      )
+      assert.strictEqual(result.errors, undefined)
+      assert.strictEqual(result.data?.updateDessert?.price, 3.5)
     })
 
     it('should delete a menu item', async () => {
       const createRes = await execute(/* GraphQL */ `
         mutation {
-          createMenuItem(name: "Temporary", price: 1.0, category: FOOD) {
+          createDessert(name: "Temporary", price: 1.0, calories: 100) {
+            __typename
             id
           }
         }
       `)
-      const newItemId = createRes.data?.createMenuItem?.id
+      const newItemId = createRes.data?.createDessert?.id
 
       const result = await execute(
         /* GraphQL */ `
           mutation ($id: Int!) {
             deleteMenuItem(id: $id) {
+              __typename
               id
             }
           }
@@ -269,6 +344,38 @@ export function runTests(schemaOrExecute: GraphQLSchema | ExecuteFn, createConte
       )
       assert.strictEqual(result.errors, undefined)
       assert.strictEqual(result.data?.deleteMenuItem?.id, newItemId)
+    })
+
+    it('should resolve MenuItem union with type-specific fields', async () => {
+      const result = await execute(/* GraphQL */ `
+        query {
+          menu {
+            __typename
+            id
+            name
+            price
+            ... on Coffee {
+              sugarLevel
+              origin
+            }
+            ... on Dessert {
+              calories
+            }
+          }
+        }
+      `)
+      assert.strictEqual(result.errors, undefined)
+      const menu = result.data?.menu
+      assert.ok(Array.isArray(menu))
+      // 验证 Coffee 类型有特有字段
+      const coffee = menu.find((item: any) => item.__typename === 'Coffee')
+      assert.ok(coffee, 'Should have at least one Coffee')
+      assert.ok(coffee.sugarLevel, 'Coffee should have sugarLevel')
+      assert.ok(coffee.origin, 'Coffee should have origin')
+      // 验证 Dessert 类型有特有字段
+      const dessert = menu.find((item: any) => item.__typename === 'Dessert')
+      assert.ok(dessert, 'Should have at least one Dessert')
+      assert.ok(typeof dessert.calories === 'number', 'Dessert should have calories')
     })
   })
 
@@ -299,8 +406,17 @@ export function runTests(schemaOrExecute: GraphQLSchema | ExecuteFn, createConte
                 name
               }
               items {
+                __typename
                 id
                 name
+                price
+                ... on Coffee {
+                  sugarLevel
+                  origin
+                }
+                ... on Dessert {
+                  calories
+                }
               }
             }
           }
@@ -313,6 +429,16 @@ export function runTests(schemaOrExecute: GraphQLSchema | ExecuteFn, createConte
       assert.strictEqual(data?.user.id, order.userId)
       assert.ok(Array.isArray(data?.items))
       assert.strictEqual(data?.items.length, order.itemIds.length)
+      // 验证 Union 类型的特有字段
+      data?.items.forEach((item: any) => {
+        assert.ok(item.__typename === 'Coffee' || item.__typename === 'Dessert')
+        if (item.__typename === 'Coffee') {
+          assert.ok(item.sugarLevel)
+          assert.ok(item.origin)
+        } else if (item.__typename === 'Dessert') {
+          assert.ok(typeof item.calories === 'number')
+        }
+      })
     })
 
     it('should create an order with valid userId and items', async () => {

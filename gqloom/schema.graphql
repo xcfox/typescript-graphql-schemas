@@ -1,28 +1,48 @@
+type Coffee implements Food {
+  id: Int!
+  name: String!
+  origin: String!
+  price: Float!
+  sugarLevel: CoffeeSugarLevel!
+}
+
+enum CoffeeSugarLevel {
+  HIGH
+  LOW
+  MEDIUM
+  NONE
+}
+
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
 scalar DateTime
 
-type MenuItem {
-  category: MenuItemCategory!
+type Dessert implements Food {
+  calories: Float!
   id: Int!
   name: String!
   price: Float!
 }
 
-enum MenuItemCategory {
-  COFFEE
-  FOOD
+interface Food {
+  id: Int!
+  name: String!
+  price: Float!
 }
 
+union Menu = Coffee | Dessert
+
 type Mutation {
-  createMenuItem(category: MenuItemCategory!, name: String!, price: Float!): MenuItem!
+  createCoffee(name: String!, origin: String!, price: Float!, sugarLevel: CoffeeSugarLevel!): Coffee!
+  createDessert(calories: Float!, name: String!, price: Float!): Dessert!
   createOrder(items: [Int!]!, userId: Int!): Order!
   createUser(email: String!, name: String!): User!
-  deleteMenuItem(id: Int!): MenuItem
+  deleteMenuItem(id: Int!): Menu
   deleteOrder(id: Int!): Order
   deleteUser(id: Int!): User
-  updateMenuItem(category: MenuItemCategory, id: Int!, name: String, price: Float): MenuItem!
+  updateCoffee(id: Int!, name: String, origin: String, price: Float, sugarLevel: CoffeeSugarLevel): Coffee!
+  updateDessert(calories: Float, id: Int!, name: String, price: Float): Dessert!
   updateOrder(id: Int!, status: OrderStatus!): Order!
   updateUser(email: String, id: Int!, name: String): User!
 }
@@ -31,7 +51,7 @@ type Order {
   createdAt: DateTime!
   id: Int!
   itemIds: [Int!]!
-  items: [MenuItem!]!
+  items: [Menu!]!
   status: OrderStatus!
   user: User
   userId: Int!
@@ -43,8 +63,8 @@ enum OrderStatus {
 }
 
 type Query {
-  menu: [MenuItem!]!
-  menuItem(id: Int!): MenuItem!
+  menu: [Menu!]!
+  menuItem(id: Int!): Menu!
   order(id: Int!): Order!
   orders: [Order!]!
   user(id: Int!): User!

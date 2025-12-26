@@ -18,12 +18,15 @@
 每个库都必须实现以下核心领域模型和逻辑：
 
 - **User**: 用户信息（id, name, email）。
-- **MenuItem**: 菜单项（id, name, price, category: COFFEE | FOOD）。
+- **Food**: 菜单项接口，定义公共字段（id, name, price）。
+- **Coffee**: 咖啡类型，实现 `Food`，特有属性 `sugarLevel`（含糖量：NONE | LOW | MEDIUM | HIGH）和 `origin`（产地，如 "Colombia", "Ethiopia"）。
+- **Dessert**: 点心类型，实现 `Food`，特有属性 `calories`（卡路里）。
+- **MenuItem**: 联合类型（Union），`MenuItem = Coffee | Dessert`，用于展示各库对 Union 类型的支持。
 - **Order**: 订单（id, createdAt, status, userId, itemIds）。
 - **关联查询**:
   - `User.orders`: 获取用户的所有订单。
   - `Order.user`: 获取订单的下单人信息。
-  - `Order.items`: 获取订单内的商品详情。
+  - `Order.items`: 获取订单内的商品详情（返回 `MenuItem` Union 类型，需支持内联片段查询特有字段）。
 - **业务验证**:
   - 下单时校验 `userId` 和 `itemIds` 必须在内存数据库中存在。
 

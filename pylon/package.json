@@ -7,13 +7,14 @@
   "scripts": {
     "dev": "pylon dev",
     "build": "pylon build",
-    "print": "pylon build && node src/print.ts",
+    "print": "pylon build && cp .pylon/schema.graphql schema.graphql && prettier --write schema.graphql",
     "test": "pylon build && node src/schema.test.ts"
   },
   "dependencies": {
     "@coffee-shop/shared": "workspace:*",
     "@getcronit/pylon": "^2.4.2",
     "@hono/node-server": "^1.13.7",
+    "dataloader": "^2.2.3",
     "graphql": "^16.12.0"
   },
   "devDependencies": {

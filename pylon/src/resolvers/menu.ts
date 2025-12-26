@@ -1,12 +1,24 @@
 import { Int } from '@getcronit/pylon'
 import { MENU_ITEMS, incrementId } from '@coffee-shop/shared'
-import { MenuItem, type MenuCategory } from '../models/index.ts'
+
+// Enums
+export type MenuCategory = 'COFFEE' | 'FOOD'
 
 // In-memory data map
 export const menuItemMap = new Map<
   number,
   { id: number; name: string; price: number; category: MenuCategory }
 >(MENU_ITEMS.map((item) => [item.id, { ...item } as any]))
+
+// Model Class
+export class MenuItem {
+  constructor(
+    public id: Int,
+    public name: string,
+    public price: number,
+    public category: MenuCategory,
+  ) {}
+}
 
 export const menuQueries = {
   menu: (): MenuItem[] => {

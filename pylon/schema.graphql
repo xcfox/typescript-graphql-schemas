@@ -1,42 +1,42 @@
 type Query {
-orders: [Order!]!
-order(id: Int!): Order
-menu: [MenuItem!]!
-menuItem(id: Int!): MenuItem
-users: [User!]!
-user(id: Int!): User!
+  orders: [Order!]!
+  order(id: Int!): Order
+  menu: [MenuItem!]!
+  menuItem(id: Int!): MenuItem
+  users: [User!]!
+  user(id: Int!): User!
 }
 type Order {
-id: Int!
-userId: Int!
-itemIds: [Int!]!
-status: OrderStatus!
-createdAt: Date!
-user: User!
-items: [MenuItem!]!
+  id: Int!
+  userId: Int!
+  itemIds: [Int!]!
+  status: OrderStatus!
+  createdAt: Date!
+  user: User!
+  items: [MenuItem!]!
 }
 type User {
-id: Int!
-name: String!
-email: String!
-orders: [Order!]!
+  id: Int!
+  name: String!
+  email: String!
+  orders: [Order!]!
 }
 type MenuItem {
-id: Int!
-name: String!
-price: Number!
-category: MenuCategory!
+  id: Int!
+  name: String!
+  price: Number!
+  category: MenuCategory!
 }
 type Mutation {
-createOrder(userId: Int!, items: [Int!]!): Order!
-updateOrder(id: Int!, status: OrderStatusInput!): Order
-deleteOrder(id: Int!): Order
-createMenuItem(name: String!, price: Number!, category: MenuCategoryInput!): MenuItem!
-updateMenuItem(id: Int!, price: Number): MenuItem
-deleteMenuItem(id: Int!): MenuItem
-createUser(name: String!, email: String!): User!
-updateUser(id: Int!, name: String, email: String): User!
-deleteUser(id: Int!): User
+  createOrder(userId: Int!, items: [Int!]!): Order!
+  updateOrder(id: Int!, status: OrderStatusInput!): Order
+  deleteOrder(id: Int!): Order
+  createMenuItem(name: String!, price: Number!, category: MenuCategoryInput!): MenuItem!
+  updateMenuItem(id: Int!, price: Number): MenuItem
+  deleteMenuItem(id: Int!): MenuItem
+  createUser(name: String!, email: String!): User!
+  updateUser(id: Int!, name: String, email: String): User!
+  deleteUser(id: Int!): User
 }
 scalar ID
 scalar Int
@@ -51,20 +51,20 @@ scalar JSON
 scalar String
 scalar Boolean
 enum OrderStatus {
-	PENDING
-	COMPLETED
-	CANCELLED
+  PENDING
+  COMPLETED
+  CANCELLED
 }
 enum MenuCategory {
-	COFFEE
-	FOOD
+  COFFEE
+  FOOD
 }
 enum OrderStatusInput {
-	PENDING
-	COMPLETED
-	CANCELLED
+  PENDING
+  COMPLETED
+  CANCELLED
 }
 enum MenuCategoryInput {
-	COFFEE
-	FOOD
+  COFFEE
+  FOOD
 }

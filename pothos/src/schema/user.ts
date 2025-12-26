@@ -53,7 +53,7 @@ builder.mutationFields((t) => ({
       name: t.arg.string({ required: true }),
       email: t.arg.string({
         required: true,
-        validate: z.string().email(),
+        validate: z.email(),
       }),
     },
     resolve: (_parent, { name, email }) => {
@@ -69,7 +69,7 @@ builder.mutationFields((t) => ({
       id: t.arg.int({ required: true }),
       name: t.arg.string(),
       email: t.arg.string({
-        validate: z.string().email(),
+        validate: z.email(),
       }),
     },
     resolve: (_parent, { id, name, email }) => {

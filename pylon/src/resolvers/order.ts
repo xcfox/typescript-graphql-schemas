@@ -1,9 +1,12 @@
-import { Int } from '@getcronit/pylon'
+import { Int, createDecorator, ServiceError, getContext } from '@getcronit/pylon'
 import { GraphQLError } from 'graphql'
 import { ORDERS, incrementId } from '@coffee-shop/shared'
-import { Order, type OrderStatus } from '../models/index.ts'
-import { userMap } from './user.ts'
-import { menuItemMap } from './menu.ts'
+import { userMap, User } from './user.ts'
+import { menuItemMap, MenuItem } from './menu.ts'
+import type { Loaders } from '../loaders.ts'
+
+// Enums
+export type OrderStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED'
 
 // In-memory data map
 export const orderMap = new Map<
@@ -16,6 +19,51 @@ export const orderMap = new Map<
     createdAt: Date
   }
 >(ORDERS.map((o) => [o.id, { ...o } as any]))
+
+// Validation Decorators
+const validateCreateOrder = createDecorator(async (userId: Int, items: Int[]) => {
+  if (items.length === 0) {
+    throw new ServiceError('At least one item is required', {
+      code: 'INVALID_ORDER',
+      statusCode: 400,
+    })
+  }
+  if (!userMap.has(userId)) {
+    throw new ServiceError('User not found', {
+      code: 'USER_NOT_FOUND',
+      statusCode: 400,
+    })
+  }
+  for (const itemId of items) {
+    if (!menuItemMap.has(itemId)) {
+      throw new ServiceError('Menu item not found', {
+        code: 'MENU_ITEM_NOT_FOUND',
+        statusCode: 400,
+      })
+    }
+  }
+})
+
+// Model Class
+export class Order {
+  constructor(
+    public id: Int,
+    public userId: Int,
+    public itemIds: Int[],
+    public status: OrderStatus,
+    public createdAt: Date,
+  ) {}
+
+  async user(): Promise<User> {
+    const loaders = getContext().get('loaders')
+    return loaders.users.load(this.userId)
+  }
+
+  async items(): Promise<MenuItem[]> {
+    const loaders = getContext().get('loaders')
+    return loaders.menuItems.loadMany(this.itemIds) as Promise<MenuItem[]>
+  }
+}
 
 export const orderQueries = {
   orders: (): Order[] => {
@@ -31,13 +79,7 @@ export const orderQueries = {
 }
 
 export const orderMutations = {
-  createOrder: (userId: Int, items: Int[]): Order => {
-    if (items.length === 0) throw new GraphQLError('At least one item is required')
-    if (!userMap.has(userId)) throw new GraphQLError('User not found')
-    for (const itemId of items) {
-      if (!menuItemMap.has(itemId)) throw new GraphQLError('Menu item not found')
-    }
-
+  createOrder: validateCreateOrder((userId: Int, items: Int[]): Order => {
     const id = incrementId()
     const newOrder = {
       id,
@@ -54,7 +96,7 @@ export const orderMutations = {
       newOrder.status,
       newOrder.createdAt,
     )
-  },
+  }),
   updateOrder: (id: Int, status: OrderStatus): Order | undefined => {
     const order = orderMap.get(id)
     if (!order) return undefined
@@ -70,4 +112,3 @@ export const orderMutations = {
     return undefined
   },
 }
-

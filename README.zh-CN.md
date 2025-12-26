@@ -30,8 +30,8 @@
 - [x] **[Grats](https://grats.capt.dev/)**
 - [x] **[gqtx](https://github.com/sikanhe/gqtx)**
 - [x] **[GQLoom](https://gqloom.dev/)**
-- [x] **[garph](https://garph.dev/)**
 - [ ] **[Pylon](https://pylon.cronit.io/)**
+- [ ] **[garph](https://garph.dev/)**
 
 ## ☕ 业务模型：咖啡点餐系统
 

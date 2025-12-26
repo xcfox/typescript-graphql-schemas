@@ -112,10 +112,10 @@ export class OrderResolver {
   }
 
   @FieldResolver(() => [MenuItem])
-  items(@Root() order: Order): MenuItem[] {
+  items(@Root() order: Order) {
     return order.itemIds
       .map((id) => menuMap.get(id))
-      .filter((item): item is MenuItem => item != null)
+      .filter((item) => item != null)
   }
 
   @Mutation(() => Order)

@@ -1017,7 +1017,318 @@ export const userQueryFields = [
 ### 排名评级与核心差异
 
 1. **GQLoom (🏅顶级)**：由于其革命性地将**验证逻辑**与 **Schema 定义**完全合一，极大地减少了 Resolver 内部的校验代码。
-2. **Grats (🥈完善)**：虽然验证需要手动处理，但其“代码即 Schema”的极致简洁体验无人能及。
+2. **Grats (🥈完善)**：虽然验证需要手动处理，但其"代码即 Schema"的极致简洁体验无人能及。
 3. **Pothos (🥈完善)**：虽然繁琐，但其类型安全性的严谨程度是工业级项目的首选。
 4. **Pylon (🥈完善)**：速度之王，但由于过于黑盒，在大中型团队协作中可能存在隐患。
 
+---
+
+## 6. 内置功能对比分析
+
+内置功能决定了库在应对复杂业务场景时的"开箱即用"能力。优秀的库不应只是简单堆砌功能，而应通过灵活的插件系统深度集成核心API，并保持类型安全。
+
+### 各库内置功能支持情况表
+
+根据 README.zh-CN.md 第159-171行定义的7个核心内置功能维度，对各个库进行支持情况评比：
+
+| 库名称          | Directives | Extensions | 批量加载 (Dataloader) | 自定义标量 (Scalars) | 订阅 (Subscription) | 上下文 (Context) | 中间件 (Middleware) |
+| --------------- | ---------- | ---------- | --------------------- | -------------------- | ------------------- | ---------------- | ------------------- |
+| **TypeGraphQL** | ✅          | ✅          | ⚠️                     | ✅                    | ✅                   | ✅                | ✅                   |
+| **GQLoom**      | ✅          | ✅          | ✅                     | ✅                    | ✅                   | ✅                | ✅                   |
+| **Pothos**      | ✅          | ✅          | ✅                     | ✅                    | ✅                   | ✅                | ⚠️                   |
+| **Nexus**       | ⚠️          | ⚠️          | ⚠️                     | ✅                    | ✅                   | ✅                | ❌                   |
+| **Grats**       | ✅          | ✅          | ⚠️                     | ✅                    | ✅                   | ✅                | ⚠️                   |
+| **Pylon**       | ❌          | ❌          | ⚠️                     | ✅                    | ❌                   | ✅                | ✅                   |
+| **gqtx**        | ❓          | ❓          | ❓                     | ❓                    | ❓                   | ❓                | ❌                   |
+| **garph**       | ❓          | ❓          | ❓                     | ❓                    | ❓                   | ❓                | ❓                   |
+
+**图例说明：**
+- ✅ **原生支持**：库内置原生支持，无需额外配置
+- ⚠️ **有限支持**：需要额外配置或有一定限制
+- ❌ **不支持**：明确不支持该功能
+- ❓ **待调查**：需要详细检查文档和源码确认
+
+### TypeGraphQL 内置功能详细分析
+
+基于 TypeGraphQL 官方文档和项目实现，详细分析其对 7 个核心内置功能的支持情况：
+
+#### ✅ Directives (原生支持)
+- **支持程度**: 通过 `@Directive()` 装饰器声明 GraphQL Directives
+- **实现方式**: 支持在类型、字段、查询、变更等位置使用
+- **限制**: 需要手动使用第三方库实现运行时逻辑，SDL 输出有限制
+- **文档**: https://typegraphql.com/docs/directives.html
+
+#### ✅ Extensions (原生支持)
+- **支持程度**: 通过 `@Extensions()` 装饰器添加自定义元数据
+- **实现方式**: 支持在类型、字段、查询、变更等位置使用，支持数据合并
+- **限制**: 需要在中间件中手动读取和实现逻辑
+- **文档**: https://typegraphql.com/docs/extensions.html
+
+#### ⚠️ 批量加载 (Dataloader) (有限支持)
+- **支持程度**: 不提供原生集成，需要手动创建和管理 DataLoader 实例
+- **实现方式**: 项目中通过 Context 手动创建 Loaders，并在 FieldResolver 中使用
+- **限制**: 需要手动配置 DataLoader 实例和作用域管理
+- **优势**: 完全控制 DataLoader 的创建和配置
+
+#### ✅ 自定义标量 (Scalars) (原生支持)
+- **支持程度**: 通过 `scalarsMap` 配置自定义标量类型
+- **实现方式**: 支持集成 `graphql-scalars` 等第三方库
+- **项目示例**: 使用 `GraphQLDateTime` 标量映射 Date 类型
+- **优势**: 类型安全，完整的 GraphQL 标量支持
+
+#### ✅ 订阅 (Subscription) (原生支持)
+- **支持程度**: 通过 `@Subscription()` 装饰器定义订阅
+- **实现方式**: 完整的类型推导支持，支持 Redis 分布式订阅
+- **限制**: 依赖 GraphQL Server 的传输协议支持
+- **文档**: https://typegraphql.com/docs/subscriptions.html
+
+#### ✅ 上下文 (Context) (原生支持)
+- **支持程度**: 通过 `@Ctx()` 装饰器访问上下文
+- **实现方式**: TypeScript 类型定义上下文，确保编译时类型正确
+- **项目示例**: 通过 Context 传递 DataLoader 实例
+- **优势**: 支持依赖注入，可以注入服务
+
+#### ✅ 中间件 (Middleware) (原生支持)
+- **支持程度**: 通过实现 `MiddlewareInterface` 接口定义中间件
+- **实现方式**: 支持全局、Resolver 级别或字段级别的中间件
+- **特性**: 支持 Guards，通过 `@UseMiddleware()` 和 `@UseGuard()` 装饰器
+- **优势**: 类型安全，易于测试
+- **文档**: https://typegraphql.com/docs/middlewares.html
+
+### Nexus 内置功能详细分析
+
+基于 Nexus 官方文档和项目实现，详细分析其对 7 个核心内置功能的支持情况：
+
+#### ⚠️ Directives (有限支持)
+- **支持程度**: 通过插件系统支持，但不是原生内置
+- **实现方式**: 需要使用第三方插件或工具实现 GraphQL Directives
+- **限制**: 没有内置的 @directive 语法糖
+- **文档**: https://nexusjs.org/docs/plugins
+
+#### ⚠️ Extensions (有限支持)
+- **支持程度**: 支持 GraphQL Extensions，但需要通过插件系统或自定义方式实现
+- **实现方式**: 可以通过扩展现有插件（如 queryComplexityPlugin）来设置类型和字段的 extensions
+- **限制**: 没有内置的简单 API，需要自定义插件逻辑
+- **参考**: GitHub Issue #683 讨论了如何在类型上设置 extensions
+
+#### ⚠️ 批量加载 (Dataloader) (有限支持)
+- **支持程度**: 不提供内置的 DataLoader 支持，需要手动集成 DataLoader 库
+- **实现方式**: 可以与任意 DataLoader 实现集成使用
+- **限制**: 没有原生的批量加载机制，需要手动管理 DataLoader 实例
+- **优势**: 保持核心库轻量，灵活选择 DataLoader 实现
+
+#### ✅ 自定义标量 (Scalars) (原生支持)
+- **支持程度**: 通过 `scalarType()` 函数定义自定义标量类型
+- **实现方式**: 支持 `parseValue`, `serialize`, `parseLiteral` 方法
+- **项目示例**: 使用 `DateTime` 标量类型集成 `graphql-scalars`
+- **优势**: 灵活且类型安全，支持 `asNexusMethod` 选项
+
+#### ✅ 订阅 (Subscription) (原生支持)
+- **支持程度**: 通过 `subscriptionType()` 和 `subscriptionField()` 定义订阅
+- **实现方式**: 支持 async generator，支持类型生成
+- **限制**: 依赖 GraphQL Server 的传输协议支持
+- **文档**: https://nexusjs.org/docs/api/subscription-type
+
+#### ✅ 上下文 (Context) (原生支持)
+- **支持程度**: 通过 `makeSchema()` 的 `contextType` 配置定义上下文类型
+- **实现方式**: 上下文类型会自动生成到类型文件中
+- **项目示例**: 通过 `contextType` 模块配置定义上下文接口
+- **优势**: 完整的类型推导和类型安全
+
+#### ❌ 中间件 (Middleware) (不支持)
+- **支持程度**: 不提供内置的中间件系统
+- **实现方式**: 需要通过自定义插件实现中间件功能
+- **限制**: 没有内置的 MiddlewareInterface 或类似 API
+- **替代方案**: 可以通过插件系统扩展中间件功能
+
+### Pothos 内置功能详细分析
+
+基于 Pothos 官方文档和项目实现，详细分析其对 7 个核心内置功能的支持情况：
+
+#### ✅ Directives (原生支持)
+- **支持程度**: 通过 `@pothos/plugin-directives` 插件提供完整支持
+- **实现方式**: 支持在类型和字段上定义 Directives，支持类型安全的指令参数
+- **特性**: 支持数组和对象格式定义，支持与 graphql-tools 集成
+- **文档**: https://pothos-graphql.dev/docs/plugins/directives
+- **优势**: 完全类型安全，灵活的配置方式
+
+#### ✅ Extensions (原生支持)
+- **支持程度**: 通过插件系统扩展 GraphQL Extensions 功能
+- **实现方式**: 通过各种专用插件提供扩展功能（如复杂度插件等）
+- **优势**: 保持核心库轻量，按需加载扩展功能
+- **类型安全**: 与核心 API 深度集成
+
+#### ✅ 批量加载 (Dataloader) (原生支持)
+- **支持程度**: 通过 `@pothos/plugin-dataloader` 插件原生支持 DataLoader 集成
+- **实现方式**: 提供 `t.loadableGroup()`, `t.loadable()`, `t.loadableList()` 等方法
+- **项目示例**: 使用 `t.loadableGroup()` 实现用户订单的批量加载，解决 N+1 查询问题
+- **优势**: API 简洁直观，自动批量处理，类型安全
+
+#### ✅ 自定义标量 (Scalars) (原生支持)
+- **支持程度**: 通过 `builder.addScalarType()` 方法定义自定义标量类型
+- **实现方式**: 在 `SchemaTypes` 接口中定义标量的输入输出类型
+- **项目示例**: 集成 `graphql-scalars` 的 `DateTime` 标量
+- **优势**: 类型安全，支持第三方标量库集成
+
+#### ✅ 订阅 (Subscription) (原生支持)
+- **支持程度**: 通过 `builder.subscriptionType()` 定义 GraphQL Subscriptions
+- **实现方式**: 完整的类型推导支持，标准的订阅模式
+- **限制**: 依赖 GraphQL Server 的传输协议支持
+- **优势**: 与核心 API 深度集成，类型安全
+
+#### ✅ 上下文 (Context) (原生支持)
+- **支持程度**: 通过 `SchemaTypes` 接口定义上下文类型
+- **实现方式**: 利用 TypeScript 泛型实现完整的上下文类型推导
+- **项目示例**: 在 `builder.ts` 中定义 Context 接口
+- **优势**: 编译时类型检查，Resolver 中直接访问上下文
+
+#### ⚠️ 中间件 (Middleware) (有限支持)
+- **支持程度**: 通过插件系统实现中间件功能，需要额外插件
+- **实现方式**: 提供各种中间件插件，如认证、日志、性能监控等
+- **限制**: 需要安装和配置额外的中间件插件
+- **优势**: 与核心 API 深度集成，保持类型安全
+
+### Grats 内置功能详细分析
+
+基于 Grats 官方文档和项目实现，详细分析其对 7 个核心内置功能的支持情况：
+
+#### ✅ Directives (原生支持)
+- **支持程度**: 通过 `@gqlDirective` 定义，通过 `@gqlAnnotate` 使用
+- **实现方式**: 支持定义 Directive 的位置、参数和是否可重复
+- **特性**: 类型安全的 Directive 参数验证
+- **文档**: https://grats.capt.dev/docs/docblock-tags/directive-definitions
+- **优势**: 完整的类型安全和灵活的配置
+
+#### ✅ Extensions (原生支持)
+- **支持程度**: 通过 `extensions.grats.directives` 命名空间访问 Directive 注解
+- **实现方式**: Directive 注解在运行时通过 extensions 访问
+- **优势**: 命名空间隔离，避免冲突；运行时可用
+
+#### ⚠️ 批量加载 (Dataloader) (有限支持)
+- **支持程度**: 只有文档指南，没有内置集成功能
+- **实现方式**: 需要手动创建和管理 DataLoader 实例，通过 Context 传递
+- **文档**: https://grats.capt.dev/docs/guides/dataloader
+- **限制**: 不像 Pothos/GQLoom 那样提供内置的批量加载 API
+- **优势**: 提供了详细的使用指南和最佳实践
+
+#### ✅ 自定义标量 (Scalars) (原生支持)
+- **支持程度**: 通过 `@gqlScalar` 注释定义自定义标量类型
+- **实现方式**: 在 Schema 配置中提供解析器，支持第三方库集成
+- **项目示例**: 使用 `@gqlScalar` 定义 DateTime 类型
+- **优势**: 简洁的定义方式，类型安全
+
+#### ✅ 订阅 (Subscription) (原生支持)
+- **支持程度**: 通过 `@gqlSubscriptionField` 支持 GraphQL Subscriptions
+- **实现方式**: 返回 `AsyncIterable<T>` 类型，支持 async generator
+- **文档**: https://grats.capt.dev/docs/guides/subscriptions
+- **优势**: 类型安全，文档完善
+
+#### ✅ 上下文 (Context) (原生支持)
+- **支持程度**: 通过 `@gqlContext` 支持类型安全的上下文注入
+- **实现方式**: 支持派生上下文值，可以放在函数参数任意位置
+- **特性**: 支持上下文缓存（WeakMap）
+- **文档**: https://grats.capt.dev/docs/docblock-tags/context
+- **优势**: 完全类型安全，灵活的参数注入
+
+#### ⚠️ 中间件 (Middleware) (有限支持)
+- **支持程度**: 文档中未明确提及官方中间件 API
+- **实现方式**: 可能通过 Context 注入中间件逻辑
+- **限制**: 缺乏官方中间件 API 和文档说明
+- **状态**: 需要进一步调查或自定义实现
+
+### GQLoom 内置功能详细分析
+
+基于 GQLoom 官方文档和项目实现，详细分析其对 7 个核心内置功能的支持情况：
+
+#### ✅ Directives (原生支持)
+- **支持程度**: 完整支持 GraphQL Directives 的定义和使用
+- **实现方式**: 支持在对象和字段上声明 GraphQL Directives
+- **特性**: 特别在 Federation 场景中有完善支持
+- **文档**: https://gqloom.dev/docs/advanced/federation.html
+- **优势**: 完整的 Federation 集成
+
+#### ✅ Extensions (原生支持)
+- **支持程度**: 通过 `asField` 和 `asObjectType` 函数支持 GraphQL Extensions
+- **实现方式**: 在字段和对象级别添加 extensions，包括查询复杂度等元数据
+- **项目示例**: 在字段定义中使用 `extensions: { complexity: 2 }`
+- **文档**: https://gqloom.dev/docs/schema/zod.html#adding-more-metadata
+- **优势**: 与验证库 Schema 深度集成，类型安全
+
+#### ✅ 批量加载 (Dataloader) (原生支持)
+- **支持程度**: 内置批量加载机制，通过 `.load()` 方法实现
+- **实现方式**: 自动批量处理多个查询请求，解决 N+1 查询问题
+- **项目示例**: 在用户订单关联查询中使用 `.load()` 方法
+- **文档**: https://gqloom.dev/docs/dataloader.html
+- **优势**: API 简洁直观，与核心类型系统深度集成
+
+#### ✅ 自定义标量 (Scalars) (原生支持)
+- **支持程度**: 通过 Weaver 配置预设 GraphQL 类型
+- **实现方式**: 在 ZodWeaver 配置中使用 `presetGraphQLType` 函数
+- **项目示例**: 配置 ZodDate 映射到 GraphQLDateTime
+- **文档**: https://gqloom.dev/docs/schema/customize-type-mappings.html
+- **优势**: 灵活的类型映射，默认提供丰富的内置映射
+
+#### ✅ 订阅 (Subscription) (原生支持)
+- **支持程度**: 支持 async generator 和 publish/subscribe 模式
+- **实现方式**: 使用现代 JavaScript async generator 语法
+- **特性**: 可以与 GraphQL Yoga 的 PubSub 集成
+- **文档**: https://gqloom.dev/docs/advanced/subscription.html
+- **限制**: 依赖 GraphQL Server 的传输协议支持
+
+#### ✅ 上下文 (Context) (原生支持)
+- **支持程度**: 通过 `useContext()` 函数实现上下文注入
+- **实现方式**: 基于 Node.js AsyncLocalStorage，支持类似 React 的 API
+- **特性**: 支持在中间件中访问上下文，支持类型安全
+- **文档**: https://gqloom.dev/docs/context.html
+- **限制**: 在不支持 AsyncLocalStorage 的环境需要使用 context 属性
+
+#### ✅ 中间件 (Middleware) (原生支持)
+- **支持程度**: 提供完整的中间件 API，支持面向切面编程
+- **实现方式**: 通过 Middleware 函数实现权限验证、日志记录等功能
+- **特性**: 可组合多个中间件，与上下文系统深度集成
+- **文档**: https://gqloom.dev/docs/middleware.html
+- **优势**: 类型安全，支持复杂的业务逻辑注入
+
+### Pylon 内置功能详细分析
+
+基于 Pylon 官方文档和项目实现，详细分析其对 7 个核心内置功能的支持情况：
+
+#### ❌ Directives (不支持)
+- **支持程度**: 不支持 GraphQL Directives
+- **状态**: 在 GitHub TODO 中明确标注为计划实现的功能
+- **原因**: Pylon 目前不支持 Directives，但计划在未来版本中实现
+- **参考**: https://github.com/getcronit/pylon (Better Directives Support in TODO)
+
+#### ❌ Extensions (不支持)
+- **支持程度**: 不支持 GraphQL Extensions
+- **状态**: 缺乏对 Extensions 的原生支持
+- **限制**: 无法在 Schema 中添加自定义元数据
+
+#### ⚠️ 批量加载 (Dataloader) (有限支持)
+- **支持程度**: 需要手动创建和管理 DataLoader 实例
+- **实现方式**: 项目中手动创建 DataLoader 实例，通过 Context 传递
+- **项目示例**: 在 loaders.ts 中手动创建 userOrders、users、menuItems 等 DataLoader
+- **限制**: 没有内置的 DataLoader 支持，需要手动配置
+
+#### ✅ 自定义标量 (Scalars) (原生支持)
+- **支持程度**: 内置丰富标量类型，自动从 TypeScript 类型推断
+- **实现方式**: 支持 Date、JSON、Number、Any、Void、Object、File 等标量
+- **项目示例**: 自动映射 TypeScript 类型到 GraphQL 标量
+- **优势**: 零配置，类型安全
+
+#### ❌ 订阅 (Subscription) (不支持)
+- **支持程度**: 不支持 GraphQL Subscription
+- **状态**: 文档中明确表示不支持，可能需要通过 Envelop 插件扩展
+- **限制**: 缺乏原生 Subscription 支持
+
+#### ✅ 上下文 (Context) (原生支持)
+- **支持程度**: 原生支持上下文访问，包括 getContext() 和 getEnv()
+- **实现方式**: 支持访问请求上下文、环境变量、自定义 Bindings 和 Variables
+- **文档**: https://pylon.cronit.io/docs/core-concepts/context-management
+- **优势**: 完整的类型安全支持，运行时无关
+
+#### ✅ 中间件 (Middleware) (原生支持)
+- **支持程度**: 原生支持 Hono 中间件
+- **实现方式**: 通过装饰器应用到服务函数，或应用到路由
+- **文档**: https://pylon.cronit.io/docs/core-concepts/decorators
+- **优势**: 利用 Hono 生态，类型安全，灵活应用

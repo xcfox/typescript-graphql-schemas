@@ -13,26 +13,16 @@ export const Food = z.object({
 
 const SugarLevel = z.enum(['NONE', 'LOW', 'MEDIUM', 'HIGH'])
 
-export const Coffee = z
-  .object({
-    __typename: z.literal('Coffee'),
-    id: z.int(),
-    name: z.string(),
-    price: z.number(),
-    sugarLevel: SugarLevel,
-    origin: z.string(),
-  })
-  .register(asObjectType, { interfaces: [Food] })
+export const Coffee = Food.extend({
+  __typename: z.literal('Coffee'),
+  sugarLevel: SugarLevel,
+  origin: z.string(),
+}).register(asObjectType, { interfaces: [Food] })
 
-export const Dessert = z
-  .object({
-    __typename: z.literal('Dessert'),
-    id: z.int(),
-    name: z.string(),
-    price: z.number(),
-    calories: z.number(),
-  })
-  .register(asObjectType, { interfaces: [Food] })
+export const Dessert = Food.extend({
+  __typename: z.literal('Dessert'),
+  calories: z.number(),
+}).register(asObjectType, { interfaces: [Food] })
 
 export const MenuItem = z.union([Coffee, Dessert])
 

@@ -21,22 +21,47 @@ type User {
   email: String!
   orders: [Order!]!
 }
-type MenuItem {
+type Coffee implements MenuItem {
   id: Int!
   name: String!
   price: Number!
-  category: MenuCategory!
+  sugarLevel: SugarLevel!
+  origin: String!
+}
+type Dessert implements MenuItem {
+  id: Int!
+  name: String!
+  price: Number!
+  calories: Number!
 }
 type Mutation {
   createOrder(userId: Int!, items: [Int!]!): Order!
   updateOrder(id: Int!, status: OrderStatusInput!): Order
   deleteOrder(id: Int!): Order
-  createMenuItem(name: String!, price: Number!, category: MenuCategoryInput!): MenuItem!
-  updateMenuItem(id: Int!, price: Number): MenuItem
+  createCoffee(
+    name: String!
+    price: Number!
+    sugarLevel: SugarLevelInput!
+    origin: String!
+  ): Coffee!
+  updateCoffee(
+    id: Int!
+    name: String
+    price: Number
+    sugarLevel: SugarLevelInput
+    origin: String
+  ): Coffee
+  createDessert(name: String!, price: Number!, calories: Number!): Dessert!
+  updateDessert(id: Int!, name: String, price: Number, calories: Number): Dessert
   deleteMenuItem(id: Int!): MenuItem
   createUser(name: String!, email: String!): User!
   updateUser(id: Int!, name: String, email: String): User!
   deleteUser(id: Int!): User
+}
+interface MenuItem {
+  id: Int!
+  name: String!
+  price: Number!
 }
 scalar ID
 scalar Int
@@ -55,16 +80,20 @@ enum OrderStatus {
   COMPLETED
   CANCELLED
 }
-enum MenuCategory {
-  COFFEE
-  FOOD
+enum SugarLevel {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
 }
 enum OrderStatusInput {
   PENDING
   COMPLETED
   CANCELLED
 }
-enum MenuCategoryInput {
-  COFFEE
-  FOOD
+enum SugarLevelInput {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
 }

@@ -2,7 +2,7 @@ import { Int, createDecorator, ServiceError, getContext } from '@getcronit/pylon
 import { GraphQLError } from 'graphql'
 import { ORDERS, incrementId } from '@coffee-shop/shared'
 import { userMap, User } from './user.ts'
-import { menuItemMap, MenuItem } from './menu.ts'
+import { menuItemMap, MenuItem, Coffee, Dessert } from './menu.ts'
 import type { Loaders } from '../loaders.ts'
 
 // Enums
@@ -18,7 +18,7 @@ export const orderMap = new Map<
     status: OrderStatus
     createdAt: Date
   }
->(ORDERS.map((o) => [o.id, { ...o } as any]))
+>(ORDERS.map((o) => [o.id, o]))
 
 // Validation Decorators
 const validateCreateOrder = createDecorator(async (userId: Int, items: Int[]) => {
@@ -61,7 +61,10 @@ export class Order {
 
   async items(): Promise<MenuItem[]> {
     const loaders = getContext().get('loaders')
-    return loaders.menuItems.loadMany(this.itemIds) as Promise<MenuItem[]>
+    const items = await loaders.menuItems.loadMany(this.itemIds)
+    return items.filter(
+      (item): item is MenuItem => item instanceof Coffee || item instanceof Dessert,
+    )
   }
 }
 

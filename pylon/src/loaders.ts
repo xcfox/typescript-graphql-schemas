@@ -1,10 +1,9 @@
 import DataLoader from 'dataloader'
 import { orderMap } from './resolvers/order.ts'
 import { userMap } from './resolvers/user.ts'
-import { menuItemMap } from './resolvers/menu.ts'
+import { menuItemMap, Coffee, Dessert, type MenuItem } from './resolvers/menu.ts'
 import { User } from './resolvers/user.ts'
 import { Order } from './resolvers/order.ts'
-import { MenuItem } from './resolvers/menu.ts'
 
 export const createLoaders = () => {
   return {
@@ -37,7 +36,11 @@ export const createLoaders = () => {
         if (!i) {
           return new Error('Menu item not found')
         }
-        return new MenuItem(i.id, i.name, i.price, i.category)
+        if (i.__typename === 'Coffee') {
+          return new Coffee(i.id, i.name, i.price, i.sugarLevel, i.origin)
+        } else {
+          return new Dessert(i.id, i.name, i.price, i.calories)
+        }
       })
     }),
   }

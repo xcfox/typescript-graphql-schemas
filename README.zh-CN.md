@@ -65,13 +65,19 @@ pnpm print:gqloom
 
 ## 📊 选型观察 (持续更新)
 
-| 维度         | **GQLoom**                   | Pothos                | Grats                 |
-| :----------- | :--------------------------- | :-------------------- | :-------------------- |
-| **定义模式** | 编织 (Weaving)               | 构建器 (Builder)      | 注释 (Type-as-Schema) |
-| **Zod 集成** | 深度原生集成                 | 插件支持              | 需手动转换            |
-| **ID 处理**  | 精准映射 `z.int()` -> `Int!` | 显式定义              | 自动推断              |
-| **代码量**   | 极少 (零重复)                | 较多 (需定义对象映射) | 极少 (无感知)         |
-| **学习成本** | 低 (熟悉 Zod 即可)           | 中 (API 较多)         | 低 (需了解 JSDoc)     |
+| 维度            | **GQLoom**                            | **Pothos**                          | **TypeGraphQL**                                            |
+| :-------------- | :------------------------------------ | :---------------------------------- | :--------------------------------------------------------- |
+| **架构模式**    | 编织 (Weaving) - 组合式，无运行时开销 | 构建器 (Builder) - 配置式，灵活     | 装饰器 (Decorator) - 类基础，需元数据                      |
+| **类型定义**    | Zod Schema - 单一数据源，类型+验证    | Builder API - 显式定义，灵活        | 类装饰器 - 直观但需装饰器                                  |
+| **依赖复杂度**  | 最小化 (`@gqloom/core` + `zod`)       | 中等 (核心+插件+`dataloader`+`zod`) | 较高 (`type-graphql`+`reflect-metadata`+`class-validator`) |
+| **验证系统**    | Zod 原生 - 直接使用 `z.email()`       | Zod 插件 - 需配置 `validate`        | class-validator - 装饰器验证                               |
+| **批处理集成**  | 内置 `.load()` - API 直观             | `loadableGroup` - 功能完整          | 手动 DataLoader - 需自行管理                               |
+| **枚举处理**    | `z.enum()` - 最简洁                   | `builder.enumType()` - 需对象定义   | `registerEnumType()` - 需注册步骤                          |
+| **参数定义**    | 链式 API - `.input().resolve()`       | 配置对象 - `args: { ... }`          | 装饰器参数 - `@Arg()` 或 `@ArgsType()`                     |
+| **自定义验证**  | Zod `.refine()` - 简洁直观            | Zod `.refine()` - 需配置            | 自定义装饰器 - 代码量大                                    |
+| **Schema 构建** | `weave()` - 组合式，配置集中          | `builder.toSchema()` - 最简单       | `buildSchema()` - 需配置验证函数                           |
+| **代码量**      | 极少 (零重复)                         | 较多 (需定义对象映射)               | 中等 (类定义+装饰器)                                       |
+| **学习成本**    | 低 (熟悉 Zod 即可)                    | 中 (API 较多)                       | 中 (需了解装饰器+class-validator)                          |
 
 ## 📝 许可证
 MIT

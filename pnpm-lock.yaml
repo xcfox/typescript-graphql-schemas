@@ -12,13 +12,13 @@ importers:
         specifier: ^25.0.3
         version: 25.0.3
       prettier:
-        specifier: ^3.4.2
+        specifier: ^3.7.4
         version: 3.7.4
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.3
         version: 5.9.3
 
   garph:
@@ -30,13 +30,13 @@ importers:
         specifier: ^0.6.8
         version: 0.6.8(graphql@16.12.0)
       graphql:
-        specifier: ^16.10.0
+        specifier: ^16.12.0
         version: 16.12.0
       graphql-scalars:
         specifier: ^1.25.0
         version: 1.25.0(graphql@16.12.0)
       graphql-yoga:
-        specifier: ^5.10.10
+        specifier: ^5.18.0
         version: 5.18.0(graphql@16.12.0)
 
   gqloom:
@@ -51,13 +51,13 @@ importers:
         specifier: ^0.15.0
         version: 0.15.0(@gqloom/core@0.15.0(graphql@16.12.0))(graphql@16.12.0)(zod@4.2.1)
       graphql:
-        specifier: ^16.10.0
+        specifier: ^16.12.0
         version: 16.12.0
       graphql-scalars:
         specifier: ^1.25.0
         version: 1.25.0(graphql@16.12.0)
       graphql-yoga:
-        specifier: ^5.10.10
+        specifier: ^5.18.0
         version: 5.18.0(graphql@16.12.0)
       zod:
         specifier: ^4.2.1
@@ -72,13 +72,13 @@ importers:
         specifier: ^0.9.0
         version: 0.9.3(graphql@16.12.0)
       graphql:
-        specifier: ^16.10.0
+        specifier: ^16.12.0
         version: 16.12.0
       graphql-scalars:
         specifier: ^1.25.0
         version: 1.25.0(graphql@16.12.0)
       graphql-yoga:
-        specifier: ^5.10.10
+        specifier: ^5.18.0
         version: 5.18.0(graphql@16.12.0)
 
   grats:
@@ -87,13 +87,13 @@ importers:
         specifier: workspace:*
         version: link:../shared
       graphql:
-        specifier: ^16.10.0
+        specifier: ^16.12.0
         version: 16.12.0
       graphql-scalars:
         specifier: ^1.25.0
         version: 1.25.0(graphql@16.12.0)
       graphql-yoga:
-        specifier: ^5.10.10
+        specifier: ^5.18.0
         version: 5.18.0(graphql@16.12.0)
     devDependencies:
       grats:
@@ -166,7 +166,7 @@ importers:
         specifier: workspace:*
         version: link:../shared
       class-validator:
-        specifier: ^0.14.1
+        specifier: ^0.14.3
         version: 0.14.3
       dataloader:
         specifier: ^2.2.3
@@ -184,7 +184,7 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       type-graphql:
-        specifier: ^2.0.0-beta.3
+        specifier: ^2.0.0-rc.2
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
     devDependencies:
       tsx:

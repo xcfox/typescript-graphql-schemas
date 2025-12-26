@@ -9,12 +9,14 @@ export const DateTime = Gql.Scalar({
   parseLiteral: GraphQLDateTime.parseLiteral,
 })
 
-export const MenuCategoryEnum = Gql.Enum({
-  name: 'MenuCategory',
-  description: 'Menu category',
+export const SugarLevelEnum = Gql.Enum({
+  name: 'SugarLevel',
+  description: 'Sugar level for coffee',
   values: [
-    { name: 'COFFEE', value: 'COFFEE' },
-    { name: 'FOOD', value: 'FOOD' },
+    { name: 'NONE', value: 'NONE' },
+    { name: 'LOW', value: 'LOW' },
+    { name: 'MEDIUM', value: 'MEDIUM' },
+    { name: 'HIGH', value: 'HIGH' },
   ],
 })
 
@@ -34,12 +36,24 @@ export type User = {
   email: string
 }
 
-export type MenuItem = {
+export type Coffee = {
+  __typename: 'Coffee'
   id: number
   name: string
   price: number
-  category: 'COFFEE' | 'FOOD'
+  sugarLevel: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH'
+  origin: string
 }
+
+export type Dessert = {
+  __typename: 'Dessert'
+  id: number
+  name: string
+  price: number
+  calories: number
+}
+
+export type MenuItem = Coffee | Dessert
 
 export type Order = {
   id: number
@@ -51,7 +65,7 @@ export type Order = {
 
 export const userMap = new Map<number, User>(USERS.map((u) => [u.id, { ...u }]))
 export const menuItemMap = new Map<number, MenuItem>(
-  MENU_ITEMS.map((item) => [item.id, { ...item }]),
+  MENU_ITEMS.map((item) => [item.id, item as MenuItem]),
 )
 export const orderMap = new Map<number, Order>(
   ORDERS.map((o) => [o.id, { ...o, status: o.status as any }]),
@@ -74,15 +88,52 @@ export const UserType: any = Gql.Object<User>({
   ],
 })
 
-export const MenuItemType = Gql.Object<MenuItem>({
-  name: 'MenuItem',
-  description: 'Menu item information',
+// Interface: Food (公共字段)
+export const FoodInterface = Gql.InterfaceType({
+  name: 'Food',
+  description: 'Food interface with common fields',
+  fields: () => [
+    Gql.AbstractField({ name: 'id', type: Gql.NonNull(Gql.Int) }),
+    Gql.AbstractField({ name: 'name', type: Gql.NonNull(Gql.String) }),
+    Gql.AbstractField({ name: 'price', type: Gql.NonNull(Gql.Float) }),
+  ],
+})
+
+// Coffee 类型，实现 Food 接口
+export const CoffeeType: any = Gql.Object<Coffee>({
+  name: 'Coffee',
+  description: 'Coffee menu item',
+  interfaces: [FoodInterface],
   fields: () => [
     Gql.Field({ name: 'id', type: Gql.NonNull(Gql.Int) }),
     Gql.Field({ name: 'name', type: Gql.NonNull(Gql.String) }),
     Gql.Field({ name: 'price', type: Gql.NonNull(Gql.Float) }),
-    Gql.Field({ name: 'category', type: Gql.NonNull(MenuCategoryEnum) }),
+    Gql.Field({ name: 'sugarLevel', type: Gql.NonNull(SugarLevelEnum) }),
+    Gql.Field({ name: 'origin', type: Gql.NonNull(Gql.String) }),
   ],
+})
+
+// Dessert 类型，实现 Food 接口
+export const DessertType: any = Gql.Object<Dessert>({
+  name: 'Dessert',
+  description: 'Dessert menu item',
+  interfaces: [FoodInterface],
+  fields: () => [
+    Gql.Field({ name: 'id', type: Gql.NonNull(Gql.Int) }),
+    Gql.Field({ name: 'name', type: Gql.NonNull(Gql.String) }),
+    Gql.Field({ name: 'price', type: Gql.NonNull(Gql.Float) }),
+    Gql.Field({ name: 'calories', type: Gql.NonNull(Gql.Float) }),
+  ],
+})
+
+// Union 类型: MenuItem = Coffee | Dessert
+export const MenuItemType = Gql.Union({
+  name: 'MenuItem',
+  description: 'Menu item union type',
+  types: [CoffeeType, DessertType],
+  resolveType: (value: MenuItem) => {
+    return value.__typename === 'Coffee' ? 'Coffee' : 'Dessert'
+  },
 })
 
 export const OrderType: any = Gql.Object<Order>({

@@ -3,12 +3,6 @@
 
 scalar DateTime
 
-"""Menu category"""
-enum MenuCategory {
-  COFFEE
-  FOOD
-}
-
 """Order status"""
 enum OrderStatus {
   CANCELLED
@@ -16,22 +10,51 @@ enum OrderStatus {
   PENDING
 }
 
-"""Menu item information"""
-type MenuItem {
-  category: MenuCategory
+"""Sugar level for coffee"""
+enum SugarLevel {
+  HIGH
+  LOW
+  MEDIUM
+  NONE
+}
+
+"""Menu item union type"""
+union MenuItem = Coffee | Dessert
+
+"""Food interface with common fields"""
+interface Food {
+  id: Int
+  name: String
+  price: Float
+}
+
+"""Coffee menu item"""
+type Coffee implements Food {
+  id: Int
+  name: String
+  origin: String
+  price: Float
+  sugarLevel: SugarLevel
+}
+
+"""Dessert menu item"""
+type Dessert implements Food {
+  calories: Float
   id: Int
   name: String
   price: Float
 }
 
 type Mutation {
-  createMenuItem(category: MenuCategory!, name: String!, price: Float!): MenuItem
+  createCoffee(name: String!, origin: String!, price: Float!, sugarLevel: SugarLevel!): Coffee
+  createDessert(calories: Float!, name: String!, price: Float!): Dessert
   createOrder(items: [Int!]!, userId: Int!): Order
   createUser(email: String!, name: String!): User
   deleteMenuItem(id: Int!): MenuItem
   deleteOrder(id: Int!): Order
   deleteUser(id: Int!): User
-  updateMenuItem(category: MenuCategory, id: Int!, name: String, price: Float): MenuItem
+  updateCoffee(id: Int!, name: String, origin: String, price: Float, sugarLevel: SugarLevel): Coffee
+  updateDessert(calories: Float, id: Int!, name: String, price: Float): Dessert
   updateOrder(id: Int!, status: OrderStatus!): Order
   updateUser(email: String, id: Int!, name: String): User
 }
@@ -50,7 +73,6 @@ type Order {
 type Query {
   menu: [MenuItem!]
   menuItem(id: Int!): MenuItem
-  menuItems: [MenuItem!]
   order(id: Int!): Order
   orders: [Order!]
   ordersByStatus(status: OrderStatus!): [Order!]

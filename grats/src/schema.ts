@@ -5,8 +5,8 @@
 
 import type { GqlScalar } from "grats";
 import type { DateTime as DateTimeInternal } from "./models/scalars.ts";
-import { GraphQLSchema, GraphQLObjectType, GraphQLList, GraphQLNonNull, GraphQLEnumType, GraphQLInt, GraphQLString, GraphQLFloat, GraphQLScalarType } from "graphql";
-import { menu as queryMenuResolver, menuItem as queryMenuItemResolver, menuItems as queryMenuItemsResolver, createMenuItem as mutationCreateMenuItemResolver, deleteMenuItem as mutationDeleteMenuItemResolver, updateMenuItem as mutationUpdateMenuItemResolver } from "./models/menu.ts";
+import { GraphQLSchema, GraphQLObjectType, GraphQLList, GraphQLNonNull, GraphQLUnionType, GraphQLInt, GraphQLString, GraphQLFloat, GraphQLEnumType, GraphQLInterfaceType, GraphQLScalarType } from "graphql";
+import { menu as queryMenuResolver, menuItem as queryMenuItemResolver, createCoffee as mutationCreateCoffeeResolver, createDessert as mutationCreateDessertResolver, deleteMenuItem as mutationDeleteMenuItemResolver, updateCoffee as mutationUpdateCoffeeResolver, updateDessert as mutationUpdateDessertResolver } from "./models/menu.ts";
 import { items as orderItemsResolver, user as orderUserResolver, order as queryOrderResolver, orders as queryOrdersResolver, ordersByStatus as queryOrdersByStatusResolver, createOrder as mutationCreateOrderResolver, deleteOrder as mutationDeleteOrderResolver, updateOrder as mutationUpdateOrderResolver } from "./models/order.ts";
 import { orders as userOrdersResolver, user as queryUserResolver, users as queryUsersResolver, createUser as mutationCreateUserResolver, deleteUser as mutationDeleteUserResolver, updateUser as mutationUpdateUserResolver } from "./models/user.ts";
 export type SchemaConfig = {
@@ -15,26 +15,83 @@ export type SchemaConfig = {
     };
 };
 export function getSchema(config: SchemaConfig): GraphQLSchema {
-    const MenuCategoryType: GraphQLEnumType = new GraphQLEnumType({
-        description: "Menu category",
-        name: "MenuCategory",
+    const SugarLevelType: GraphQLEnumType = new GraphQLEnumType({
+        description: "Sugar level for coffee",
+        name: "SugarLevel",
         values: {
-            COFFEE: {
-                value: "COFFEE"
+            HIGH: {
+                value: "HIGH"
             },
-            FOOD: {
-                value: "FOOD"
+            LOW: {
+                value: "LOW"
+            },
+            MEDIUM: {
+                value: "MEDIUM"
+            },
+            NONE: {
+                value: "NONE"
             }
         }
     });
-    const MenuItemType: GraphQLObjectType = new GraphQLObjectType({
-        name: "MenuItem",
-        description: "Menu item information",
+    const FoodType: GraphQLInterfaceType = new GraphQLInterfaceType({
+        description: "Food interface with common fields",
+        name: "Food",
         fields() {
             return {
-                category: {
-                    name: "category",
-                    type: MenuCategoryType
+                id: {
+                    name: "id",
+                    type: GraphQLInt
+                },
+                name: {
+                    name: "name",
+                    type: GraphQLString
+                },
+                price: {
+                    name: "price",
+                    type: GraphQLFloat
+                }
+            };
+        }
+    });
+    const CoffeeType: GraphQLObjectType = new GraphQLObjectType({
+        name: "Coffee",
+        description: "Coffee menu item",
+        fields() {
+            return {
+                id: {
+                    name: "id",
+                    type: GraphQLInt
+                },
+                name: {
+                    name: "name",
+                    type: GraphQLString
+                },
+                origin: {
+                    name: "origin",
+                    type: GraphQLString
+                },
+                price: {
+                    name: "price",
+                    type: GraphQLFloat
+                },
+                sugarLevel: {
+                    name: "sugarLevel",
+                    type: SugarLevelType
+                }
+            };
+        },
+        interfaces() {
+            return [FoodType];
+        }
+    });
+    const DessertType: GraphQLObjectType = new GraphQLObjectType({
+        name: "Dessert",
+        description: "Dessert menu item",
+        fields() {
+            return {
+                calories: {
+                    name: "calories",
+                    type: GraphQLFloat
                 },
                 id: {
                     name: "id",
@@ -49,6 +106,16 @@ export function getSchema(config: SchemaConfig): GraphQLSchema {
                     type: GraphQLFloat
                 }
             };
+        },
+        interfaces() {
+            return [FoodType];
+        }
+    });
+    const MenuItemType: GraphQLUnionType = new GraphQLUnionType({
+        name: "MenuItem",
+        description: "Menu item union type",
+        types() {
+            return [CoffeeType, DessertType];
         }
     });
     const DateTimeType: GraphQLScalarType = new GraphQLScalarType({
@@ -162,13 +229,6 @@ export function getSchema(config: SchemaConfig): GraphQLSchema {
                         return queryMenuItemResolver(args.id);
                     }
                 },
-                menuItems: {
-                    name: "menuItems",
-                    type: new GraphQLList(new GraphQLNonNull(MenuItemType)),
-                    resolve() {
-                        return queryMenuItemsResolver();
-                    }
-                },
                 order: {
                     name: "order",
                     type: OrderType,
@@ -226,12 +286,33 @@ export function getSchema(config: SchemaConfig): GraphQLSchema {
         name: "Mutation",
         fields() {
             return {
-                createMenuItem: {
-                    name: "createMenuItem",
-                    type: MenuItemType,
+                createCoffee: {
+                    name: "createCoffee",
+                    type: CoffeeType,
                     args: {
-                        category: {
-                            type: new GraphQLNonNull(MenuCategoryType)
+                        name: {
+                            type: new GraphQLNonNull(GraphQLString)
+                        },
+                        origin: {
+                            type: new GraphQLNonNull(GraphQLString)
+                        },
+                        price: {
+                            type: new GraphQLNonNull(GraphQLFloat)
+                        },
+                        sugarLevel: {
+                            type: new GraphQLNonNull(SugarLevelType)
+                        }
+                    },
+                    resolve(_source, args) {
+                        return mutationCreateCoffeeResolver(args.name, args.price, args.sugarLevel, args.origin);
+                    }
+                },
+                createDessert: {
+                    name: "createDessert",
+                    type: DessertType,
+                    args: {
+                        calories: {
+                            type: new GraphQLNonNull(GraphQLFloat)
                         },
                         name: {
                             type: new GraphQLNonNull(GraphQLString)
@@ -241,7 +322,7 @@ export function getSchema(config: SchemaConfig): GraphQLSchema {
                         }
                     },
                     resolve(_source, args) {
-                        return mutationCreateMenuItemResolver(args.name, args.price, args.category);
+                        return mutationCreateDessertResolver(args.name, args.price, args.calories);
                     }
                 },
                 createOrder: {
@@ -310,12 +391,36 @@ export function getSchema(config: SchemaConfig): GraphQLSchema {
                         return mutationDeleteUserResolver(args.id);
                     }
                 },
-                updateMenuItem: {
-                    name: "updateMenuItem",
-                    type: MenuItemType,
+                updateCoffee: {
+                    name: "updateCoffee",
+                    type: CoffeeType,
                     args: {
-                        category: {
-                            type: MenuCategoryType
+                        id: {
+                            type: new GraphQLNonNull(GraphQLInt)
+                        },
+                        name: {
+                            type: GraphQLString
+                        },
+                        origin: {
+                            type: GraphQLString
+                        },
+                        price: {
+                            type: GraphQLFloat
+                        },
+                        sugarLevel: {
+                            type: SugarLevelType
+                        }
+                    },
+                    resolve(_source, args) {
+                        return mutationUpdateCoffeeResolver(args.id, args.name, args.price, args.sugarLevel, args.origin);
+                    }
+                },
+                updateDessert: {
+                    name: "updateDessert",
+                    type: DessertType,
+                    args: {
+                        calories: {
+                            type: GraphQLFloat
                         },
                         id: {
                             type: new GraphQLNonNull(GraphQLInt)
@@ -328,7 +433,7 @@ export function getSchema(config: SchemaConfig): GraphQLSchema {
                         }
                     },
                     resolve(_source, args) {
-                        return mutationUpdateMenuItemResolver(args.id, args.name, args.price, args.category);
+                        return mutationUpdateDessertResolver(args.id, args.name, args.price, args.calories);
                     }
                 },
                 updateOrder: {
@@ -370,6 +475,6 @@ export function getSchema(config: SchemaConfig): GraphQLSchema {
     return new GraphQLSchema({
         query: QueryType,
         mutation: MutationType,
-        types: [DateTimeType, MenuCategoryType, OrderStatusType, MenuItemType, MutationType, OrderType, QueryType, UserType]
+        types: [DateTimeType, OrderStatusType, SugarLevelType, MenuItemType, FoodType, CoffeeType, DessertType, MutationType, OrderType, QueryType, UserType]
     });
 }

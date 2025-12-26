@@ -45,6 +45,24 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
 
+  gqtx:
+    dependencies:
+      '@coffee-shop/shared':
+        specifier: workspace:*
+        version: link:../shared
+      gqtx:
+        specifier: ^0.9.0
+        version: 0.9.3(graphql@16.12.0)
+      graphql:
+        specifier: ^16.10.0
+        version: 16.12.0
+      graphql-scalars:
+        specifier: ^1.25.0
+        version: 1.25.0(graphql@16.12.0)
+      graphql-yoga:
+        specifier: ^5.10.10
+        version: 5.18.0(graphql@16.12.0)
+
   grats:
     dependencies:
       '@coffee-shop/shared':
@@ -468,6 +486,11 @@ packages:
   get-tsconfig@4.13.0:
     resolution: {integrity: sha512-1VKTZJCwBrvbd+Wn3AOgQP/2Av+TfTCOlE4AcRJE72W1ksZXbAx8PPBR9RzgTeSPzlPMHrbANMH3LbltH73wxQ==}
 
+  gqtx@0.9.3:
+    resolution: {integrity: sha512-LQii9isCdtVuUg1RC9wJy1L8o8bWEgubs2yQ/+INnvenqUxjTb/5rObmreDT2fxe07CTCaufPy64JYg1bcoT4g==}
+    peerDependencies:
+      graphql: ^16.7.0
+
   graphql-query-complexity@0.12.0:
     resolution: {integrity: sha512-fWEyuSL6g/+nSiIRgIipfI6UXTI7bAxrpPlCY1c0+V3pAEUo1ybaKmSBgNr1ed2r+agm1plJww8Loig9y6s2dw==}
     peerDependencies:
@@ -842,6 +865,10 @@ snapshots:
   get-tsconfig@4.13.0:
     dependencies:
       resolve-pkg-maps: 1.0.0
+
+  gqtx@0.9.3(graphql@16.12.0):
+    dependencies:
+      graphql: 16.12.0
 
   graphql-query-complexity@0.12.0(graphql@16.12.0):
     dependencies:

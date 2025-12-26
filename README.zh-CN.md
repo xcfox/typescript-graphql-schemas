@@ -28,7 +28,7 @@
 - [x] **[Nexus](https://nexusjs.org/)**
 - [x] **[Pothos](https://pothos-graphql.dev/)**
 - [x] **[Grats](https://grats.capt.dev/)**
-- [ ] **[gqtx](https://github.com/sikanhe/gqtx)**
+- [x] **[gqtx](https://github.com/sikanhe/gqtx)**
 - [x] **[GQLoom](https://gqloom.dev/)**
 - [ ] **[Pylon](https://pylon.cronit.io/)**
 - [ ] **[garph](https://garph.dev/)**

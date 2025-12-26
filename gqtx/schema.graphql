@@ -1,0 +1,63 @@
+scalar DateTime
+
+"""Menu category"""
+enum MenuCategory {
+  COFFEE
+  FOOD
+}
+
+"""Menu item information"""
+type MenuItem {
+  category: MenuCategory!
+  id: Int!
+  name: String!
+  price: Float!
+}
+
+type Mutation {
+  createMenuItem(category: MenuCategory!, name: String!, price: Float!): MenuItem!
+  createOrder(items: [Int!]!, userId: Int!): Order!
+  createUser(email: String!, name: String!): User!
+  deleteMenuItem(id: Int!): MenuItem
+  deleteOrder(id: Int!): Order
+  deleteUser(id: Int!): User
+  updateMenuItem(category: MenuCategory, id: Int!, name: String, price: Float): MenuItem
+  updateOrder(id: Int!, status: OrderStatus!): Order
+  updateUser(email: String, id: Int!, name: String): User
+}
+
+"""Order information"""
+type Order {
+  createdAt: DateTime!
+  id: Int!
+  itemIds: [Int!]!
+  items: [MenuItem!]!
+  status: OrderStatus!
+  user: User!
+  userId: Int!
+}
+
+"""Order status"""
+enum OrderStatus {
+  CANCELLED
+  COMPLETED
+  PENDING
+}
+
+type Query {
+  menu: [MenuItem!]!
+  menuItem(id: Int!): MenuItem
+  menuItems: [MenuItem!]!
+  order(id: Int!): Order
+  orders: [Order!]!
+  user(id: Int!): User
+  users: [User!]!
+}
+
+"""User information"""
+type User {
+  email: String!
+  id: Int!
+  name: String!
+  orders: [Order!]!
+}

@@ -18,7 +18,10 @@
     "test:nexus": "pnpm -F nexus test",
     "dev:grats": "pnpm -F grats dev",
     "print:grats": "pnpm -F grats print",
-    "test:grats": "pnpm -F grats test"
+    "test:grats": "pnpm -F grats test",
+    "dev:gqtx": "pnpm -F gqtx dev",
+    "print:gqtx": "pnpm -F gqtx print",
+    "test:gqtx": "pnpm -F gqtx test"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

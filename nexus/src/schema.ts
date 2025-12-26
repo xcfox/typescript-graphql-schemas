@@ -10,7 +10,15 @@ import './schema/order.ts'
 
 // Import query and mutation extensions
 import { UserQuery, UserMutation } from './schema/user.ts'
-import { MenuQuery, MenuMutation } from './schema/menu.ts'
+import {
+  MenuQuery,
+  MenuMutation,
+  Food,
+  Coffee,
+  Dessert,
+  MenuItem,
+  SugarLevel,
+} from './schema/menu.ts'
 import { OrderQuery, OrderMutation } from './schema/order.ts'
 
 // DateTime scalar
@@ -51,6 +59,11 @@ export const schema = makeSchema({
     Mutation,
     UserQuery,
     UserMutation,
+    Food,
+    Coffee,
+    Dessert,
+    MenuItem,
+    SugarLevel,
     MenuQuery,
     MenuMutation,
     OrderQuery,

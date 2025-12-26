@@ -32,8 +32,8 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
-  MenuCategory: "COFFEE" | "FOOD"
   OrderStatus: "COMPLETED" | "PENDING"
+  SugarLevel: "HIGH" | "LOW" | "MEDIUM" | "NONE"
 }
 
 export interface NexusGenScalars {
@@ -46,8 +46,15 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
-  MenuItem: { // root type
-    category: NexusGenEnums['MenuCategory']; // MenuCategory!
+  Coffee: { // root type
+    id: number; // Int!
+    name: string; // String!
+    origin: string; // String!
+    price: number; // Float!
+    sugarLevel: NexusGenEnums['SugarLevel']; // SugarLevel!
+  }
+  Dessert: { // root type
+    calories: number; // Float!
     id: number; // Int!
     name: string; // String!
     price: number; // Float!
@@ -69,30 +76,41 @@ export interface NexusGenObjects {
 }
 
 export interface NexusGenInterfaces {
+  Food: NexusGenRootTypes['Coffee'] | NexusGenRootTypes['Dessert'];
 }
 
 export interface NexusGenUnions {
+  MenuItem: NexusGenRootTypes['Coffee'] | NexusGenRootTypes['Dessert'];
 }
 
-export type NexusGenRootTypes = NexusGenObjects
+export type NexusGenRootTypes = NexusGenInterfaces & NexusGenObjects & NexusGenUnions
 
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
-  MenuItem: { // field return type
-    category: NexusGenEnums['MenuCategory']; // MenuCategory!
+  Coffee: { // field return type
+    id: number; // Int!
+    name: string; // String!
+    origin: string; // String!
+    price: number; // Float!
+    sugarLevel: NexusGenEnums['SugarLevel']; // SugarLevel!
+  }
+  Dessert: { // field return type
+    calories: number; // Float!
     id: number; // Int!
     name: string; // String!
     price: number; // Float!
   }
   Mutation: { // field return type
-    createMenuItem: NexusGenRootTypes['MenuItem']; // MenuItem!
+    createCoffee: NexusGenRootTypes['Coffee']; // Coffee!
+    createDessert: NexusGenRootTypes['Dessert']; // Dessert!
     createOrder: NexusGenRootTypes['Order']; // Order!
     createUser: NexusGenRootTypes['User']; // User!
     deleteMenuItem: NexusGenRootTypes['MenuItem'] | null; // MenuItem
     deleteOrder: NexusGenRootTypes['Order'] | null; // Order
     deleteUser: NexusGenRootTypes['User'] | null; // User
-    updateMenuItem: NexusGenRootTypes['MenuItem']; // MenuItem!
+    updateCoffee: NexusGenRootTypes['Coffee'] | null; // Coffee
+    updateDessert: NexusGenRootTypes['Dessert'] | null; // Dessert
     updateOrder: NexusGenRootTypes['Order']; // Order!
     updateUser: NexusGenRootTypes['User']; // User!
   }
@@ -107,7 +125,7 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     menu: NexusGenRootTypes['MenuItem'][]; // [MenuItem!]!
-    menuItem: NexusGenRootTypes['MenuItem']; // MenuItem!
+    menuItem: NexusGenRootTypes['MenuItem'] | null; // MenuItem
     order: NexusGenRootTypes['Order']; // Order!
     orders: NexusGenRootTypes['Order'][]; // [Order!]!
     user: NexusGenRootTypes['User']; // User!
@@ -119,23 +137,37 @@ export interface NexusGenFieldTypes {
     name: string; // String!
     orders: NexusGenRootTypes['Order'][]; // [Order!]!
   }
+  Food: { // field return type
+    id: number; // Int!
+    name: string; // String!
+    price: number; // Float!
+  }
 }
 
 export interface NexusGenFieldTypeNames {
-  MenuItem: { // field return type name
-    category: 'MenuCategory'
+  Coffee: { // field return type name
+    id: 'Int'
+    name: 'String'
+    origin: 'String'
+    price: 'Float'
+    sugarLevel: 'SugarLevel'
+  }
+  Dessert: { // field return type name
+    calories: 'Float'
     id: 'Int'
     name: 'String'
     price: 'Float'
   }
   Mutation: { // field return type name
-    createMenuItem: 'MenuItem'
+    createCoffee: 'Coffee'
+    createDessert: 'Dessert'
     createOrder: 'Order'
     createUser: 'User'
     deleteMenuItem: 'MenuItem'
     deleteOrder: 'Order'
     deleteUser: 'User'
-    updateMenuItem: 'MenuItem'
+    updateCoffee: 'Coffee'
+    updateDessert: 'Dessert'
     updateOrder: 'Order'
     updateUser: 'User'
   }
@@ -162,12 +194,23 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
     orders: 'Order'
   }
+  Food: { // field return type name
+    id: 'Int'
+    name: 'String'
+    price: 'Float'
+  }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
-    createMenuItem: { // args
-      category: NexusGenEnums['MenuCategory']; // MenuCategory!
+    createCoffee: { // args
+      name: string; // String!
+      origin: string; // String!
+      price: number; // Float!
+      sugarLevel: NexusGenEnums['SugarLevel']; // SugarLevel!
+    }
+    createDessert: { // args
+      calories: number; // Float!
       name: string; // String!
       price: number; // Float!
     }
@@ -188,8 +231,15 @@ export interface NexusGenArgTypes {
     deleteUser: { // args
       id: number; // Int!
     }
-    updateMenuItem: { // args
-      category?: NexusGenEnums['MenuCategory'] | null; // MenuCategory
+    updateCoffee: { // args
+      id: number; // Int!
+      name?: string | null; // String
+      origin?: string | null; // String
+      price?: number | null; // Float
+      sugarLevel?: NexusGenEnums['SugarLevel'] | null; // SugarLevel
+    }
+    updateDessert: { // args
+      calories?: number | null; // Float
       id: number; // Int!
       name?: string | null; // String
       price?: number | null; // Float
@@ -218,9 +268,13 @@ export interface NexusGenArgTypes {
 }
 
 export interface NexusGenAbstractTypeMembers {
+  MenuItem: "Coffee" | "Dessert"
+  Food: "Coffee" | "Dessert"
 }
 
 export interface NexusGenTypeInterfaces {
+  Coffee: "Food"
+  Dessert: "Food"
 }
 
 export type NexusGenObjectNames = keyof NexusGenObjects;
@@ -229,15 +283,15 @@ export type NexusGenInputNames = never;
 
 export type NexusGenEnumNames = keyof NexusGenEnums;
 
-export type NexusGenInterfaceNames = never;
+export type NexusGenInterfaceNames = keyof NexusGenInterfaces;
 
 export type NexusGenScalarNames = keyof NexusGenScalars;
 
-export type NexusGenUnionNames = never;
+export type NexusGenUnionNames = keyof NexusGenUnions;
 
 export type NexusGenObjectsUsingAbstractStrategyIsTypeOf = never;
 
-export type NexusGenAbstractsUsingStrategyResolveType = never;
+export type NexusGenAbstractsUsingStrategyResolveType = "Food" | "MenuItem";
 
 export type NexusGenFeaturesConfig = {
   abstractTypeStrategies: {

@@ -60,7 +60,7 @@ export const orderMutationFields = [
     resolve: (_, { id, status }) => {
       const order = orderMap.get(id)
       if (!order) throw new GraphQLError('Order not found')
-      order.status = status as any
+      order.status = status as Order['status']
       return order
     },
   }),

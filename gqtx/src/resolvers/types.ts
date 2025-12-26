@@ -68,10 +68,13 @@ export const menuItemMap = new Map<number, MenuItem>(
   MENU_ITEMS.map((item) => [item.id, item as MenuItem]),
 )
 export const orderMap = new Map<number, Order>(
-  ORDERS.map((o) => [o.id, { ...o, status: o.status as any }]),
+  ORDERS.map((o) => [o.id, { ...o, status: o.status as Order['status'] }]),
 )
 
-export const UserType: any = Gql.Object<User>({
+// 前向声明 OrderType，避免循环引用
+let OrderType: ReturnType<typeof Gql.Object<Order>>
+
+export const UserType = Gql.Object<User>({
   name: 'User',
   description: 'User information',
   fields: () => [
@@ -100,7 +103,7 @@ export const FoodInterface = Gql.InterfaceType({
 })
 
 // Coffee 类型，实现 Food 接口
-export const CoffeeType: any = Gql.Object<Coffee>({
+export const CoffeeType = Gql.Object<Coffee>({
   name: 'Coffee',
   description: 'Coffee menu item',
   interfaces: [FoodInterface],
@@ -114,7 +117,7 @@ export const CoffeeType: any = Gql.Object<Coffee>({
 })
 
 // Dessert 类型，实现 Food 接口
-export const DessertType: any = Gql.Object<Dessert>({
+export const DessertType = Gql.Object<Dessert>({
   name: 'Dessert',
   description: 'Dessert menu item',
   interfaces: [FoodInterface],
@@ -136,7 +139,7 @@ export const MenuItemType = Gql.Union({
   },
 })
 
-export const OrderType: any = Gql.Object<Order>({
+OrderType = Gql.Object<Order>({
   name: 'Order',
   description: 'Order information',
   fields: () => [
@@ -167,3 +170,5 @@ export const OrderType: any = Gql.Object<Order>({
     }),
   ],
 })
+
+export { OrderType }

@@ -219,7 +219,7 @@ export const Coffee = objectType({
 ```
 
 - ✅ **直观的实现方式**：通过 `t.implements('Food')` 实现接口
-- ⚠️ **需要重复定义字段**：接口的公共字段需要在接口和实现类中都定义（虽然可以通过类型生成避免运行时重复）
+- ✅ **自动继承公共字段**：接口的公共字段自动继承，实现类只需定义特有字段
 - ⚠️ **需要手动处理 `resolveType`**：需要在接口定义中手动实现 `resolveType` 函数
 
 #### 枚举类型 (Enum)
@@ -331,7 +331,7 @@ export const OrderQuery = extendType({ type: 'Query', ... })
 使用 `extendType()` 扩展 Query 和 Mutation：
 
 ```typescript
-// nexus/src/schema/user.ts (lines 54-114)
+// nexus/src/schema/user.ts (lines 54-113)
 export const UserMutation = extendType({
   type: 'Mutation',
   definition(t) {
@@ -485,7 +485,7 @@ export function parse<T>(schema: z.ZodType<T>, value: unknown): T {
 自定义验证需要在 Resolver 中手动实现：
 
 ```typescript
-// nexus/src/schema/order.ts (lines 99-123)
+// nexus/src/schema/order.ts (lines 99-122)
 resolve(_parent, { userId, items }) {
   // Validate userId exists
   if (!userMap.has(userId)) {
@@ -806,7 +806,7 @@ export function parse<T>(schema: z.ZodType<T>, value: unknown): T {
 Nexus 对主流 GraphQL Server 有良好的兼容性支持。
 
 **支持的 Server**：
-- ✅ **Apollo Server**：官方推荐，文档示例主要使用 Apollo Server
+- ✅ **Apollo Server**：官方支持，文档中有集成示例
 - ✅ **GraphQL Yoga**：支持集成（示例中使用）
 - ✅ **express-graphql**：支持集成
 - ✅ **其他标准 GraphQL Server**：生成的 Schema 符合 GraphQL 标准，兼容所有标准 GraphQL Server

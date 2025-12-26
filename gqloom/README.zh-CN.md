@@ -125,7 +125,7 @@ export const User = z.object({
 支持 Union 类型定义，通过 `z.union()` 定义：
 
 ```typescript
-// gqloom/src/resolvers/menu.ts (line 37)
+// gqloom/src/resolvers/menu.ts (line 27)
 export const MenuItem = z.union([Coffee, Dessert])
 ```
 
@@ -146,17 +146,12 @@ export const Food = z.object({
   price: z.number(),
 })
 
-// gqloom/src/resolvers/menu.ts (lines 16-25)
-export const Coffee = z
-  .object({
-    __typename: z.literal('Coffee'),
-    id: z.int(),
-    name: z.string(),
-    price: z.number(),
-    sugarLevel: SugarLevel,
-    origin: z.string(),
-  })
-  .register(asObjectType, { interfaces: [Food] })
+// gqloom/src/resolvers/menu.ts (lines 16-20)
+export const Coffee = Food.extend({
+  __typename: z.literal('Coffee'),
+  sugarLevel: SugarLevel,
+  origin: z.string(),
+}).register(asObjectType, { interfaces: [Food] })
 ```
 
 - ✅ **直观的实现方式**：通过 `.register(asObjectType, { interfaces: [Food] })` 实现接口

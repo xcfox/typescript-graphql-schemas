@@ -84,11 +84,13 @@ pnpm print:gqloom
 ### 6. 内置功能
 内置功能决定了库在应对复杂业务场景时的“开箱即用”能力。
 - **定义**：库是否原生支持 GraphQL 开发中的常见模式和进阶功能，减少样板代码（Boilerplate）。
-  - **Directives**：是否支持 GraphQL Directives 的定义和使用。
-  - **Extensions**：是否支持 GraphQL Extensions 的定义和使用，允许声明查询复杂度（complexity）等。
+  - **Directives**：是否支持 GraphQL Directives 的定义和使用，是否支持联邦架构 (Federation)。
+  - **Extensions**：是否支持 GraphQL Extensions 的定义和使用，是否能够声明查询复杂度（complexity）等。
   - **批量加载 (Batching)**：原生支持 DataLoader 集成，以优雅地解决 N+1 查询问题。
   - **自定义标量 (Scalars)**：是否内置了常用的标量类型（如 `DateTime`, `JSON`, `BigInt`），以及定义新标量的简便程度。
   - **订阅 (Subscription)**：支持实时数据推送的便捷程度及其底层传输协议的兼容性。
+  - **上下文 (Context)**：是否支持在 Resolver 中注入上下文，以及上下文的类型推导能力。
+  - **中间件 (Middleware)**：是否支持在 Resolver 执行前后注入中间件逻辑（如日志记录、权限检查、性能监控）。
 - **评判标准**：功能不应只是简单的堆砌，而应与核心 API 深度集成并保持类型安全。现代库应当通过灵活的插件系统（Plugin System）提供功能，既能避免核心库过于臃肿，又能显著减少开发者编写重复性逻辑的工作量。
 
 ### 7. 生态集成

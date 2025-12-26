@@ -9,7 +9,7 @@
 
 ## 📐 对比维度解析
 
-在评估 GraphQL Schema 构建库时，我们主要关注以下 7 个核心技术维度。这些维度直接影响开发者的编码体验（DX）、代码的可维护性以及运行时的性能。
+在评估 GraphQL Schema 构建库时，我们主要关注以下 6 个核心技术维度。这些维度直接影响开发者的编码体验（DX）、代码的可维护性以及运行时的性能。
 
 ### 1. 架构模式
 
@@ -189,9 +189,11 @@ export const userMap = new Map<number, z.infer<typeof User>>(USERS.map((u) => [u
 
 ---
 
-### 4. 解析器定义
+### 4. 解析器定义与输入验证
 
-**评估结果：类型安全，模块化组织优秀**
+**评估结果：类型安全，验证能力强大**
+
+解析器（Resolver）是业务逻辑的核心所在。优秀的解析器定义应当能够自动推断输入参数类型、提供强类型的返回值校验，并能优雅地集成验证逻辑。
 
 #### 类型安全的 Resolver
 
@@ -285,12 +287,6 @@ export const schema = weave(ZodWeaver, zodWeaverConfig, userResolver, menuResolv
 
 - ✅ **简单组装**：通过 `weave()` 函数简单地将所有 Resolver 组合
 - ✅ **配置集中**：Weaver 配置集中管理
-
----
-
-### 5. 输入验证与参数定义
-
-**评估结果：参数定义优秀，验证能力强大**
 
 #### 参数定义
 
@@ -404,7 +400,7 @@ export const User = z.object({
 
 ---
 
-### 6. 内置功能
+### 5. 内置功能
 
 **评估结果：功能完整，开箱即用**
 
@@ -563,7 +559,7 @@ export const zodWeaverConfig = ZodWeaver.config({
 
 ---
 
-### 7. 生态集成
+### 6. 生态集成
 
 **评估结果：生态集成优秀，支持多种验证库和 ORM**
 

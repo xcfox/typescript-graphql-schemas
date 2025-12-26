@@ -1,0 +1,84 @@
+enum Category {
+  COFFEE
+  FOOD
+}
+
+scalar DateTime
+
+type MenuItem {
+  category: Category!
+  id: Int!
+  name: String!
+  price: Float!
+}
+
+type Mutation {
+  """Create a new menu item"""
+  createMenuItem(category: Category!, name: String!, price: Float!): MenuItem!
+
+  """Create a new order"""
+  createOrder(items: [Int!]!, userId: Int!): Order!
+
+  """Create a new user"""
+  createUser(email: String!, name: String!): User!
+
+  """Delete a menu item"""
+  deleteMenuItem(id: Int!): MenuItem
+
+  """Delete an order"""
+  deleteOrder(id: Int!): Order
+
+  """Delete a user"""
+  deleteUser(id: Int!): User
+
+  """Update a menu item"""
+  updateMenuItem(category: Category, id: Int!, name: String, price: Float): MenuItem!
+
+  """Update an order status"""
+  updateOrder(id: Int!, status: OrderStatus!): Order!
+
+  """Update a user"""
+  updateUser(email: String, id: Int!, name: String): User!
+}
+
+type Order {
+  createdAt: DateTime!
+  id: Int!
+  itemIds: [Int!]!
+  items: [MenuItem!]!
+  status: OrderStatus!
+  user: User
+  userId: Int!
+}
+
+enum OrderStatus {
+  COMPLETED
+  PENDING
+}
+
+type Query {
+  """Get all menu items"""
+  menu: [MenuItem!]!
+
+  """Get a menu item by ID"""
+  menuItem(id: Int!): MenuItem!
+
+  """Get an order by ID"""
+  order(id: Int!): Order!
+
+  """Get all orders"""
+  orders: [Order!]!
+
+  """Get a user by ID"""
+  user(id: Int!): User!
+
+  """Get all users"""
+  users: [User!]!
+}
+
+type User {
+  email: String!
+  id: Int!
+  name: String!
+  orders: [Order!]!
+}

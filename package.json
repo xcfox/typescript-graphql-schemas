@@ -21,7 +21,10 @@
     "test:grats": "pnpm -F grats test",
     "dev:gqtx": "pnpm -F gqtx dev",
     "print:gqtx": "pnpm -F gqtx print",
-    "test:gqtx": "pnpm -F gqtx test"
+    "test:gqtx": "pnpm -F gqtx test",
+    "dev:garph": "pnpm -F garph dev",
+    "print:garph": "pnpm -F garph print",
+    "test:garph": "pnpm -F garph test"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

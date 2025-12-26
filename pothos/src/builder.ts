@@ -36,7 +36,4 @@ builder.addScalarType('DateTime', DateTimeResolver, {})
 builder.queryType({})
 builder.mutationType({})
 
-export type InferPothosObject<T> =
-  T extends PothosSchemaTypes.ObjectRef<any, infer Shape> ? Shape : never
-
 export { builder }

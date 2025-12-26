@@ -3,17 +3,8 @@ import { MENU_ITEMS, incrementId } from '@coffee-shop/shared'
 import { GraphQLError } from 'graphql'
 
 // SugarLevel 枚举
-export const SugarLevel = {
-  NONE: 'NONE',
-  LOW: 'LOW',
-  MEDIUM: 'MEDIUM',
-  HIGH: 'HIGH',
-} as const
-
-export type SugarLevel = (typeof SugarLevel)[keyof typeof SugarLevel]
-
-builder.enumType(SugarLevel, {
-  name: 'SugarLevel',
+export const SugarLevel = builder.enumType('SugarLevel', {
+  values: ['NONE', 'LOW', 'MEDIUM', 'HIGH'] as const,
 })
 
 // 类型定义
@@ -22,7 +13,7 @@ type CoffeeItem = {
   id: number
   name: string
   price: number
-  sugarLevel: SugarLevel
+  sugarLevel: typeof SugarLevel.$inferType
   origin: string
 }
 
@@ -127,7 +118,7 @@ builder.mutationFields((t) => ({
         id,
         name,
         price,
-        sugarLevel: sugarLevel as SugarLevel,
+        sugarLevel: sugarLevel as typeof SugarLevel.$inferType,
         origin,
       }
       menuMap.set(id, newItem)
@@ -150,7 +141,7 @@ builder.mutationFields((t) => ({
       }
       if (name != null) item.name = name
       if (price != null) item.price = price
-      if (sugarLevel != null) item.sugarLevel = sugarLevel as SugarLevel
+      if (sugarLevel != null) item.sugarLevel = sugarLevel as typeof SugarLevel.$inferType
       if (origin != null) item.origin = origin
       return item
     },

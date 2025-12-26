@@ -1,19 +1,13 @@
-import { builder, type InferPothosObject } from '../builder.ts'
+import { builder } from '../builder.ts'
 import { ORDERS, incrementId } from '@coffee-shop/shared'
 import * as z from 'zod'
 import { GraphQLError } from 'graphql'
 import { userMap, User } from './user.ts'
 import { menuMap, MenuItem } from './menu.ts'
 
-export const OrderStatus = {
-  PENDING: 'PENDING',
-  COMPLETED: 'COMPLETED',
-} as const
-
-export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
-
-builder.enumType(OrderStatus, {
-  name: 'OrderStatus',
+// OrderStatus 枚举
+export const OrderStatus = builder.enumType('OrderStatus', {
+  values: ['PENDING', 'COMPLETED'] as const,
 })
 
 export const Order = builder.simpleObject('Order', {
@@ -42,11 +36,11 @@ builder.objectFields(Order, (t) => ({
   }),
 }))
 
-// 移除 OrderShape，通过推导获取类型
-export const orderMap = new Map<number, InferPothosObject<typeof Order>>(
+// 使用 Pothos 推荐的 $inferType 来推导类型
+export const orderMap = new Map<number, typeof Order.$inferType>(
   ORDERS.map((o) => [
     o.id,
-    { ...o, status: o.status as OrderStatus } as InferPothosObject<typeof Order>,
+    { ...o, status: o.status as 'PENDING' | 'COMPLETED' } as typeof Order.$inferType,
   ]),
 )
 
@@ -89,7 +83,7 @@ builder.mutationFields((t) => ({
         id,
         userId,
         itemIds: items,
-        status: OrderStatus.PENDING,
+        status: 'PENDING' as const,
         createdAt: new Date(),
       }
       orderMap.set(id, newOrder)

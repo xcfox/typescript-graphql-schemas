@@ -1,4 +1,4 @@
-import { builder, type InferPothosObject } from '../builder.ts'
+import { builder } from '../builder.ts'
 import { USERS, incrementId } from '@coffee-shop/shared'
 import * as z from 'zod'
 import { GraphQLError } from 'graphql'
@@ -23,9 +23,9 @@ builder.objectFields(User, (t) => ({
   }),
 }))
 
-// 从 UserRef 的泛型参数中提取 Shape，不再手写 interface
-export const userMap = new Map<number, InferPothosObject<typeof User>>(
-  USERS.map((u) => [u.id, u as InferPothosObject<typeof User>]),
+// 使用 Pothos 推荐的 $inferType 来推导类型
+export const userMap = new Map<number, typeof User.$inferType>(
+  USERS.map((u) => [u.id, u as typeof User.$inferType]),
 )
 
 builder.queryFields((t) => ({

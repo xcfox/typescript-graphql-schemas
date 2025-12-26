@@ -1,7 +1,7 @@
 import { Field, ObjectType, registerEnumType, Int } from 'type-graphql'
 import { GraphQLDateTime } from 'graphql-scalars'
 import { User } from './user.type.ts'
-import { MenuItem } from './menu.type.ts'
+import { MenuItem, Coffee, Dessert } from './menu.type.ts'
 
 export enum OrderStatus {
   PENDING = 'PENDING',
@@ -33,6 +33,5 @@ export class Order {
   user?: User | null
 
   @Field(() => [MenuItem])
-  items!: MenuItem[]
+  items!: (Coffee | Dessert)[]
 }
-

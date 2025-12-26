@@ -1,30 +1,96 @@
-import { builder, type InferPothosObject } from '../builder.ts'
+import { builder } from '../builder.ts'
 import { MENU_ITEMS, incrementId } from '@coffee-shop/shared'
 import { GraphQLError } from 'graphql'
 
-export const MenuCategory = {
-  COFFEE: 'COFFEE',
-  FOOD: 'FOOD',
+// SugarLevel 枚举
+export const SugarLevel = {
+  NONE: 'NONE',
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
 } as const
 
-export type MenuCategory = (typeof MenuCategory)[keyof typeof MenuCategory]
+export type SugarLevel = (typeof SugarLevel)[keyof typeof SugarLevel]
 
-builder.enumType(MenuCategory, {
-  name: 'MenuCategory',
+builder.enumType(SugarLevel, {
+  name: 'SugarLevel',
 })
 
-export const MenuItem = builder.simpleObject('MenuItem', {
+// 类型定义
+type CoffeeItem = {
+  __typename: 'Coffee'
+  id: number
+  name: string
+  price: number
+  sugarLevel: SugarLevel
+  origin: string
+}
+
+type DessertItem = {
+  __typename: 'Dessert'
+  id: number
+  name: string
+  price: number
+  calories: number
+}
+
+type MenuItemType = CoffeeItem | DessertItem
+
+// Food Interface（公共字段）
+export const Food = builder
+  .interfaceRef<{
+    id: number
+    name: string
+    price: number
+  }>('Food')
+  .implement({
+    fields: (t) => ({
+      id: t.int(),
+      name: t.string(),
+      price: t.float(),
+    }),
+  })
+
+// Coffee 类型，实现 Food 接口
+export const Coffee = builder.objectRef<CoffeeItem>('Coffee').implement({
+  interfaces: [Food],
   fields: (t) => ({
-    id: t.int(),
-    name: t.string(),
-    price: t.float(),
-    category: t.field({ type: MenuCategory }),
+    id: t.int({ resolve: (parent) => parent.id }),
+    name: t.string({ resolve: (parent) => parent.name }),
+    price: t.float({ resolve: (parent) => parent.price }),
+    sugarLevel: t.field({
+      type: SugarLevel,
+      resolve: (parent) => parent.sugarLevel,
+    }),
+    origin: t.string({ resolve: (parent) => parent.origin }),
   }),
 })
 
-// 移除 MenuItemShape，通过推导获取类型
-export const menuMap = new Map<number, InferPothosObject<typeof MenuItem>>(
-  MENU_ITEMS.map((i) => [i.id, i as InferPothosObject<typeof MenuItem>]),
+// Dessert 类型，实现 Food 接口
+export const Dessert = builder.objectRef<DessertItem>('Dessert').implement({
+  interfaces: [Food],
+  fields: (t) => ({
+    id: t.int({ resolve: (parent) => parent.id }),
+    name: t.string({ resolve: (parent) => parent.name }),
+    price: t.float({ resolve: (parent) => parent.price }),
+    calories: t.float({ resolve: (parent) => parent.calories }),
+  }),
+})
+
+// Union 类型: MenuItem = Coffee | Dessert
+export const MenuItem = builder.unionType('MenuItem', {
+  types: [Coffee, Dessert],
+  resolveType: (item) => {
+    if (item && typeof item === 'object' && '__typename' in item) {
+      return item.__typename === 'Coffee' ? Coffee : Dessert
+    }
+    return null
+  },
+})
+
+// In-memory data store
+export const menuMap = new Map<number, MenuItemType>(
+  MENU_ITEMS.map((i) => [i.id, i as MenuItemType]),
 )
 
 builder.queryFields((t) => ({
@@ -46,34 +112,85 @@ builder.queryFields((t) => ({
 }))
 
 builder.mutationFields((t) => ({
-  createMenuItem: t.field({
-    type: MenuItem,
+  createCoffee: t.field({
+    type: Coffee,
     args: {
       name: t.arg.string({ required: true }),
       price: t.arg.float({ required: true }),
-      category: t.arg({ type: MenuCategory, required: true }),
+      sugarLevel: t.arg({ type: SugarLevel, required: true }),
+      origin: t.arg.string({ required: true }),
     },
-    resolve: (_parent, { name, price, category }) => {
+    resolve: (_parent, { name, price, sugarLevel, origin }) => {
       const id = incrementId()
-      const newItem = { id, name, price, category }
+      const newItem: CoffeeItem = {
+        __typename: 'Coffee',
+        id,
+        name,
+        price,
+        sugarLevel: sugarLevel as SugarLevel,
+        origin,
+      }
       menuMap.set(id, newItem)
       return newItem
     },
   }),
-  updateMenuItem: t.field({
-    type: MenuItem,
+  updateCoffee: t.field({
+    type: Coffee,
     args: {
       id: t.arg.int({ required: true }),
       name: t.arg.string(),
       price: t.arg.float(),
-      category: t.arg({ type: MenuCategory }),
+      sugarLevel: t.arg({ type: SugarLevel }),
+      origin: t.arg.string(),
     },
-    resolve: (_parent, { id, name, price, category }) => {
+    resolve: (_parent, { id, name, price, sugarLevel, origin }) => {
       const item = menuMap.get(id)
-      if (!item) throw new GraphQLError('Menu item not found')
+      if (!item || item.__typename !== 'Coffee') {
+        throw new GraphQLError('Coffee not found')
+      }
       if (name != null) item.name = name
       if (price != null) item.price = price
-      if (category != null) item.category = category
+      if (sugarLevel != null) item.sugarLevel = sugarLevel as SugarLevel
+      if (origin != null) item.origin = origin
+      return item
+    },
+  }),
+  createDessert: t.field({
+    type: Dessert,
+    args: {
+      name: t.arg.string({ required: true }),
+      price: t.arg.float({ required: true }),
+      calories: t.arg.float({ required: true }),
+    },
+    resolve: (_parent, { name, price, calories }) => {
+      const id = incrementId()
+      const newItem: DessertItem = {
+        __typename: 'Dessert',
+        id,
+        name,
+        price,
+        calories,
+      }
+      menuMap.set(id, newItem)
+      return newItem
+    },
+  }),
+  updateDessert: t.field({
+    type: Dessert,
+    args: {
+      id: t.arg.int({ required: true }),
+      name: t.arg.string(),
+      price: t.arg.float(),
+      calories: t.arg.float(),
+    },
+    resolve: (_parent, { id, name, price, calories }) => {
+      const item = menuMap.get(id)
+      if (!item || item.__typename !== 'Dessert') {
+        throw new GraphQLError('Dessert not found')
+      }
+      if (name != null) item.name = name
+      if (price != null) item.price = price
+      if (calories != null) item.calories = calories
       return item
     },
   }),

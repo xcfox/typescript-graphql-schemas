@@ -803,8 +803,6 @@ export type SugarLevel = 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH'
 7. **Pylon**: 推断能力极强，写代码最快，但**缺乏 Schema 对象**导致灵活性受限。
 8. **garph**: 简洁现代，性能好，Infer 功能非常实用。
 
----
-
 ### 综合比较与评级
 
 | 库名称      | 类型安全 | 代码重复率 | 代码量 | DX (开发体验) | 综合评级 |
@@ -825,4 +823,201 @@ export type SugarLevel = 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH'
 
 **关键洞察**：
 接口（Interface）的实现是敲门砖。凡是要求在子类/实现类中手动重复定义接口字段的库（如 TypeGraphQL、Nexus、gqtx），在大型项目中都会带来沉重的维护负担。而能实现自动继承或通过单一数据源推导的库，才是现代 GraphQL 开发的首选。
+
+## 4. 解析器定义对比分析
+
+解析器（Resolver）是业务逻辑的核心所在。优秀的解析器定义应当能够自动推断输入参数类型、提供强类型的返回值校验，并能优雅地集成验证逻辑。
+
+### 各库解析器代码示例
+
+#### TypeGraphQL (Decorator模式)
+使用类、装饰器和反射元数据。输入验证依赖 `class-validator` 装饰器。
+
+```typescript
+@ArgsType()
+class CreateUserArgs {
+  @Field(() => String)
+  @IsEmail({}, { message: 'Invalid email format' })
+  email!: string
+}
+
+@Resolver(() => User)
+export class UserResolver {
+  @Query(() => User)
+  user(@Arg('id', () => Int) id: number): User {
+    const user = userMap.get(id)
+    if (!user) throw new GraphQLError('User not found')
+    return user
+  }
+
+  @Mutation(() => User)
+  createUser(@Args() { name, email }: CreateUserArgs): User {
+    // 逻辑实现...
+  }
+}
+```
+- **优势**：面向对象风格，对 Java/C# 背景开发者极度友好；功能非常全面。
+- **劣势**：**极其啰嗦**，需要为同一个字段重复写 TS 类型和装饰器类型；必须启用 `reflect-metadata`，运行时开销大。
+
+#### Nexus (Builder模式)
+显式定义每个 Query 和 Mutation。类型安全依赖开发时生成的 `nexus-typegen.d.ts`。
+
+```typescript
+export const UserQuery = extendType({
+  type: 'Query',
+  definition(t) {
+    t.nonNull.field('user', {
+      type: User,
+      args: { id: nonNull(intArg()) },
+      resolve(_parent, { id }) {
+        const user = userMap.get(id)
+        if (!user) throw new GraphQLError('User not found')
+        return user
+      },
+    })
+  },
+})
+```
+- **优势**：代码优先，不依赖装饰器；Schema 与实现分离。
+- **劣势**：**样板代码多**；类型推断不直接，必须运行生成脚本后才能获得完美的 IDE 提示。
+
+#### Pothos (Builder模式)
+通过全局 `builder` 实例链式调用。拥有最强的 TS 类型推导能力。
+
+```typescript
+builder.queryFields((t) => ({
+  user: t.field({
+    type: User,
+    args: { id: t.arg.int({ required: true }) },
+    resolve: (_parent, { id }) => {
+      const user = userMap.get(id)
+      if (!user) throw new GraphQLError('User not found')
+      return user
+    },
+  }),
+}))
+
+builder.mutationFields((t) => ({
+  createUser: t.field({
+    type: User,
+    args: {
+      email: t.arg.string({ required: true, validate: z.email() }),
+    },
+    resolve: (_parent, { name, email }) => { /* ... */ },
+  }),
+}))
+```
+- **优势**：**类型安全天花板**，参数和返回类型推断极其精准；插件生态丰富（如验证插件、Prisma 插件）。
+- **劣势**：API 稍显复杂，`builder` 对象的链式调用在大型项目中可能导致代码组织混乱。
+
+#### Grats (Inference模式)
+直接将 TS 函数导出为解析器。通过 JSDoc 注释标记。
+
+```typescript
+/** @gqlQueryField */
+export function user(id: Int): User {
+  const user = userMap.get(id)
+  if (!user) throw new GraphQLError('User not found')
+  return user
+}
+
+/** @gqlMutationField */
+export function createUser(name: string, email: string): User {
+  if (!email.includes('@')) throw new GraphQLError('Invalid email format')
+  // ...
+}
+```
+- **优势**：**最极致的简洁**，几乎就是在写纯 TS 函数；零运行时开销；真正的单一数据源。
+- **劣势**：由于依赖注释，某些复杂的关联加载（如 Dataloader）需要按照特定模式编写函数。
+
+#### GQLoom (Weaving模式)
+将 Zod 等验证库 Schema 直接作为输入输出定义。
+
+```typescript
+export const userResolver = resolver.of(User, {
+  user: query(User)
+    .input({ id: z.int() })
+    .resolve(({ id }) => {
+      const user = userMap.get(id)
+      if (!user) throw new GraphQLError('User not found')
+      return user
+    }),
+
+  createUser: mutation(User)
+    .input({ name: z.string(), email: z.email() })
+    .resolve(({ name, email }) => { /* ... */ }),
+})
+```
+- **优势**：**验证与逻辑三位一体**，输入校验直接在 Schema 定义层完成；API 现代且极简；完美解决类型同步问题。
+- **劣势**：目前仍处于早期阶段，生态插件不如 Pothos 丰富。
+
+#### Pylon (Inference模式)
+追求极致的“自动”，直接根据导出对象生成 GraphQL。
+
+```typescript
+export const userQueries = {
+  user: (id: Int): User => {
+    const u = userMap.get(id)
+    if (!u) throw new GraphQLError('User not found')
+    return new User(u.id, u.name, u.email)
+  },
+}
+```
+- **优势**：**写代码最快**，几乎感知不到 GraphQL 的存在；非常适合快速原型开发。
+- **劣势**：**极度黑盒且框架绑定**，与 Hono 深度耦合；在需要精细控制 GraphQL 指令（Directives）或复杂中间件时显得力不从心。
+
+#### garph (Builder模式)
+现代化的 Builder 模式，通过泛型 `InferResolvers` 实现类型绑定。
+
+```typescript
+export const userQueryResolvers: InferResolvers<{ UserQuery: typeof UserQuery }, {}> = {
+  UserQuery: {
+    user: (_, { id }) => {
+      const user = userMap.get(id)
+      if (!user) throw new GraphQLError('User not found')
+      return user
+    },
+  },
+}
+```
+- **优势**：API 简洁现代；类型推断能力强，不依赖生成文件。
+- **劣势**：定义（Fields）与实现（Resolvers）需要通过 `InferResolvers` 手动关联，略显繁琐。
+
+#### gqtx (Builder模式)
+偏底层的函数式构建。
+
+```typescript
+export const userQueryFields = [
+  Gql.Field({
+    name: 'user',
+    type: UserType,
+    args: { id: Gql.Arg({ type: Gql.NonNullInput(Gql.Int) }) },
+    resolve: (_, { id }) => { /* ... */ },
+  }),
+]
+```
+- **优势**：纯函数，无依赖。
+- **劣势**：**代码极度臃肿**，类型推导能力弱，需要大量手动注解。
+
+---
+
+### 解析器组装与得分项
+
+| 库名称          | 输入验证集成             | 参数类型推导      | 返回值类型校验    | 样板代码量 | 综合得分 |
+| :-------------- | :----------------------- | :---------------- | :---------------- | :--------- | :------- |
+| **GQLoom**      | 🏅 顶级 (Zod内置)         | 🏅 顶级 (Zod推导)  | 🏅 顶级 (Zod校验)  | ✅ 很少     | 🏅 顶级   |
+| **Grats**       | ⚠️ 一般 (手动)            | 🏅 顶级 (自动)     | 🏅 顶级 (自动)     | 🏅 极少     | 🥈 完善   |
+| **Pothos**      | 🥈 优秀 (插件)            | 🏅 顶级 (链式推导) | 🏅 顶级 (链式推导) | ⚠️ 中等     | 🥈 完善   |
+| **Pylon**       | ⚠️ 一般 (手动)            | 🏅 顶级 (自动)     | 🏅 顶级 (自动)     | 🏅 极少     | 🥈 完善   |
+| **garph**       | ⚠️ 一般 (手动)            | ✅ 良好 (泛型)     | ✅ 良好 (泛型)     | ✅ 较少     | 🥈 完善   |
+| **Nexus**       | ⚠️ 一般 (手动)            | ⚠️ 一般 (需生成)   | ⚠️ 一般 (需生成)   | ❌ 较多     | 🥉 凑合   |
+| **TypeGraphQL** | 🥈 优秀 (class-validator) | ⚠️ 一般 (重复定义) | ✅ 良好            | ❌ 极多     | 🥉 凑合   |
+| **gqtx**        | ⚠️ 一般 (手动)            | ❌ 较差            | ❌ 较差            | ❌ 极多     | 🪦 没有   |
+
+### 排名评级与核心差异
+
+1. **GQLoom (🏅顶级)**：由于其革命性地将**验证逻辑**与 **Schema 定义**完全合一，极大地减少了 Resolver 内部的校验代码。
+2. **Grats (🥈完善)**：虽然验证需要手动处理，但其“代码即 Schema”的极致简洁体验无人能及。
+3. **Pothos (🥈完善)**：虽然繁琐，但其类型安全性的严谨程度是工业级项目的首选。
+4. **Pylon (🥈完善)**：速度之王，但由于过于黑盒，在大中型团队协作中可能存在隐患。
 

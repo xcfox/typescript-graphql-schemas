@@ -11,12 +11,13 @@ export const DateTime = g.scalarType<Date, Date>('DateTime', {
   parseLiteral: (ast) => GraphQLDateTime.parseLiteral(ast, {}) as Date,
 })
 
-export const MenuCategoryEnum = g.enumType('MenuCategory', ['COFFEE', 'FOOD'] as const)
 export const OrderStatusEnum = g.enumType('OrderStatus', [
   'PENDING',
   'COMPLETED',
   'CANCELLED',
 ] as const)
+
+export const SugarLevelEnum = g.enumType('SugarLevel', ['NONE', 'LOW', 'MEDIUM', 'HIGH'] as const)
 
 export const UserType = g.type('User', {
   id: g.int(),
@@ -29,11 +30,32 @@ export const UserType = g.type('User', {
     .optional(),
 })
 
-export const MenuItemType = g.type('MenuItem', {
+// Interface: Food (公共字段)
+export const FoodInterface = g.interface('Food', {
   id: g.int(),
   name: g.string(),
   price: g.float(),
-  category: g.ref(MenuCategoryEnum),
+})
+
+// Coffee 类型，实现 Food 接口
+export const CoffeeType = g
+  .type('Coffee', {
+    sugarLevel: g.ref(SugarLevelEnum),
+    origin: g.string(),
+  })
+  .implements(FoodInterface)
+
+// Dessert 类型，实现 Food 接口
+export const DessertType = g
+  .type('Dessert', {
+    calories: g.float(),
+  })
+  .implements(FoodInterface)
+
+// Union 类型: MenuItem = Coffee | Dessert
+export const MenuItemType = g.unionType('MenuItem', {
+  Coffee: CoffeeType,
+  Dessert: DessertType,
 })
 
 export const OrderType = g.type('Order', {
@@ -47,7 +69,9 @@ export const OrderType = g.type('Order', {
 })
 
 export type User = Infer<typeof UserType>
-export type MenuItem = Infer<typeof MenuItemType>
+export type Coffee = Infer<typeof CoffeeType>
+export type Dessert = Infer<typeof DessertType>
+export type MenuItem = Coffee | Dessert
 export type Order = Infer<typeof OrderType>
 
 // Data maps for in-memory storage with generic types
@@ -56,6 +80,3 @@ export const menuItemMap = new Map<number, MenuItem>(
   MENU_ITEMS.map((item) => [item.id, item as MenuItem]),
 )
 export const orderMap = new Map<number, Order>(ORDERS.map((o) => [o.id, o as Order]))
-
-export { buildSchema }
-export type { InferResolvers, Infer }

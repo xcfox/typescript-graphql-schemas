@@ -1,25 +1,38 @@
-scalar DateTime
-
-enum MenuCategory {
-  COFFEE
-  FOOD
+type Coffee implements Food {
+  id: Int!
+  name: String!
+  origin: String!
+  price: Float!
+  sugarLevel: SugarLevel!
 }
 
-type MenuItem {
-  category: MenuCategory!
+scalar DateTime
+
+type Dessert implements Food {
+  calories: Float!
   id: Int!
   name: String!
   price: Float!
 }
 
+interface Food {
+  id: Int!
+  name: String!
+  price: Float!
+}
+
+union MenuItem = Coffee | Dessert
+
 type Mutation {
-  createMenuItem(category: MenuCategory!, name: String!, price: Float!): MenuItem!
+  createCoffee(name: String!, origin: String!, price: Float!, sugarLevel: SugarLevel!): Coffee!
+  createDessert(calories: Float!, name: String!, price: Float!): Dessert!
   createOrder(items: [Int!]!, userId: Int!): Order!
   createUser(email: String!, name: String!): User!
   deleteMenuItem(id: Int!): MenuItem
   deleteOrder(id: Int!): Order
   deleteUser(id: Int!): User
-  updateMenuItem(id: Int!, price: Float): MenuItem
+  updateCoffee(id: Int!, name: String, origin: String, price: Float, sugarLevel: SugarLevel): Coffee
+  updateDessert(calories: Float, id: Int!, name: String, price: Float): Dessert
   updateOrder(id: Int!, status: OrderStatus!): Order
   updateUser(email: String, id: Int!, name: String): User
 }
@@ -47,6 +60,13 @@ type Query {
   orders: [Order!]!
   user(id: Int!): User
   users: [User!]!
+}
+
+enum SugarLevel {
+  HIGH
+  LOW
+  MEDIUM
+  NONE
 }
 
 type User {

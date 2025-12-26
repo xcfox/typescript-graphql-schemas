@@ -15,8 +15,8 @@
 ```text
 /typescript-graphql-schemas
 ├── gqloom/           # GQLoom 方案 (Weaving 模式，极致 DX)
-├── pothos/           # Pothos 方案 (Builder 模式，生产环境首选) - 待初始化
-├── grats/            # Grats 方案 (Type-as-Schema，黑科技) - 待初始化
+├── pothos/           # Pothos 方案 (Builder 模式，生产环境首选)
+├── grats/            # Grats 方案 (Type-as-Schema，黑科技)
 ├── shared/           # 共享业务模型、Mock 数据及全局自增 ID
 ├── package.json      # 根目录全局脚本
 └── pnpm-workspace.yaml
@@ -27,7 +27,7 @@
 - [x] **[TypeGraphQL](https://typegraphql.com/)**
 - [x] **[Nexus](https://nexusjs.org/)**
 - [x] **[Pothos](https://pothos-graphql.dev/)**
-- [ ] **[Grats](https://grats.capt.dev/)**
+- [x] **[Grats](https://grats.capt.dev/)**
 - [ ] **[gqtx](https://github.com/sikanhe/gqtx)**
 - [x] **[GQLoom](https://gqloom.dev/)**
 - [ ] **[Pylon](https://pylon.cronit.io/)**

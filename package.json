@@ -15,7 +15,10 @@
     "test:typegraphql": "pnpm -F typegraphql test",
     "dev:nexus": "pnpm -F nexus dev",
     "print:nexus": "pnpm -F nexus print",
-    "test:nexus": "pnpm -F nexus test"
+    "test:nexus": "pnpm -F nexus test",
+    "dev:grats": "pnpm -F grats dev",
+    "print:grats": "pnpm -F grats print",
+    "test:grats": "pnpm -F grats test"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

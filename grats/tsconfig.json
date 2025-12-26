@@ -1,0 +1,17 @@
+{
+  "grats": {
+    "importModuleSpecifierEnding": ".ts",
+    "tsSchema": "./src/schema.ts"
+  },
+  "compilerOptions": {
+    "module": "nodenext",
+    "target": "esnext",
+    "lib": ["esnext"],
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
+}

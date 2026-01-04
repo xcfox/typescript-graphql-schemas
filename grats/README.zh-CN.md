@@ -14,8 +14,8 @@
 ## 📊 综合评分
 | 维度                | 得分 (1-5) | 简评                                                               |
 | :------------------ | :--------- | :----------------------------------------------------------------- |
-| **1. 架构模式**     | <-待评分-> | 轻量依赖，使用标准 JSDoc 注释，但需要构建步骤，配置略显复杂        |
-| **2. 类型定义**     | <-待评分-> | 完全支持原生 TypeScript 语法，强大的类型推断，接口字段自动继承     |
+| **1. 架构模式**     | **3.5**    | 轻量依赖，使用标准 JSDoc 注释，但需要构建步骤，配置略显复杂        |
+| **2. 类型定义**     | **4.5**    | 完全支持原生 TypeScript 语法，强大的类型推断，接口字段自动继承     |
 | **3. 解析器与验证** | <-待评分-> | 函数式 API 简洁，参数类型自动推断，但无内置验证和 DataLoader       |
 | **4. 内置功能**     | <-待评分-> | 核心功能完善（Directives、Scalars、Subscriptions），但高级功能缺失 |
 | **5. 生态集成**     | <-待评分-> | GraphQL Server 兼容性极佳，但 ORM 和验证库需要手动集成             |
@@ -43,7 +43,7 @@ Grats 采用 **静态分析（Static Analysis）** 架构模式，通过 TypeScr
 
 ### 1.1 依赖复杂度 (Dependency Complexity)
 
-**评分：<-待评分->**
+**评分：4.0**
 
 **证据**：
 - **运行时依赖**（`grats/package.json` 第 20-24 行）：
@@ -67,7 +67,7 @@ Grats 采用 **静态分析（Static Analysis）** 架构模式，通过 TypeScr
 
 ### 1.2 构建流程 (Build Flow)
 
-**评分：<-待评分->**
+**评分：3.0**
 
 **证据**：
 - **必须运行 CLI**：必须执行 `npx grats` 或 `grats` 命令生成 Schema（`src/cli.ts:47-53`）
@@ -107,7 +107,7 @@ Grats 采用 **静态分析（Static Analysis）** 架构模式，通过 TypeScr
 
 ### 1.3 配置魔法 (Config & Language Magic)
 
-**评分：<-待评分->**
+**评分：4.0**
 
 **证据**：
 - **JSDoc 注释驱动**：使用标准 JSDoc 注释标记 GraphQL 实体（`src/Extractor.ts:60-73`）：
@@ -179,7 +179,7 @@ export function users(): User[] {
 
 ### 1.4 生态集成 (Ecosystem Integration)
 
-**评分：<-待评分->**
+**评分：4.0**
 
 **证据**：
 - **标准 npm 安装**：通过 `npm install grats` 或 `pnpm add grats` 安装（`grats/package.json`）
@@ -231,7 +231,7 @@ const server = new ApolloServer({
 
 #### 1.1 依赖复杂度 (Dependency Complexity)
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **理由**：
 - 运行时依赖仅 4 个（`commander`, `graphql`, `semver`, `typescript`）
@@ -241,7 +241,7 @@ const server = new ApolloServer({
 
 #### 1.2 构建流程 (Build Flow)
 
-**得分：<-待评分->**
+**得分：3.0**
 
 **理由**：
 - 必须运行 CLI 命令生成 Schema，无法"即写即用"
@@ -251,7 +251,7 @@ const server = new ApolloServer({
 
 #### 1.3 配置魔法 (Config & Language Magic)
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **理由**：
 - 使用标准 JSDoc 注释，符合 TypeScript 最佳实践
@@ -261,7 +261,7 @@ const server = new ApolloServer({
 
 #### 1.4 生态集成 (Ecosystem Integration)
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **理由**：
 - 标准 npm 安装，流程简单
@@ -271,7 +271,7 @@ const server = new ApolloServer({
 
 ### 综合评分
 
-**架构模式总分：<-待评分->**
+**架构模式总分：3.5**
 
 **优势**：
 - 轻量依赖，无运行时开销
@@ -290,7 +290,7 @@ Grats 采用 **Implementation-First** 方法，TypeScript 代码是单一数据�
 
 ### 2.1 单一数据源（Single Source of Truth）实现度
 
-**评分：<-待评分->**
+**评分：4.5**
 
 **证据**：
 - **TypeScript 代码即 Schema**：`typescript-graphql-schemas/grats/src/models/user.ts` 中的 TypeScript 类型定义直接生成 GraphQL Schema
@@ -338,7 +338,7 @@ type User {
 
 ### 2.2 枚举与字符串联合支持（Enum & String Union Types）
 
-**评分：<-待评分->**
+**评分：5.0**
 
 **证据**：
 - **支持 TypeScript Enum**：`src/Extractor.ts:2032-2082` 的 `enumEnumDeclaration` 方法支持 TypeScript `enum` 声明
@@ -383,7 +383,7 @@ enum SugarLevel {
 
 ### 2.3 接口继承与联合类型体验（Interface & Union）
 
-**评分：<-待评分->**
+**评分：4.5**
 
 **证据**：
 - **接口字段自动继承**：`src/transforms/addInterfaceFields.ts` 自动将接口字段添加到实现类型
@@ -475,7 +475,7 @@ union MenuItem = Coffee | Dessert
 
 ### 2.4 类型推断强度与显式声明平衡
 
-**评分：<-待评分->**
+**评分：4.0**
 
 **证据**：
 - **基础类型自动推断**：`src/Extractor.ts` 通过 TypeScript 编译器 API 自动推断 `string`、`number`、`boolean` 等基础类型
@@ -536,7 +536,7 @@ export function menuItem(id: Int): MenuItem | null {
 
 #### 2.1 单一数据源（Single Source of Truth）实现度
 
-**得分：<-待评分->**
+**得分：4.5**
 
 **理由**：
 - TypeScript 代码是单一数据源，GraphQL Schema 自动从中提取
@@ -546,7 +546,7 @@ export function menuItem(id: Int): MenuItem | null {
 
 #### 2.2 枚举与字符串联合支持（Enum & String Union Types）
 
-**得分：<-待评分->**
+**得分：5.0**
 
 **理由**：
 - 完全支持原生 TypeScript 枚举语法，零配置
@@ -556,7 +556,7 @@ export function menuItem(id: Int): MenuItem | null {
 
 #### 2.3 接口继承与联合类型体验（Interface & Union）
 
-**得分：<-待评分->**
+**得分：4.5**
 
 **理由**：
 - 接口字段自动继承，实现类型无需重复声明公共字段
@@ -566,7 +566,7 @@ export function menuItem(id: Int): MenuItem | null {
 
 #### 2.4 类型推断强度与显式声明平衡
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **理由**：
 - 强大的类型推断：自动推断基础类型、数组、可选类型
@@ -576,7 +576,7 @@ export function menuItem(id: Int): MenuItem | null {
 
 ### 综合评分
 
-**类型定义总分：<-待评分->**
+**类型定义总分：4.5**
 
 **优势**：
 - 完全支持原生 TypeScript 语法，零配置

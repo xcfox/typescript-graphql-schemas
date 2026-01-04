@@ -14,8 +14,8 @@
 ## 📊 综合评分
 | 维度                | 得分 (1-5) | 简评                                                                    |
 | :------------------ | :--------- | :---------------------------------------------------------------------- |
-| **1. 架构模式**     | <-待评分-> | Builder 模式，极简依赖，零魔法，即写即用，完全中立                      |
-| **2. 类型定义**     | <-待评分-> | 深度推断，$inferType 强大，接口自动继承，Union 需手动处理               |
+| **1. 架构模式**     | **5.0**    | Builder 模式，极简依赖，零魔法，即写即用，完全中立                      |
+| **2. 类型定义**     | **4.0**    | 深度推断，$inferType 强大，接口自动继承，Union 需手动处理               |
 | **3. 解析器与验证** | <-待评分-> | 参数完全自动推断，回调模式增加代码量，模块化灵活性受限，声明式验证支持  |
 | **4. 内置功能**     | <-待评分-> | 核心功能完善，插件系统强大，官方插件丰富，需要安装插件                  |
 | **5. 生态集成**     | <-待评分-> | ORM 深度整合，验证库无缝集成，完全兼容所有 GraphQL Server，主流框架支持 |
@@ -61,7 +61,7 @@ const schema = builder.toSchema()
 
 #### 1.1 依赖复杂度 (Dependency Complexity)
 
-**得分：<-待评分->**
+**得分：5.0**
 
 **证据**：
 - **核心包依赖**（`pothos/packages/core/package.json` 第 48-50 行）：
@@ -78,7 +78,7 @@ const schema = builder.toSchema()
 
 #### 1.2 构建流程 (Build Flow)
 
-**得分：<-待评分->**
+**得分：5.0**
 
 **证据**：
 - **纯运行时构建**：`pothos/packages/core/src/builder.ts`（第 681-726 行）的 `toSchema()` 方法在运行时执行
@@ -106,7 +106,7 @@ export const schema = builder.toSchema()
 
 #### 1.3 配置魔法 (Config & Language Magic)
 
-**得分：<-待评分->**
+**得分：5.0**
 
 **证据**：
 - **无装饰器**：所有类型定义使用函数调用，如 `builder.objectType()`, `builder.interfaceRef()`
@@ -139,7 +139,7 @@ builder.objectType(User, {
 
 #### 1.4 生态集成 (Ecosystem Integration)
 
-**得分：<-待评分->**
+**得分：5.0**
 
 **证据**：
 - **标准安装**：`npm install @pothos/core` 即可使用，无特殊要求
@@ -160,13 +160,13 @@ builder.objectType(User, {
 
 ### 架构模式综合评分
 
-**得分：<-待评分->**
+**得分：5.0**
 
 **评分依据**：
-- 依赖复杂度：<-待评分->（极简依赖，仅依赖 `graphql` 标准库）
-- 构建流程：<-待评分->（即写即用，零构建步骤）
-- 配置魔法：<-待评分->（零魔法，完全原生 TypeScript）
-- 生态集成：<-待评分->（完全中立，标准兼容，丰富的集成示例）
+- 依赖复杂度：**5.0**（极简依赖，仅依赖 `graphql` 标准库）
+- 构建流程：**5.0**（即写即用，零构建步骤）
+- 配置魔法：**5.0**（零魔法，完全原生 TypeScript）
+- 生态集成：**5.0**（完全中立，标准兼容，丰富的集成示例）
 
 **优势**：
 1. **极简依赖**：核心包仅依赖 `graphql`，零运行时开销
@@ -196,7 +196,7 @@ Pothos 采用 **Builder API + 类型推断** 的方式实现类型定义。Schem
 
 #### 2.1 单一数据源（Single Source of Truth）实现度
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **证据**：
 - **Schema 定义即数据源**：`typescript-graphql-schemas/pothos/src/schema/user.ts`（第 7-13 行）通过 `builder.simpleObject()` 定义 Schema
@@ -234,7 +234,7 @@ export const schema = builder.toSchema()
 
 #### 2.2 枚举与字符串联合支持（Enum & String Union Types）
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **证据**：
 - **`as const` 数组支持**：`typescript-graphql-schemas/pothos/src/schema/menu.ts`（第 6-8 行）使用 `builder.enumType('SugarLevel', { values: ['NONE', 'LOW', 'MEDIUM', 'HIGH'] as const })`
@@ -273,7 +273,7 @@ builder.enumType(OrderStatusEnum, {
 
 #### 2.3 接口继承与联合类型体验（Interface & Union）
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **证据**：
 - **接口字段自动继承**：`typescript-graphql-schemas/pothos/src/schema/menu.ts`（第 30-56 行）展示接口实现
@@ -344,7 +344,7 @@ createCoffee: (_parent, { name, price, sugarLevel, origin }) => {
 
 #### 2.4 类型推断强度与显式声明平衡
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **证据**：
 - **自动推断基础类型**：Builder API 自动处理 String、Int、Float、Boolean、ID、Enum 等基础类型
@@ -407,13 +407,13 @@ builder.queryFields((t) => ({
 
 ### 类型定义综合评分
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **评分依据**：
-- 单一数据源：<-待评分->（深度推断，但验证逻辑需要插件支持）
-- 枚举支持：<-待评分->（轻量映射，支持 `as const` 数组和 TypeScript Enum）
-- 接口继承与 Union：<-待评分->（智能继承，但 Union 需要手动处理 `__typename` 和 `resolveType`）
-- 类型推断强度：<-待评分->（强大推断，`$inferType` 提供完整支持，但复杂类型需要显式指定）
+- 单一数据源：**4.0**（深度推断，但验证逻辑需要插件支持）
+- 枚举支持：**4.0**（轻量映射，支持 `as const` 数组和 TypeScript Enum）
+- 接口继承与 Union：**4.0**（智能继承，但 Union 需要手动处理 `__typename` 和 `resolveType`）
+- 类型推断强度：**4.0**（强大推断，`$inferType` 提供完整支持，但复杂类型需要显式指定）
 
 **优势**：
 1. **`$inferType` 工具强大**：所有类型都提供 `$inferType` 属性，类型推断完整
@@ -1344,7 +1344,7 @@ export class AppModule {}
 **总分：<-待评分->**
 
 **各维度得分**：
-- 架构模式：<-待评分->
+- 架构模式：**5.0**
 - 类型定义：<-待评分->
 - 解析器与验证：<-待评分->
 - 内置功能：<-待评分->

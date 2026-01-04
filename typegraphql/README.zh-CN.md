@@ -14,8 +14,8 @@
 ## 📊 综合评分
 | 维度                | 得分 (1-5) | 简评                                                    |
 | :------------------ | :--------- | :------------------------------------------------------ |
-| **1. 架构模式**     | <-待评分-> | 装饰器模式，中等依赖，轻量构建，特性依赖，良好集成      |
-| **2. 类型定义**     | <-待评分-> | 逻辑关联，显式注册，逻辑决议，强力绑定，大量显式声明    |
+| **1. 架构模式**     | **3.0** | 装饰器模式，中等依赖，轻量构建，特性依赖，良好集成      |
+| **2. 类型定义**     | **2.0** | 逻辑关联，显式注册，逻辑决议，强力绑定，大量显式声明    |
 | **3. 解析器与验证** | <-待评分-> | 天然领域模块化，但大量显式声明，DataLoader 无内置支持   |
 | **4. 内置功能**     | <-待评分-> | 核心功能完善，但 DataLoader 和深度限制无内置支持        |
 | **5. 生态集成**     | <-待评分-> | GraphQL Server 完全兼容，验证库深度集成，ORM 需手动配置 |
@@ -66,7 +66,7 @@ const schema = await buildSchema({
 
 #### 1.1 依赖复杂度 (Dependency Complexity)
 
-**得分：<-待评分->**
+**得分：3.0**
 
 **证据**：
 - **必须依赖**（`type-graphql/package.json` 第 99-108 行）：
@@ -104,7 +104,7 @@ import { validate } from 'class-validator'  // 可选，用于验证
 
 #### 1.2 构建流程 (Build Flow)
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **证据**：
 - **纯运行时构建**：`type-graphql/src/utils/buildSchema.ts`（第 57-66 行）的 `buildSchema()` 函数在运行时执行
@@ -159,7 +159,7 @@ const schema = await buildSchema({
 
 #### 1.3 配置魔法 (Config & Language Magic)
 
-**得分：<-待评分->**
+**得分：2.0**
 
 **证据**：
 - **必须启用装饰器**：需要 TypeScript 配置 `experimentalDecorators: true` 和 `emitDecoratorMetadata: true`
@@ -218,7 +218,7 @@ const { getType, typeOptions } = findType({
 
 #### 1.4 生态集成 (Ecosystem Integration)
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **证据**：
 - **标准安装**：`npm install type-graphql` 即可使用，无特殊要求
@@ -272,13 +272,13 @@ export const Field: typeof src.Field = dummyDecorator
 
 ### 架构模式综合评分
 
-**得分：<-待评分->**
+**得分：3.0**
 
 **评分依据**：
-- 依赖复杂度：<-待评分->（中等依赖，需要 `reflect-metadata` 和装饰器支持）
-- 构建流程：<-待评分->（轻量构建，纯运行时构建，装饰器自动收集元数据）
-- 配置魔法：<-待评分->（特性依赖，必须启用实验性装饰器和反射环境）
-- 生态集成：<-待评分->（良好集成，标准兼容，丰富的集成示例）
+- 依赖复杂度：**3.0**（中等依赖，需要 `reflect-metadata` 和装饰器支持）
+- 构建流程：**4.0**（轻量构建，纯运行时构建，装饰器自动收集元数据）
+- 配置魔法：**2.0**（特性依赖，必须启用实验性装饰器和反射环境）
+- 生态集成：**4.0**（良好集成，标准兼容，丰富的集成示例）
 
 **优势**：
 1. **装饰器语法直观**：使用类和装饰器定义 Schema，代码结构清晰
@@ -311,7 +311,7 @@ TypeGraphQL 采用 **装饰器 + 反射元数据** 的方式实现类型定义�
 
 #### 2.1 单一数据源（Single Source of Truth）实现度
 
-**得分：<-待评分->**
+**得分：3.0**
 
 **证据**：
 - **TypeScript 类定义是数据源**：`typescript-graphql-schemas/typegraphql/src/resolvers/user.type.ts`（第 4-17 行）通过类定义 TypeScript 类型
@@ -367,7 +367,7 @@ const reflectedType: Function[] | Function | undefined = Reflect.getMetadata(
 
 #### 2.2 枚举与字符串联合支持（Enum & String Union Types）
 
-**得分：<-待评分->**
+**得分：3.0**
 
 **证据**：
 - **必须手动注册**：`typescript-graphql-schemas/typegraphql/src/resolvers/menu.type.ts`（第 19-21 行）使用 `registerEnumType()` 注册枚举
@@ -423,7 +423,7 @@ export function registerEnumType<TEnum extends object>(
 
 #### 2.3 接口继承与联合类型体验（Interface & Union）
 
-**得分：<-待评分->**
+**得分：3.0**
 
 **证据**：
 - **接口字段需要手动重复声明**：`typescript-graphql-schemas/typegraphql/src/resolvers/menu.type.ts`（第 24-69 行）展示接口实现
@@ -506,7 +506,7 @@ if (objectType.interfaceClasses) {
 
 #### 2.4 类型推断强度与显式声明平衡
 
-**得分：<-待评分->**
+**得分：1.0**
 
 **证据**：
 - **几乎所有字段都需要显式类型函数**：`typescript-graphql-schemas/typegraphql/src` 中所有 29 个字段装饰器都使用 `@Field(() => Type)` 显式提供类型
@@ -558,13 +558,13 @@ if (!returnTypeFunc && (!metadataDesignType || bannedTypes.includes(metadataDesi
 
 ### 类型定义综合评分
 
-**得分：<-待评分->**
+**得分：2.0**
 
 **评分依据**：
-- 单一数据源：<-待评分->（逻辑关联，需要手动装饰器标记，存在重复声明）
-- 枚举与字符串联合支持：<-待评分->（显式注册，需要手动调用 `registerEnumType()`）
-- 接口继承与联合类型体验：<-待评分->（逻辑决议，需要手动实现 `resolveType`，接口字段需重复声明）
-- 类型推断强度：<-待评分->（强力绑定，几乎所有字段都需要显式声明）
+- 单一数据源：**3.0**（逻辑关联，需要手动装饰器标记，存在重复声明）
+- 枚举与字符串联合支持：**3.0**（显式注册，需要手动调用 `registerEnumType()`）
+- 接口继承与联合类型体验：**3.0**（逻辑决议，需要手动实现 `resolveType`，接口字段需重复声明）
+- 类型推断强度：**1.0**（强力绑定，几乎所有字段都需要显式声明）
 
 **优势**：
 1. **类型安全**：显式声明确保 TypeScript 类型与 GraphQL Schema 完全同步
@@ -1533,7 +1533,7 @@ app.register(yoga, { prefix: '/graphql' })
 **总分：<-待评分->**
 
 **各维度得分**：
-- 架构模式：<-待评分->
+- 架构模式：**3.0**
 - 类型定义：<-待评分->
 - 解析器与验证：<-待评分->
 - 内置功能：<-待评分->

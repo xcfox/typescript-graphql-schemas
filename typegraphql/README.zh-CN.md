@@ -12,13 +12,13 @@
 | **最近提交** | 2026-01-01                                  |
 
 ## 📊 综合评分
-| 维度                | 得分 (1-5)  | 简评                                                    |
-| :------------------ | :---------- | :------------------------------------------------------ |
-| **1. 架构模式**     | ⭐⭐⭐ (3.5)   | 装饰器模式，中等依赖，轻量构建，特性依赖，良好集成      |
-| **2. 类型定义**     | ⭐⭐⭐ (2.75)  | 逻辑关联，显式注册，逻辑决议，强力绑定，大量显式声明    |
-| **3. 解析器与验证** | ⭐⭐⭐ (3.0)   | 天然领域模块化，但大量显式声明，DataLoader 无内置支持   |
-| **4. 内置功能**     | ⭐⭐⭐ (3.4)   | 核心功能完善，但 DataLoader 和深度限制无内置支持        |
-| **5. 生态集成**     | ⭐⭐⭐⭐ (3.75) | GraphQL Server 完全兼容，验证库深度集成，ORM 需手动配置 |
+| 维度                | 得分 (1-5) | 简评                                                    |
+| :------------------ | :--------- | :------------------------------------------------------ |
+| **1. 架构模式**     | <-待评分-> | 装饰器模式，中等依赖，轻量构建，特性依赖，良好集成      |
+| **2. 类型定义**     | <-待评分-> | 逻辑关联，显式注册，逻辑决议，强力绑定，大量显式声明    |
+| **3. 解析器与验证** | <-待评分-> | 天然领域模块化，但大量显式声明，DataLoader 无内置支持   |
+| **4. 内置功能**     | <-待评分-> | 核心功能完善，但 DataLoader 和深度限制无内置支持        |
+| **5. 生态集成**     | <-待评分-> | GraphQL Server 完全兼容，验证库深度集成，ORM 需手动配置 |
 
 ---
 
@@ -66,7 +66,7 @@ const schema = await buildSchema({
 
 #### 1.1 依赖复杂度 (Dependency Complexity)
 
-**得分：⭐⭐⭐（中等依赖）**
+**得分：<-待评分->**
 
 **证据**：
 - **必须依赖**（`type-graphql/package.json` 第 99-108 行）：
@@ -104,7 +104,7 @@ import { validate } from 'class-validator'  // 可选，用于验证
 
 #### 1.2 构建流程 (Build Flow)
 
-**得分：⭐⭐⭐⭐（轻量构建）**
+**得分：<-待评分->**
 
 **证据**：
 - **纯运行时构建**：`type-graphql/src/utils/buildSchema.ts`（第 57-66 行）的 `buildSchema()` 函数在运行时执行
@@ -159,7 +159,7 @@ const schema = await buildSchema({
 
 #### 1.3 配置魔法 (Config & Language Magic)
 
-**得分：⭐⭐⭐（特性依赖）**
+**得分：<-待评分->**
 
 **证据**：
 - **必须启用装饰器**：需要 TypeScript 配置 `experimentalDecorators: true` 和 `emitDecoratorMetadata: true`
@@ -218,7 +218,7 @@ const { getType, typeOptions } = findType({
 
 #### 1.4 生态集成 (Ecosystem Integration)
 
-**得分：⭐⭐⭐⭐（良好集成）**
+**得分：<-待评分->**
 
 **证据**：
 - **标准安装**：`npm install type-graphql` 即可使用，无特殊要求
@@ -272,13 +272,13 @@ export const Field: typeof src.Field = dummyDecorator
 
 ### 架构模式综合评分
 
-**得分：3.5 / 5.0**（**⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 依赖复杂度：3/5（中等依赖，需要 `reflect-metadata` 和装饰器支持）
-- 构建流程：4/5（轻量构建，纯运行时构建，装饰器自动收集元数据）
-- 配置魔法：3/5（特性依赖，必须启用实验性装饰器和反射环境）
-- 生态集成：4/5（良好集成，标准兼容，丰富的集成示例）
+- 依赖复杂度：<-待评分->（中等依赖，需要 `reflect-metadata` 和装饰器支持）
+- 构建流程：<-待评分->（轻量构建，纯运行时构建，装饰器自动收集元数据）
+- 配置魔法：<-待评分->（特性依赖，必须启用实验性装饰器和反射环境）
+- 生态集成：<-待评分->（良好集成，标准兼容，丰富的集成示例）
 
 **优势**：
 1. **装饰器语法直观**：使用类和装饰器定义 Schema，代码结构清晰
@@ -311,7 +311,7 @@ TypeGraphQL 采用 **装饰器 + 反射元数据** 的方式实现类型定义�
 
 #### 2.1 单一数据源（Single Source of Truth）实现度
 
-**得分：⭐⭐⭐（逻辑关联）**
+**得分：<-待评分->**
 
 **证据**：
 - **TypeScript 类定义是数据源**：`typescript-graphql-schemas/typegraphql/src/resolvers/user.type.ts`（第 4-17 行）通过类定义 TypeScript 类型
@@ -367,7 +367,7 @@ const reflectedType: Function[] | Function | undefined = Reflect.getMetadata(
 
 #### 2.2 枚举与字符串联合支持（Enum & String Union Types）
 
-**得分：⭐⭐⭐（显式注册）**
+**得分：<-待评分->**
 
 **证据**：
 - **必须手动注册**：`typescript-graphql-schemas/typegraphql/src/resolvers/menu.type.ts`（第 19-21 行）使用 `registerEnumType()` 注册枚举
@@ -423,7 +423,7 @@ export function registerEnumType<TEnum extends object>(
 
 #### 2.3 接口继承与联合类型体验（Interface & Union）
 
-**得分：⭐⭐⭐（逻辑决议）**
+**得分：<-待评分->**
 
 **证据**：
 - **接口字段需要手动重复声明**：`typescript-graphql-schemas/typegraphql/src/resolvers/menu.type.ts`（第 24-69 行）展示接口实现
@@ -506,7 +506,7 @@ if (objectType.interfaceClasses) {
 
 #### 2.4 类型推断强度与显式声明平衡
 
-**得分：⭐⭐（强力绑定）**
+**得分：<-待评分->**
 
 **证据**：
 - **几乎所有字段都需要显式类型函数**：`typescript-graphql-schemas/typegraphql/src` 中所有 29 个字段装饰器都使用 `@Field(() => Type)` 显式提供类型
@@ -558,13 +558,13 @@ if (!returnTypeFunc && (!metadataDesignType || bannedTypes.includes(metadataDesi
 
 ### 类型定义综合评分
 
-**得分：2.75 / 5.0**（**⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 单一数据源：3/5（逻辑关联，需要手动装饰器标记，存在重复声明）
-- 枚举与字符串联合支持：3/5（显式注册，需要手动调用 `registerEnumType()`）
-- 接口继承与联合类型体验：3/5（逻辑决议，需要手动实现 `resolveType`，接口字段需重复声明）
-- 类型推断强度：2/5（强力绑定，几乎所有字段都需要显式声明）
+- 单一数据源：<-待评分->（逻辑关联，需要手动装饰器标记，存在重复声明）
+- 枚举与字符串联合支持：<-待评分->（显式注册，需要手动调用 `registerEnumType()`）
+- 接口继承与联合类型体验：<-待评分->（逻辑决议，需要手动实现 `resolveType`，接口字段需重复声明）
+- 类型推断强度：<-待评分->（强力绑定，几乎所有字段都需要显式声明）
 
 **优势**：
 1. **类型安全**：显式声明确保 TypeScript 类型与 GraphQL Schema 完全同步
@@ -596,7 +596,7 @@ TypeGraphQL 采用 **装饰器 + 类方法** 的方式实现解析器定义。Re
 
 #### 3.1 开发体验（代码简洁度）
 
-**得分：⭐⭐⭐（代码量中等，模板代码较多）**
+**得分：<-待评分->**
 
 **证据**：
 - **需要大量装饰器**：每个参数都需要 `@Arg()` 装饰器，每个方法都需要 `@Query()` 或 `@Mutation()` 装饰器
@@ -653,7 +653,7 @@ createUser(@Args(() => CreateUserArgs) { name, email }: CreateUserArgs): User {
 
 #### 3.2 模块化设计（领域驱动开发支持）
 
-**得分：⭐⭐⭐⭐⭐（天然领域模块化，强制按领域组织）**
+**得分：<-待评分->**
 
 **证据**：
 - **按 Resolver 类组织**：`typescript-graphql-schemas/typegraphql/src/resolvers/` 目录按领域拆分文件（`user.resolver.ts`, `menu.resolver.ts`, `order.resolver.ts`）
@@ -701,7 +701,7 @@ export class MenuResolver {
 
 #### 3.3 参数定义与类型推导
 
-**得分：⭐⭐（参数类型需要大量显式声明，类型推导有限）**
+**得分：<-待评分->**
 
 **证据**：
 - **每个参数都需要显式类型函数**：`typescript-graphql-schemas/typegraphql/src/resolvers/menu.resolver.ts`（第 47-50 行）每个参数都需要 `@Arg('name', () => String)` 显式声明类型
@@ -753,7 +753,7 @@ createUser(@Args(() => CreateUserArgs) { name, email }: CreateUserArgs): User {
 
 #### 3.4 输入验证机制
 
-**得分：⭐⭐⭐⭐（支持声明式验证，但需要额外配置）**
+**得分：<-待评分->**
 
 **证据**：
 - **支持 class-validator 装饰器**：`typescript-graphql-schemas/typegraphql/src/resolvers/user.resolver.ts`（第 30 行）使用 `@IsEmail()` 装饰器进行验证
@@ -853,7 +853,7 @@ export async function validateArg(
 
 #### 3.5 批量加载（DataLoader）集成
 
-**得分：⛔（没有提供任何内置的 dataloader 支持）**
+**得分：<-待评分->**
 
 **证据**：
 - **需要手动创建 DataLoader 实例**：`typescript-graphql-schemas/typegraphql/src/context.ts`（第 11-23 行）需要手动创建 DataLoader 实例
@@ -903,14 +903,14 @@ async orders(@Root() user: User, @Ctx() { loaders }: MyContext): Promise<Order[]
 
 ### 解析器与验证综合评分
 
-**得分：3.0 / 5.0**（**⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 开发体验：3/5（代码量中等，模板代码较多）
-- 模块化设计：5/5（天然领域模块化，强制按领域组织）
-- 参数定义与类型推导：2/5（参数类型需要大量显式声明，类型推导有限）
-- 输入验证机制：4/5（支持声明式验证，但需要额外配置）
-- 批量加载（DataLoader）集成：0/5（没有提供任何内置的 dataloader 支持）
+- 开发体验：<-待评分->（代码量中等，模板代码较多）
+- 模块化设计：<-待评分->（天然领域模块化，强制按领域组织）
+- 参数定义与类型推导：<-待评分->（参数类型需要大量显式声明，类型推导有限）
+- 输入验证机制：<-待评分->（支持声明式验证，但需要额外配置）
+- 批量加载（DataLoader）集成：<-待评分->（没有提供任何内置的 dataloader 支持）
 
 **优势**：
 1. **天然领域模块化**：通过 Resolver 类创建明确的模块边界，类型定义、Query、Mutation、Field Resolver 都在同一模块中
@@ -1275,18 +1275,18 @@ const server = new ApolloServer({
 
 ### 内置功能综合评分
 
-**得分：3.4 / 5.0**（**⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 指令支持：✅ 内置支持（5/5）
-- 扩展支持：✅ 内置支持（5/5）
-- 批量加载：⛔ 无法实现（0/5）
-- 自定义标量：✅ 内置支持（5/5）
-- 订阅：✅ 内置支持（5/5）
-- 上下文注入：✅ 内置支持（5/5）
-- 中间件：✅ 内置支持（5/5）
-- 查询复杂度分析：⚠️ 插件/额外实现（2/5）
-- 深度限制：⛔ 无法实现（0/5）
+- 指令支持：✅ 内置支持（<-待评分->）
+- 扩展支持：✅ 内置支持（<-待评分->）
+- 批量加载：⛔ 无法实现（<-待评分->）
+- 自定义标量：✅ 内置支持（<-待评分->）
+- 订阅：✅ 内置支持（<-待评分->）
+- 上下文注入：✅ 内置支持（<-待评分->）
+- 中间件：✅ 内置支持（<-待评分->）
+- 查询复杂度分析：⚠️ 插件/额外实现（<-待评分->）
+- 深度限制：⛔ 无法实现（<-待评分->）
 
 **优势**：
 1. **核心功能完善**：Directives、Extensions、Subscriptions、Custom Scalars、Context、Middleware 等核心功能都提供原生支持
@@ -1315,7 +1315,7 @@ TypeGraphQL 通过标准 GraphQL Schema 和装饰器模式实现生态集成。O
 
 #### 5.1 ORM 集成深度（ORM Integration Depth）
 
-**得分：⭐⭐⭐（基础集成）**
+**得分：<-待评分->**
 
 **证据**：
 - **TypeORM 集成**：`type-graphql/examples/typeorm-basic-usage/index.ts`（第 13-14 行）需要手动初始化 TypeORM 连接，`recipe.resolver.ts`（第 16-20 行）需要手动获取 Repository
@@ -1367,7 +1367,7 @@ const schema = await buildSchema({
 
 #### 5.2 验证库集成（Validation Library Integration）
 
-**得分：⭐⭐⭐⭐（深度集成）**
+**得分：<-待评分->**
 
 **证据**：
 - **class-validator 深度集成**：`type-graphql/docs/validation.md`（第 15-100 行）展示 `class-validator` 装饰器与 Schema 定义深度绑定
@@ -1412,7 +1412,7 @@ const schema = await buildSchema({
 
 #### 5.3 GraphQL Server 兼容性（Server Compatibility）
 
-**得分：⭐⭐⭐⭐⭐（完全兼容）**
+**得分：<-待评分->**
 
 **证据**：
 - **Apollo Server 集成**：`type-graphql/examples/simple-usage/index.ts`（第 18-22 行）展示 Apollo Server 集成，`examples/` 目录包含大量 Apollo Server 示例
@@ -1460,7 +1460,7 @@ const gateway = new ApolloGateway({
 
 #### 5.4 Web 框架适配（Web Framework Adapter）
 
-**得分：⭐⭐⭐⭐（主流框架支持）**
+**得分：<-待评分->**
 
 **证据**：
 - **NestJS 官方集成**：`type-graphql/docs/nestjs.md`（第 6-36 行）展示通过 `typegraphql-nestjs` 包集成 NestJS
@@ -1505,13 +1505,13 @@ app.register(yoga, { prefix: '/graphql' })
 
 ### 生态集成综合评分
 
-**得分：3.75 / 5.0**（**⭐⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- ORM 集成深度：3/5（基础集成，需要较多配置和样板代码）
-- 验证库集成：4/5（深度集成，`class-validator` 深度绑定）
-- GraphQL Server 兼容性：5/5（完全兼容，所有主流 Server 支持）
-- Web 框架适配：4/5（主流框架支持，NestJS 官方集成）
+- ORM 集成深度：<-待评分->（基础集成，需要较多配置和样板代码）
+- 验证库集成：<-待评分->（深度集成，`class-validator` 深度绑定）
+- GraphQL Server 兼容性：<-待评分->（完全兼容，所有主流 Server 支持）
+- Web 框架适配：<-待评分->（主流框架支持，NestJS 官方集成）
 
 **优势**：
 1. **GraphQL Server 完全兼容**：与所有主流 GraphQL Server 完全兼容，输出标准 GraphQL Schema
@@ -1530,14 +1530,14 @@ app.register(yoga, { prefix: '/graphql' })
 
 ### 综合评分
 
-**总分：3.28 / 5.0**（**⭐⭐⭐**）
+**总分：<-待评分->**
 
 **各维度得分**：
-- 架构模式：3.5 / 5.0（⭐⭐⭐）
-- 类型定义：2.75 / 5.0（⭐⭐⭐）
-- 解析器与验证：3.0 / 5.0（⭐⭐⭐）
-- 内置功能：3.4 / 5.0（⭐⭐⭐）
-- 生态集成：3.75 / 5.0（⭐⭐⭐⭐）
+- 架构模式：<-待评分->
+- 类型定义：<-待评分->
+- 解析器与验证：<-待评分->
+- 内置功能：<-待评分->
+- 生态集成：<-待评分->
 
 ### 核心优势
 

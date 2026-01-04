@@ -14,11 +14,11 @@
 ## 📊 综合评分
 | 维度                | 得分 (1-5) | 简评                                                               |
 | :------------------ | :--------- | :----------------------------------------------------------------- |
-| **1. 架构模式**     | 3.5        | 轻量依赖，使用标准 JSDoc 注释，但需要构建步骤，配置略显复杂        |
-| **2. 类型定义**     | 4.25       | 完全支持原生 TypeScript 语法，强大的类型推断，接口字段自动继承     |
-| **3. 解析器与验证** | 2.8        | 函数式 API 简洁，参数类型自动推断，但无内置验证和 DataLoader       |
-| **4. 内置功能**     | 2.8        | 核心功能完善（Directives、Scalars、Subscriptions），但高级功能缺失 |
-| **5. 生态集成**     | 3.25       | GraphQL Server 兼容性极佳，但 ORM 和验证库需要手动集成             |
+| **1. 架构模式**     | <-待评分-> | 轻量依赖，使用标准 JSDoc 注释，但需要构建步骤，配置略显复杂        |
+| **2. 类型定义**     | <-待评分-> | 完全支持原生 TypeScript 语法，强大的类型推断，接口字段自动继承     |
+| **3. 解析器与验证** | <-待评分-> | 函数式 API 简洁，参数类型自动推断，但无内置验证和 DataLoader       |
+| **4. 内置功能**     | <-待评分-> | 核心功能完善（Directives、Scalars、Subscriptions），但高级功能缺失 |
+| **5. 生态集成**     | <-待评分-> | GraphQL Server 兼容性极佳，但 ORM 和验证库需要手动集成             |
 
 ---
 
@@ -43,7 +43,7 @@ Grats 采用 **静态分析（Static Analysis）** 架构模式，通过 TypeScr
 
 ### 1.1 依赖复杂度 (Dependency Complexity)
 
-**评分：⭐⭐⭐⭐（轻量依赖）**
+**评分：<-待评分->**
 
 **证据**：
 - **运行时依赖**（`grats/package.json` 第 20-24 行）：
@@ -67,7 +67,7 @@ Grats 采用 **静态分析（Static Analysis）** 架构模式，通过 TypeScr
 
 ### 1.2 构建流程 (Build Flow)
 
-**评分：⭐⭐⭐（显式构建）**
+**评分：<-待评分->**
 
 **证据**：
 - **必须运行 CLI**：必须执行 `npx grats` 或 `grats` 命令生成 Schema（`src/cli.ts:47-53`）
@@ -107,7 +107,7 @@ Grats 采用 **静态分析（Static Analysis）** 架构模式，通过 TypeScr
 
 ### 1.3 配置魔法 (Config & Language Magic)
 
-**评分：⭐⭐⭐（特性依赖）**
+**评分：<-待评分->**
 
 **证据**：
 - **JSDoc 注释驱动**：使用标准 JSDoc 注释标记 GraphQL 实体（`src/Extractor.ts:60-73`）：
@@ -179,7 +179,7 @@ export function users(): User[] {
 
 ### 1.4 生态集成 (Ecosystem Integration)
 
-**评分：⭐⭐⭐⭐（良好集成）**
+**评分：<-待评分->**
 
 **证据**：
 - **标准 npm 安装**：通过 `npm install grats` 或 `pnpm add grats` 安装（`grats/package.json`）
@@ -231,7 +231,7 @@ const server = new ApolloServer({
 
 #### 1.1 依赖复杂度 (Dependency Complexity)
 
-**得分：⭐⭐⭐⭐（轻量依赖）**
+**得分：<-待评分->**
 
 **理由**：
 - 运行时依赖仅 4 个（`commander`, `graphql`, `semver`, `typescript`）
@@ -241,7 +241,7 @@ const server = new ApolloServer({
 
 #### 1.2 构建流程 (Build Flow)
 
-**得分：⭐⭐⭐（显式构建）**
+**得分：<-待评分->**
 
 **理由**：
 - 必须运行 CLI 命令生成 Schema，无法"即写即用"
@@ -251,7 +251,7 @@ const server = new ApolloServer({
 
 #### 1.3 配置魔法 (Config & Language Magic)
 
-**得分：⭐⭐⭐（特性依赖）**
+**得分：<-待评分->**
 
 **理由**：
 - 使用标准 JSDoc 注释，符合 TypeScript 最佳实践
@@ -261,7 +261,7 @@ const server = new ApolloServer({
 
 #### 1.4 生态集成 (Ecosystem Integration)
 
-**得分：⭐⭐⭐⭐（良好集成）**
+**得分：<-待评分->**
 
 **理由**：
 - 标准 npm 安装，流程简单
@@ -271,7 +271,7 @@ const server = new ApolloServer({
 
 ### 综合评分
 
-**架构模式总分：3.5/5（⭐⭐⭐）**
+**架构模式总分：<-待评分->**
 
 **优势**：
 - 轻量依赖，无运行时开销
@@ -290,7 +290,7 @@ Grats 采用 **Implementation-First** 方法，TypeScript 代码是单一数据�
 
 ### 2.1 单一数据源（Single Source of Truth）实现度
 
-**评分：⭐⭐⭐⭐（深度推断）**
+**评分：<-待评分->**
 
 **证据**：
 - **TypeScript 代码即 Schema**：`typescript-graphql-schemas/grats/src/models/user.ts` 中的 TypeScript 类型定义直接生成 GraphQL Schema
@@ -338,7 +338,7 @@ type User {
 
 ### 2.2 枚举与字符串联合支持（Enum & String Union Types）
 
-**评分：⭐⭐⭐⭐⭐（零配置复用）**
+**评分：<-待评分->**
 
 **证据**：
 - **支持 TypeScript Enum**：`src/Extractor.ts:2032-2082` 的 `enumEnumDeclaration` 方法支持 TypeScript `enum` 声明
@@ -383,7 +383,7 @@ enum SugarLevel {
 
 ### 2.3 接口继承与联合类型体验（Interface & Union）
 
-**评分：⭐⭐⭐⭐（智能继承）**
+**评分：<-待评分->**
 
 **证据**：
 - **接口字段自动继承**：`src/transforms/addInterfaceFields.ts` 自动将接口字段添加到实现类型
@@ -475,7 +475,7 @@ union MenuItem = Coffee | Dessert
 
 ### 2.4 类型推断强度与显式声明平衡
 
-**评分：⭐⭐⭐⭐（强大推断）**
+**评分：<-待评分->**
 
 **证据**：
 - **基础类型自动推断**：`src/Extractor.ts` 通过 TypeScript 编译器 API 自动推断 `string`、`number`、`boolean` 等基础类型
@@ -536,7 +536,7 @@ export function menuItem(id: Int): MenuItem | null {
 
 #### 2.1 单一数据源（Single Source of Truth）实现度
 
-**得分：⭐⭐⭐⭐（深度推断）**
+**得分：<-待评分->**
 
 **理由**：
 - TypeScript 代码是单一数据源，GraphQL Schema 自动从中提取
@@ -546,7 +546,7 @@ export function menuItem(id: Int): MenuItem | null {
 
 #### 2.2 枚举与字符串联合支持（Enum & String Union Types）
 
-**得分：⭐⭐⭐⭐⭐（零配置复用）**
+**得分：<-待评分->**
 
 **理由**：
 - 完全支持原生 TypeScript 枚举语法，零配置
@@ -556,7 +556,7 @@ export function menuItem(id: Int): MenuItem | null {
 
 #### 2.3 接口继承与联合类型体验（Interface & Union）
 
-**得分：⭐⭐⭐⭐（智能继承）**
+**得分：<-待评分->**
 
 **理由**：
 - 接口字段自动继承，实现类型无需重复声明公共字段
@@ -566,7 +566,7 @@ export function menuItem(id: Int): MenuItem | null {
 
 #### 2.4 类型推断强度与显式声明平衡
 
-**得分：⭐⭐⭐⭐（强大推断）**
+**得分：<-待评分->**
 
 **理由**：
 - 强大的类型推断：自动推断基础类型、数组、可选类型
@@ -576,7 +576,7 @@ export function menuItem(id: Int): MenuItem | null {
 
 ### 综合评分
 
-**类型定义总分：4.25/5（⭐⭐⭐⭐）**
+**类型定义总分：<-待评分->**
 
 **优势**：
 - 完全支持原生 TypeScript 语法，零配置
@@ -602,7 +602,7 @@ Grats 的 Resolver 定义采用 **函数式 API + JSDoc 注释** 的方式。所
 
 ### 3.1 开发体验（代码简洁度）
 
-**评分：⭐⭐⭐⭐（代码简洁）**
+**评分：<-待评分->**
 
 **证据**：
 - **函数式 API**：`typescript-graphql-schemas/grats/src/models/user.ts` 中的 Resolver 都是普通函数
@@ -654,7 +654,7 @@ export function createUser(name: string, email: string): User {
 
 ### 3.2 模块化设计（领域驱动开发支持）
 
-**评分：⭐⭐⭐⭐（支持领域模块化）**
+**评分：<-待评分->**
 
 **证据**：
 - **按领域组织**：`typescript-graphql-schemas/grats/src/models/` 目录按领域模块组织（`user.ts`、`menu.ts`、`order.ts`）
@@ -706,7 +706,7 @@ export function createUser(name: string, email: string): User { ... }
 
 ### 3.3 参数定义与类型推导
 
-**评分：⭐⭐⭐⭐（参数类型大部分自动推断）**
+**评分：<-待评分->**
 
 **证据**：
 - **参数类型自动推断**：`typescript-graphql-schemas/grats/src/models/user.ts` 第 28 行的 `user(id: Int)` 中，`id` 类型自动推断为 `Int`
@@ -783,7 +783,7 @@ export function currentUser(vc: VC): User {
 
 ### 3.4 输入验证机制
 
-**评分：⭐⭐（无内置验证，需要完全手动实现）**
+**评分：<-待评分->**
 
 **证据**：
 - **无内置验证**：`typescript-graphql-schemas/grats/src/models/user.ts`（第 43-44、58-60 行）所有验证逻辑都需要手动编写
@@ -847,7 +847,7 @@ export function createOrder(userId: Int, items: Int[]): Order {
 
 ### 3.5 批量加载（DataLoader）集成
 
-**评分：⛔（无内置支持）**
+**评分：<-待评分->**
 
 **证据**：
 - **无内置 DataLoader 支持**：框架源码中未找到 DataLoader 相关实现
@@ -900,7 +900,7 @@ export function user(post: Post, vc: VC): User {
 
 #### 3.1 开发体验（代码简洁度）
 
-**得分：⭐⭐⭐⭐（代码简洁）**
+**得分：<-待评分->**
 
 **理由**：
 - 函数式 API 简洁直观，符合 TypeScript 最佳实践
@@ -910,7 +910,7 @@ export function user(post: Post, vc: VC): User {
 
 #### 3.2 模块化设计（领域驱动开发支持）
 
-**得分：⭐⭐⭐⭐（支持领域模块化）**
+**得分：<-待评分->**
 
 **理由**：
 - 支持按领域模块组织代码，类型定义和 Resolver 在同一模块中
@@ -920,7 +920,7 @@ export function user(post: Post, vc: VC): User {
 
 #### 3.3 参数定义与类型推导
 
-**得分：⭐⭐⭐⭐（参数类型大部分自动推断）**
+**得分：<-待评分->**
 
 **理由**：
 - 参数类型大部分自动推断：通过 TypeScript 类型系统自动推断参数类型
@@ -930,7 +930,7 @@ export function user(post: Post, vc: VC): User {
 
 #### 3.4 输入验证机制
 
-**得分：⭐⭐（无内置验证，需要完全手动实现）**
+**得分：<-待评分->**
 
 **理由**：
 - 无内置验证：所有验证逻辑都需要手动编写
@@ -940,7 +940,7 @@ export function user(post: Post, vc: VC): User {
 
 #### 3.5 批量加载（DataLoader）集成
 
-**得分：⛔（无内置支持）**
+**得分：<-待评分->**
 
 **理由**：
 - 无内置支持：框架不提供任何 DataLoader 相关的 API 或工具
@@ -950,7 +950,7 @@ export function user(post: Post, vc: VC): User {
 
 ### 综合评分
 
-**解析器与验证总分：2.8/5（⭐⭐⭐）**
+**解析器与验证总分：<-待评分->**
 
 **优势**：
 - 函数式 API 简洁直观，符合 TypeScript 最佳实践
@@ -1220,7 +1220,7 @@ export function currentUser(vc: VC): User {
 
 ### 内置功能综合评分
 
-**得分：2.8 / 5.0（⭐⭐⭐）**
+**得分：<-待评分->**
 
 **评分依据**：
 - 核心功能支持良好：Directives、Scalars、Subscriptions、Context 都提供原生支持
@@ -1250,7 +1250,7 @@ Grats 采用 **标准 GraphQL Schema 输出 + 手动集成** 的策略。通过 
 
 ### 5.1 ORM 集成深度（ORM Integration Depth）
 
-**评分：⭐⭐（弱集成）**
+**评分：<-待评分->**
 
 **证据**：
 - **无官方插件**：未找到 Prisma、Drizzle、TypeORM 等 ORM 的官方插件
@@ -1303,7 +1303,7 @@ export function user(id: Int): User {
 
 ### 5.2 验证库集成（Validation Library Integration）
 
-**评分：⭐⭐（弱集成）**
+**评分：<-待评分->**
 
 **证据**：
 - **无官方插件**：未找到 Zod、Yup、Valibot 等验证库的官方插件
@@ -1367,7 +1367,7 @@ export function createOrder(userId: Int, items: Int[]): Order {
 
 ### 5.3 GraphQL Server 兼容性（Server Compatibility）
 
-**评分：⭐⭐⭐⭐⭐（完全兼容）**
+**评分：<-待评分->**
 
 **证据**：
 - **输出标准 GraphQL Schema**：`typescript-graphql-schemas/grats/src/schema.ts` 的 `getSchema()` 函数输出标准 `GraphQLSchema` 实例
@@ -1432,7 +1432,7 @@ app.listen(4000);
 
 ### 5.4 Web 框架适配（Web Framework Adapter）
 
-**评分：⭐⭐⭐⭐（主流框架支持）**
+**评分：<-待评分->**
 
 **证据**：
 - **Next.js 官方示例**：`examples/next-js/` 提供完整的 Next.js App Router 集成示例
@@ -1475,7 +1475,7 @@ export {
 
 #### 5.1 ORM 集成深度（ORM Integration Depth）
 
-**得分：⭐⭐（弱集成）**
+**得分：<-待评分->**
 
 **理由**：
 - 无官方插件：不提供 Prisma、Drizzle、TypeORM 等 ORM 的官方插件
@@ -1485,7 +1485,7 @@ export {
 
 #### 5.2 验证库集成（Validation Library Integration）
 
-**得分：⭐⭐（弱集成）**
+**得分：<-待评分->**
 
 **理由**：
 - 无官方插件：不提供 Zod、Yup、Valibot 等验证库的官方插件
@@ -1495,7 +1495,7 @@ export {
 
 #### 5.3 GraphQL Server 兼容性（Server Compatibility）
 
-**得分：⭐⭐⭐⭐⭐（完全兼容）**
+**得分：<-待评分->**
 
 **理由**：
 - 完全兼容：与所有主流 GraphQL Server 完全兼容
@@ -1505,7 +1505,7 @@ export {
 
 #### 5.4 Web 框架适配（Web Framework Adapter）
 
-**得分：⭐⭐⭐⭐（主流框架支持）**
+**得分：<-待评分->**
 
 **理由**：
 - Next.js 官方示例：提供完整的 Next.js App Router 集成示例
@@ -1515,7 +1515,7 @@ export {
 
 ### 综合评分
 
-**生态集成总分：3.25/5（⭐⭐⭐）**
+**生态集成总分：<-待评分->**
 
 **优势**：
 - GraphQL Server 兼容性极佳，与所有主流 Server 完全兼容
@@ -1531,7 +1531,7 @@ export {
 
 ### 总体评价
 
-Grats 是一个基于 TypeScript 编译器插件的 GraphQL Schema 构建框架，采用 **Implementation-First** 方法，通过静态分析 TypeScript 代码生成 GraphQL Schema。总体评分为 **3.32/5（⭐⭐⭐）**。
+Grats 是一个基于 TypeScript 编译器插件的 GraphQL Schema 构建框架，采用 **Implementation-First** 方法，通过静态分析 TypeScript 代码生成 GraphQL Schema。总体评分为 **<-待评分->**。
 
 ### 核心优势
 
@@ -1571,15 +1571,6 @@ Grats 是一个基于 TypeScript 编译器插件的 GraphQL Schema 构建框架�
 - **构建流程**：显式构建，必须运行 CLI 命令
 - **配置方式**：JSDoc 注释 + tsconfig.json 配置
 - **生态集成**：标准 GraphQL Schema 输出，手动集成 ORM 和验证库
-
-### 与其他框架对比
-
-相比其他框架：
-- **vs TypeGraphQL**：更轻量，无装饰器依赖，但需要构建步骤
-- **vs Nexus**：更简洁，无 Builder API，但功能更少
-- **vs Pothos**：更轻量，无运行时开销，但功能更少
-- **vs GQLoom**：更轻量，无验证库依赖，但无内置验证和 DataLoader
-- **vs garph**：更轻量，无 graphql-compose 依赖，但功能更少
 
 ### 最终建议
 

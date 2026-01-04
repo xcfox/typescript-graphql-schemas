@@ -12,13 +12,13 @@
 | **最近提交** | 2025-12-31                      |
 
 ## 📊 综合评分
-| 维度                | 得分 (1-5)   | 简评                                                                    |
-| :------------------ | :----------- | :---------------------------------------------------------------------- |
-| **1. 架构模式**     | ⭐⭐⭐⭐⭐ (5.0)  | Builder 模式，极简依赖，零魔法，即写即用，完全中立                      |
-| **2. 类型定义**     | ⭐⭐⭐⭐ (4.25)  | 深度推断，$inferType 强大，接口自动继承，Union 需手动处理               |
-| **3. 解析器与验证** | ⭐⭐⭐⭐ (4.0)   | 参数完全自动推断，回调模式增加代码量，模块化灵活性受限，声明式验证支持  |
-| **4. 内置功能**     | ⭐⭐⭐⭐ (4.0)   | 核心功能完善，插件系统强大，官方插件丰富，需要安装插件                  |
-| **5. 生态集成**     | ⭐⭐⭐⭐⭐ (4.75) | ORM 深度整合，验证库无缝集成，完全兼容所有 GraphQL Server，主流框架支持 |
+| 维度                | 得分 (1-5) | 简评                                                                    |
+| :------------------ | :--------- | :---------------------------------------------------------------------- |
+| **1. 架构模式**     | <-待评分-> | Builder 模式，极简依赖，零魔法，即写即用，完全中立                      |
+| **2. 类型定义**     | <-待评分-> | 深度推断，$inferType 强大，接口自动继承，Union 需手动处理               |
+| **3. 解析器与验证** | <-待评分-> | 参数完全自动推断，回调模式增加代码量，模块化灵活性受限，声明式验证支持  |
+| **4. 内置功能**     | <-待评分-> | 核心功能完善，插件系统强大，官方插件丰富，需要安装插件                  |
+| **5. 生态集成**     | <-待评分-> | ORM 深度整合，验证库无缝集成，完全兼容所有 GraphQL Server，主流框架支持 |
 
 ---
 
@@ -61,7 +61,7 @@ const schema = builder.toSchema()
 
 #### 1.1 依赖复杂度 (Dependency Complexity)
 
-**得分：⭐⭐⭐⭐⭐（极简依赖）**
+**得分：<-待评分->**
 
 **证据**：
 - **核心包依赖**（`pothos/packages/core/package.json` 第 48-50 行）：
@@ -78,7 +78,7 @@ const schema = builder.toSchema()
 
 #### 1.2 构建流程 (Build Flow)
 
-**得分：⭐⭐⭐⭐⭐（即写即用）**
+**得分：<-待评分->**
 
 **证据**：
 - **纯运行时构建**：`pothos/packages/core/src/builder.ts`（第 681-726 行）的 `toSchema()` 方法在运行时执行
@@ -106,7 +106,7 @@ export const schema = builder.toSchema()
 
 #### 1.3 配置魔法 (Config & Language Magic)
 
-**得分：⭐⭐⭐⭐⭐（零魔法）**
+**得分：<-待评分->**
 
 **证据**：
 - **无装饰器**：所有类型定义使用函数调用，如 `builder.objectType()`, `builder.interfaceRef()`
@@ -139,7 +139,7 @@ builder.objectType(User, {
 
 #### 1.4 生态集成 (Ecosystem Integration)
 
-**得分：⭐⭐⭐⭐⭐（完全中立）**
+**得分：<-待评分->**
 
 **证据**：
 - **标准安装**：`npm install @pothos/core` 即可使用，无特殊要求
@@ -160,13 +160,13 @@ builder.objectType(User, {
 
 ### 架构模式综合评分
 
-**得分：5.0 / 5.0**（**⭐⭐⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 依赖复杂度：5/5（极简依赖，仅依赖 `graphql` 标准库）
-- 构建流程：5/5（即写即用，零构建步骤）
-- 配置魔法：5/5（零魔法，完全原生 TypeScript）
-- 生态集成：5/5（完全中立，标准兼容，丰富的集成示例）
+- 依赖复杂度：<-待评分->（极简依赖，仅依赖 `graphql` 标准库）
+- 构建流程：<-待评分->（即写即用，零构建步骤）
+- 配置魔法：<-待评分->（零魔法，完全原生 TypeScript）
+- 生态集成：<-待评分->（完全中立，标准兼容，丰富的集成示例）
 
 **优势**：
 1. **极简依赖**：核心包仅依赖 `graphql`，零运行时开销
@@ -196,7 +196,7 @@ Pothos 采用 **Builder API + 类型推断** 的方式实现类型定义。Schem
 
 #### 2.1 单一数据源（Single Source of Truth）实现度
 
-**得分：⭐⭐⭐⭐（深度推断）**
+**得分：<-待评分->**
 
 **证据**：
 - **Schema 定义即数据源**：`typescript-graphql-schemas/pothos/src/schema/user.ts`（第 7-13 行）通过 `builder.simpleObject()` 定义 Schema
@@ -234,7 +234,7 @@ export const schema = builder.toSchema()
 
 #### 2.2 枚举与字符串联合支持（Enum & String Union Types）
 
-**得分：⭐⭐⭐⭐（轻量映射）**
+**得分：<-待评分->**
 
 **证据**：
 - **`as const` 数组支持**：`typescript-graphql-schemas/pothos/src/schema/menu.ts`（第 6-8 行）使用 `builder.enumType('SugarLevel', { values: ['NONE', 'LOW', 'MEDIUM', 'HIGH'] as const })`
@@ -273,7 +273,7 @@ builder.enumType(OrderStatusEnum, {
 
 #### 2.3 接口继承与联合类型体验（Interface & Union）
 
-**得分：⭐⭐⭐⭐（智能继承）**
+**得分：<-待评分->**
 
 **证据**：
 - **接口字段自动继承**：`typescript-graphql-schemas/pothos/src/schema/menu.ts`（第 30-56 行）展示接口实现
@@ -344,7 +344,7 @@ createCoffee: (_parent, { name, price, sugarLevel, origin }) => {
 
 #### 2.4 类型推断强度与显式声明平衡
 
-**得分：⭐⭐⭐⭐（强大推断）**
+**得分：<-待评分->**
 
 **证据**：
 - **自动推断基础类型**：Builder API 自动处理 String、Int、Float、Boolean、ID、Enum 等基础类型
@@ -407,13 +407,13 @@ builder.queryFields((t) => ({
 
 ### 类型定义综合评分
 
-**得分：4.25 / 5.0**（四舍五入为 **⭐⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 单一数据源：4/5（深度推断，但验证逻辑需要插件支持）
-- 枚举支持：4/5（轻量映射，支持 `as const` 数组和 TypeScript Enum）
-- 接口继承与 Union：4/5（智能继承，但 Union 需要手动处理 `__typename` 和 `resolveType`）
-- 类型推断强度：4.5/5（强大推断，`$inferType` 提供完整支持，但复杂类型需要显式指定）
+- 单一数据源：<-待评分->（深度推断，但验证逻辑需要插件支持）
+- 枚举支持：<-待评分->（轻量映射，支持 `as const` 数组和 TypeScript Enum）
+- 接口继承与 Union：<-待评分->（智能继承，但 Union 需要手动处理 `__typename` 和 `resolveType`）
+- 类型推断强度：<-待评分->（强大推断，`$inferType` 提供完整支持，但复杂类型需要显式指定）
 
 **优势**：
 1. **`$inferType` 工具强大**：所有类型都提供 `$inferType` 属性，类型推断完整
@@ -444,7 +444,7 @@ Pothos 采用 **Builder API + 插件化验证** 的方式实现解析器定义�
 
 #### 3.1 开发体验（代码简洁度）
 
-**得分：⭐⭐⭐⭐（代码简洁，模板代码量中等）**
+**得分：<-待评分->**
 
 **证据**：
 - **字段定义简洁**：`typescript-graphql-schemas/pothos/src/schema/user.ts`（第 31-47 行）使用 `builder.queryFields()` 定义 Query，代码结构清晰
@@ -505,7 +505,7 @@ builder.mutationFields((t) => ({
 
 #### 3.2 模块化设计（领域驱动开发支持）
 
-**得分：⭐⭐⭐⭐（支持领域模块化，提供了模块化 API）**
+**得分：<-待评分->**
 
 **证据**：
 - **按领域组织**：`typescript-graphql-schemas/pothos/src/schema/` 目录按领域拆分文件（`user.ts`, `menu.ts`, `order.ts`）
@@ -574,7 +574,7 @@ builder.mutationFields((t) => ({
 
 #### 3.3 参数定义与类型推导
 
-**得分：⭐⭐⭐⭐⭐（参数类型完全自动推断）**
+**得分：<-待评分->**
 
 **证据**：
 - **参数定义在字段中**：`typescript-graphql-schemas/pothos/src/schema/user.ts`（第 38-40 行）参数通过 `args` 对象定义在字段中
@@ -631,7 +631,7 @@ builder.mutationFields((t) => ({
 
 #### 3.4 输入验证机制
 
-**得分：⭐⭐⭐⭐（支持声明式验证，但需要额外配置）**
+**得分：<-待评分->**
 
 **证据**：
 - **插件支持验证**：`typescript-graphql-schemas/pothos/src/builder.ts`（第 24 行）安装 `ValidationPlugin`
@@ -691,7 +691,7 @@ builder.mutationFields((t) => ({
 
 #### 3.5 批量加载（DataLoader）集成
 
-**得分：⭐⭐⭐⭐（通过插件支持 dataloader，需要一些样板代码）**
+**得分：<-待评分->**
 
 **证据**：
 - **插件支持**：`typescript-graphql-schemas/pothos/src/builder.ts`（第 3、24 行）安装 `DataloaderPlugin`
@@ -736,14 +736,14 @@ builder.objectFields(Order, (t) => ({
 
 ### 解析器与验证综合评分
 
-**得分：4.0 / 5.0**（四舍五入为 **⭐⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 开发体验：4/5（代码简洁，模板代码量中等）
-- 模块化设计：4/5（支持领域模块化，提供了模块化 API）
-- 参数定义与类型推导：5/5（参数类型完全自动推断）
-- 输入验证机制：4/5（支持声明式验证，但需要额外配置）
-- 批量加载：4/5（通过插件支持 dataloader，需要一些样板代码）
+- 开发体验：<-待评分->（代码简洁，模板代码量中等）
+- 模块化设计：<-待评分->（支持领域模块化，提供了模块化 API）
+- 参数定义与类型推导：<-待评分->（参数类型完全自动推断）
+- 输入验证机制：<-待评分->（支持声明式验证，但需要额外配置）
+- 批量加载：<-待评分->（通过插件支持 dataloader，需要一些样板代码）
 
 **优势**：
 1. **参数类型完全自动推断**：Resolver 函数的参数类型完全自动推断，无需手动声明
@@ -1070,7 +1070,7 @@ class LoggingPlugin extends BasePlugin {
 
 ### 内置功能综合评分
 
-**得分：4.0 / 5.0**（**⭐⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
 - 核心功能完善：Context、Subscriptions、Custom Scalars 原生支持
@@ -1106,7 +1106,7 @@ Pothos 采用插件化架构实现生态集成。ORM 集成通过官方插件（
 
 #### 5.1 ORM 集成深度（ORM Integration Depth）
 
-**得分：⭐⭐⭐⭐⭐（深度整合）**
+**得分：<-待评分->**
 
 **证据**：
 - **Prisma 官方插件**：`pothos/packages/plugin-prisma/package.json`（第 2-4 行）提供官方插件 `@pothos/plugin-prisma`
@@ -1154,7 +1154,7 @@ builder.queryType({
 
 #### 5.2 验证库集成（Validation Library Integration）
 
-**得分：⭐⭐⭐⭐⭐（无缝集成）**
+**得分：<-待评分->**
 
 **证据**：
 - **Zod 官方插件**：`pothos/packages/plugin-zod/package.json`（第 2-4 行）提供官方插件 `@pothos/plugin-zod`
@@ -1210,7 +1210,7 @@ builder.mutationFields((t) => ({
 
 #### 5.3 GraphQL Server 兼容性（Server Compatibility）
 
-**得分：⭐⭐⭐⭐⭐（完全兼容）**
+**得分：<-待评分->**
 
 **证据**：
 - **输出标准 GraphQL Schema**：`pothos/packages/core/src/builder.ts`（第 711 行）的 `toSchema()` 方法返回标准 `GraphQLSchema` 对象
@@ -1257,7 +1257,7 @@ const server = new ApolloServer({ schema })
 
 #### 5.4 Web 框架适配（Web Framework Adapter）
 
-**得分：⭐⭐⭐⭐（主流框架支持）**
+**得分：<-待评分->**
 
 **证据**：
 - **Next.js 官方示例**：`pothos/examples/nextjs/` 提供完整的 Next.js 集成示例
@@ -1317,13 +1317,13 @@ export class AppModule {}
 
 ### 生态集成综合评分
 
-**得分：4.75 / 5.0**（四舍五入为 **⭐⭐⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- ORM 集成深度：5/5（深度整合，提供 Prisma 和 Drizzle 官方插件）
-- 验证库集成：5/5（无缝集成，提供 Zod 官方插件，验证逻辑与 Schema 定义完全合一）
-- GraphQL Server 兼容性：5/5（完全兼容，与所有主流 GraphQL Server 兼容）
-- Web 框架适配：4/5（主流框架支持，提供官方示例，但需要手动配置）
+- ORM 集成深度：<-待评分->（深度整合，提供 Prisma 和 Drizzle 官方插件）
+- 验证库集成：<-待评分->（无缝集成，提供 Zod 官方插件，验证逻辑与 Schema 定义完全合一）
+- GraphQL Server 兼容性：<-待评分->（完全兼容，与所有主流 GraphQL Server 兼容）
+- Web 框架适配：<-待评分->（主流框架支持，提供官方示例，但需要手动配置）
 
 **优势**：
 1. **ORM 深度整合**：提供 Prisma 和 Drizzle 官方插件，直接复用模型定义，类型完全同步，零样板代码
@@ -1341,14 +1341,14 @@ export class AppModule {}
 
 ### 综合评分
 
-**总分：4.4 / 5.0**（**⭐⭐⭐⭐**）
+**总分：<-待评分->**
 
 **各维度得分**：
-- 架构模式：5.0 / 5.0（⭐⭐⭐⭐⭐）
-- 类型定义：4.25 / 5.0（⭐⭐⭐⭐）
-- 解析器与验证：4.0 / 5.0（⭐⭐⭐⭐）
-- 内置功能：4.0 / 5.0（⭐⭐⭐⭐）
-- 生态集成：4.75 / 5.0（⭐⭐⭐⭐⭐）
+- 架构模式：<-待评分->
+- 类型定义：<-待评分->
+- 解析器与验证：<-待评分->
+- 内置功能：<-待评分->
+- 生态集成：<-待评分->
 
 ### 核心优势
 

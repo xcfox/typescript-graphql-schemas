@@ -14,11 +14,11 @@
 ## 📊 综合评分
 | 维度                | 得分 (1-5) | 简评                                                         |
 | :------------------ | :--------- | :----------------------------------------------------------- |
-| **1. 架构模式**     | ⭐⭐⭐ (3.0)  | Inference 模式，必须构建，深度集成 Hono                      |
-| **2. 类型定义**     | ⭐⭐⭐⭐ (4.0) | 深度推断，零配置枚举，智能接口检测                           |
-| **3. 解析器与验证** | ⭐⭐⭐ (3.4)  | 代码简洁，类型自动推断，但验证和 DataLoader 需手动实现       |
-| **4. 内置功能**     | ⭐⭐⭐ (3.0)  | Context/Middleware/Subscriptions 完善，DataLoader 无内置支持 |
-| **5. 生态集成**     | ⭐⭐ (1.5)   | ORM 基础集成，验证库无集成，框架绑定严重                     |
+| **1. 架构模式**     | <-待评分-> | Inference 模式，必须构建，深度集成 Hono                      |
+| **2. 类型定义**     | <-待评分-> | 深度推断，零配置枚举，智能接口检测                           |
+| **3. 解析器与验证** | <-待评分-> | 代码简洁，类型自动推断，但验证和 DataLoader 需手动实现       |
+| **4. 内置功能**     | <-待评分-> | Context/Middleware/Subscriptions 完善，DataLoader 无内置支持 |
+| **5. 生态集成**     | <-待评分-> | ORM 基础集成，验证库无集成，框架绑定严重                     |
 
 ---
 
@@ -54,7 +54,7 @@ pylon build  // 或 pylon dev
 
 ### 1.1 依赖复杂度 (Dependency Complexity)
 
-**评分：⭐⭐⭐ (3/5)**
+**评分：<-待评分->**
 
 **核心依赖分析**：
 - **运行时依赖**（`packages/pylon/package.json` 第 23-38 行）：
@@ -107,7 +107,7 @@ pylon build  // 或 pylon dev
 
 ### 1.2 构建流程 (Build Flow)
 
-**评分：⭐⭐⭐ (3/5)**
+**评分：<-待评分->**
 
 **构建方式**：
 - **必须运行构建命令**：`pylon build` 或 `pylon dev` 来生成 Schema（`packages/pylon-dev/src/index.ts` 第 19-37 行）
@@ -191,7 +191,7 @@ export const resolvers = {
 
 ### 1.3 配置魔法 (Config & Language Magic)
 
-**评分：⭐⭐⭐⭐ (4/5)**
+**评分：<-待评分->**
 
 **技术实现**：
 - **使用 TypeScript Compiler API**：通过静态分析 TypeScript 源码生成 Schema（`packages/pylon-builder/src/schema/builder.ts` 第 12-26 行）
@@ -268,7 +268,7 @@ export const graphql = {
 
 ### 1.4 生态集成 (Ecosystem Integration)
 
-**评分：⭐⭐⭐ (3/5)**
+**评分：<-待评分->**
 
 **集成方式**：
 - **深度集成 Hono**：`app` 就是 Hono 实例（`packages/pylon/src/app/index.ts` 第 6 行），无法更换底层框架
@@ -330,13 +330,13 @@ export default app  // 导出 Hono 应用
 
 ### 架构模式综合评分
 
-**得分：3.25 / 5.0**（四舍五入为 **⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 依赖复杂度：3/5（中等依赖，包含完整的 GraphQL Server 和 Web 框架）
-- 构建流程：3/5（显式构建，必须运行构建命令）
-- 配置魔法：4/5（极简配置，使用 TypeScript Compiler API 静态分析）
-- 生态集成：3/5（环境敏感，深度集成 Hono，无法灵活更换）
+- 依赖复杂度：<-待评分->（中等依赖，包含完整的 GraphQL Server 和 Web 框架）
+- 构建流程：<-待评分->（显式构建，必须运行构建命令）
+- 配置魔法：<-待评分->（极简配置，使用 TypeScript Compiler API 静态分析）
+- 生态集成：<-待评分->（环境敏感，深度集成 Hono，无法灵活更换）
 
 **优势**：
 1. **自动类型推断**：通过 TypeScript Compiler API 自动从源码生成 Schema，减少手动定义
@@ -393,7 +393,7 @@ export type MenuItem = Coffee | Dessert
 
 #### 2.1 单一数据源（Single Source of Truth）实现度
 
-**评分：⭐⭐⭐⭐ (4/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **TypeScript 类型是数据源**：`typescript-graphql-schemas/pylon/src/index.ts`（第 13-87 行）定义 TypeScript 类型
@@ -431,7 +431,7 @@ export interface Food {
 
 #### 2.2 枚举与字符串联合支持（Enum & String Union Types）
 
-**评分：⭐⭐⭐⭐⭐ (5/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **零配置复用**：直接支持 TypeScript 字符串联合类型，无需手动注册
@@ -487,7 +487,7 @@ enum OrderStatusInput {
 
 #### 2.3 接口继承与联合类型体验（Interface & Union）
 
-**评分：⭐⭐⭐⭐ (4/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **接口自动继承**：类实现接口时，接口字段自动继承到 GraphQL Schema
@@ -578,7 +578,7 @@ export const resolvers = {
 
 #### 2.4 类型推断强度与显式声明平衡
 
-**评分：⭐⭐⭐⭐ (4/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **函数签名自动推断**：从函数参数和返回类型自动推断 GraphQL 类型
@@ -640,13 +640,13 @@ if (firstType.isUnion() && !isPrimitive(firstType)) {
 
 ### 类型定义综合评分
 
-**得分：4.25 / 5.0**（四舍五入为 **⭐⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 单一数据源：4/5（深度推断，但验证逻辑需要手动实现）
-- 枚举与字符串联合：5/5（零配置复用，完全自动）
-- 接口继承与联合类型：4/5（智能继承，但需要字段检查）
-- 类型推断强度：4/5（强大推断，但需要显式类型标记）
+- 单一数据源：<-待评分->（深度推断，但验证逻辑需要手动实现）
+- 枚举与字符串联合：<-待评分->（零配置复用，完全自动）
+- 接口继承与联合类型：<-待评分->（智能继承，但需要字段检查）
+- 类型推断强度：<-待评分->（强大推断，但需要显式类型标记）
 
 **优势**：
 1. **完全自动推断**：从 TypeScript 类型自动生成 GraphQL Schema，无需手动定义
@@ -704,7 +704,7 @@ export class User {
 
 #### 3.1 开发体验（代码简洁度）
 
-**评分：⭐⭐⭐⭐ (4/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **函数式定义**：`typescript-graphql-schemas/pylon/src/index.ts`（第 227-270 行）直接使用函数定义 Resolver，代码极简
@@ -762,7 +762,7 @@ export class User {
 
 #### 3.2 模块化设计（领域驱动开发支持）
 
-**评分：⭐⭐⭐ (3/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **按操作类型组织**：所有 Resolver 都在一个 `graphql` 对象中，按 Query/Mutation 组织（`typescript-graphql-schemas/pylon/src/index.ts` 第 227-398 行）
@@ -808,7 +808,7 @@ export const graphql = {
 
 #### 3.3 参数定义与类型推导
 
-**评分：⭐⭐⭐⭐⭐ (5/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **参数类型完全自动推断**：从函数签名自动推断 GraphQL 参数类型（`packages/pylon/src/define-pylon.ts` 第 218-235 行）
@@ -858,7 +858,7 @@ type Mutation {
 
 #### 3.4 输入验证机制
 
-**评分：⭐⭐⭐ (3/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **装饰器验证**：使用 `createDecorator` 实现验证（`packages/pylon/src/create-decorator.ts` 第 3-68 行）
@@ -932,7 +932,7 @@ const validateCreateOrder = createDecorator(async (userId: Int, items: Int[]) =>
 
 #### 3.5 批量加载（DataLoader）集成
 
-**评分：⭐⭐ (2/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **需要手动创建 DataLoader**：DataLoader 需要手动创建和配置（`typescript-graphql-schemas/pylon/src/index.ts` 第 174-213 行）
@@ -984,14 +984,14 @@ export class User {
 
 ### 解析器与验证综合评分
 
-**得分：3.4 / 5.0**（四舍五入为 **⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 开发体验：4/5（代码简洁，但 DataLoader 需要手动集成）
-- 模块化设计：3/5（无模块化考虑，完全按操作类型组织）
-- 参数定义与类型推导：5/5（参数类型完全自动推断）
-- 输入验证机制：3/5（支持验证，但需要手动编写验证逻辑）
-- 批量加载（DataLoader）集成：2/5（无内置支持，需要大量样板代码）
+- 开发体验：<-待评分->（代码简洁，但 DataLoader 需要手动集成）
+- 模块化设计：<-待评分->（无模块化考虑，完全按操作类型组织）
+- 参数定义与类型推导：<-待评分->（参数类型完全自动推断）
+- 输入验证机制：<-待评分->（支持验证，但需要手动编写验证逻辑）
+- 批量加载（DataLoader）集成：<-待评分->（无内置支持，需要大量样板代码）
 
 **优势**：
 1. **代码极简**：函数式定义，几乎无样板代码
@@ -1292,18 +1292,18 @@ export const config: PylonConfig = {
 
 ### 内置功能综合评分
 
-**得分：3.0 / 5.0**（四舍五入为 **⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 指令支持：2/5（插件/额外实现）
-- 扩展支持：2/5（插件/额外实现）
-- 批量加载：1/5（无法实现）
-- 自定义标量：5/5（内置支持）
-- 订阅：5/5（内置支持）
-- 上下文注入：5/5（内置支持）
-- 中间件：5/5（内置支持）
-- 查询复杂度分析：2/5（插件/额外实现）
-- 深度限制：2/5（插件/额外实现）
+- 指令支持：<-待评分->（插件/额外实现）
+- 扩展支持：<-待评分->（插件/额外实现）
+- 批量加载：<-待评分->（无法实现）
+- 自定义标量：<-待评分->（内置支持）
+- 订阅：<-待评分->（内置支持）
+- 上下文注入：<-待评分->（内置支持）
+- 中间件：<-待评分->（内置支持）
+- 查询复杂度分析：<-待评分->（插件/额外实现）
+- 深度限制：<-待评分->（插件/额外实现）
 
 **优势**：
 1. **Context 注入完善**：原生支持上下文注入，类型推导完善
@@ -1327,7 +1327,7 @@ Pylon 通过深度集成 Hono 和 GraphQL Yoga，提供了良好的运行时兼�
 
 #### 5.1 ORM 集成深度（ORM Integration Depth）
 
-**评分：⭐⭐⭐ (3/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **支持 Prisma**：官方文档（`docs/pages/docs/integrations/databases.mdx`）推荐使用 Prisma，提供了详细的集成指南
@@ -1398,7 +1398,7 @@ export const graphql = {
 
 #### 5.2 验证库集成（Validation Library Integration）
 
-**评分：⭐ (1/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **无验证库集成**：`packages/pylon/src` 中没有找到 Zod、Valibot、Yup 等验证库的集成
@@ -1432,7 +1432,7 @@ createUser: validateEmail((name: string, email: string): User => {
 
 #### 5.3 GraphQL Server 兼容性（Server Compatibility）
 
-**评分：⭐ (1/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **绑定 GraphQL Yoga**：`packages/pylon/src/app/handler/pylon-handler.ts`（第 8 行）使用 `createYoga` 创建 GraphQL Server
@@ -1466,7 +1466,7 @@ const yoga = createYoga({
 
 #### 5.4 Web 框架适配（Web Framework Adapter）
 
-**评分：⭐ (1/5)**
+**评分：<-待评分->**
 
 **证据**：
 - **绑定 Hono**：`packages/pylon/src/app/index.ts`（第 6 行）`app` 是 Hono 实例，无法更换
@@ -1510,13 +1510,13 @@ app.use('*', async (c, next) => {
 
 ### 生态集成综合评分
 
-**得分：1.5 / 5.0**（四舍五入为 **⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- ORM 集成深度：3/5（基础集成，支持 Prisma 和 Drizzle，但需要手动集成）
-- 验证库集成：1/5（无集成，需要手动实现验证逻辑）
-- GraphQL Server 兼容性：1/5（绑定 GraphQL Yoga，无法更换）
-- Web 框架适配：1/5（绑定 Hono，无法更换）
+- ORM 集成深度：<-待评分->（基础集成，支持 Prisma 和 Drizzle，但需要手动集成）
+- 验证库集成：<-待评分->（无集成，需要手动实现验证逻辑）
+- GraphQL Server 兼容性：<-待评分->（绑定 GraphQL Yoga，无法更换）
+- Web 框架适配：<-待评分->（绑定 Hono，无法更换）
 
 **优势**：
 1. **ORM 支持良好**：官方推荐 Prisma，提供集成指南和 `prisma-extended-models` 包
@@ -1532,7 +1532,7 @@ app.use('*', async (c, next) => {
 
 ### 综合评分
 
-**总分：2.98 / 5.0**（平均分）
+**总分：<-待评分->**
 
 Pylon 是一个采用 Inference（自动推断）模式的 GraphQL Schema 构建框架，通过 TypeScript Compiler API 静态分析源码自动生成 GraphQL Schema。框架在类型定义方面表现优秀，支持深度推断和零配置枚举，但在生态集成方面存在明显短板，强制绑定 Hono 和 GraphQL Yoga，验证库无集成。
 

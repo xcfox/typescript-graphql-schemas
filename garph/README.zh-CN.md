@@ -14,11 +14,11 @@
 ## 📊 综合评分
 | 维度                | 得分 (1-5) | 简评                                       |
 | :------------------ | :--------- | :----------------------------------------- |
-| **1. 架构模式**     | ⭐⭐⭐⭐ (4.0) | Builder 模式，零魔法，即写即用，依赖轻量   |
-| **2. 类型定义**     | ⭐⭐⭐⭐ (4.0) | 深度推断，智能继承，枚举灵活，Union 需手动 |
-| **3. 解析器与验证** | ⭐⭐⭐ (3.4)  | 参数自动推断，DataLoader 原生，无内置验证  |
-| **4. 内置功能**     | ⭐⭐⭐ (3.0)  | 核心功能完善，高级功能缺失，安全功能不足   |
-| **5. 生态集成**     | ⭐⭐⭐ (2.75) | 标准兼容，ORM/验证集成弱，无官方适配器     |
+| **1. 架构模式**     | <-待评分-> | Builder 模式，零魔法，即写即用，依赖轻量   |
+| **2. 类型定义**     | <-待评分-> | 深度推断，智能继承，枚举灵活，Union 需手动 |
+| **3. 解析器与验证** | <-待评分-> | 参数自动推断，DataLoader 原生，无内置验证  |
+| **4. 内置功能**     | <-待评分-> | 核心功能完善，高级功能缺失，安全功能不足   |
+| **5. 生态集成**     | <-待评分-> | 标准兼容，ORM/验证集成弱，无官方适配器     |
 
 ---
 
@@ -54,7 +54,7 @@ const schema = buildSchema({ g, resolvers })
 
 #### 1.1 依赖复杂度 (Dependency Complexity)
 
-**得分：⭐⭐⭐⭐（轻量依赖）**
+**得分：<-待评分->**
 
 **证据**：
 - **运行时依赖**（`garph/package.json` 第 30-33 行）：
@@ -70,7 +70,7 @@ const schema = buildSchema({ g, resolvers })
 
 #### 1.2 构建流程 (Build Flow)
 
-**得分：⭐⭐⭐⭐⭐（即写即用）**
+**得分：<-待评分->**
 
 **证据**：
 - **纯运行时构建**：`garph/src/schema.ts`（第 17-21 行）的 `buildSchema()` 函数在运行时执行
@@ -92,7 +92,7 @@ const yoga = createYoga({ schema })
 
 #### 1.3 配置魔法 (Config & Language Magic)
 
-**得分：⭐⭐⭐⭐⭐（零魔法）**
+**得分：<-待评分->**
 
 **证据**：
 - **无装饰器**：所有类型定义使用函数调用，如 `g.type()`, `g.string()`
@@ -120,7 +120,7 @@ type User = Infer<typeof UserType>
 
 #### 1.4 生态集成 (Ecosystem Integration)
 
-**得分：⭐⭐⭐⭐（良好集成）**
+**得分：<-待评分->**
 
 **证据**：
 - **标准安装**：`npm install garph` 即可使用，无特殊要求
@@ -136,13 +136,13 @@ type User = Infer<typeof UserType>
 
 ### 架构模式综合评分
 
-**得分：4.5 / 5.0**（四舍五入为 **⭐⭐⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 依赖复杂度：4/5（轻量依赖，但 `graphql-compose` 增加体积）
-- 构建流程：5/5（即写即用，零构建步骤）
-- 配置魔法：5/5（零魔法，完全原生 TypeScript）
-- 生态集成：4/5（良好集成，标准兼容）
+- 依赖复杂度：<-待评分->（轻量依赖，但 `graphql-compose` 增加体积）
+- 构建流程：<-待评分->（即写即用，零构建步骤）
+- 配置魔法：<-待评分->（零魔法，完全原生 TypeScript）
+- 生态集成：<-待评分->（良好集成，标准兼容）
 
 **优势**：
 1. **零配置启动**：无需装饰器、反射或代码生成，开箱即用
@@ -169,7 +169,7 @@ Garph 采用 **Builder API + 类型推断** 的方式实现类型定义。Schema
 
 #### 2.1 单一数据源（Single Source of Truth）实现度
 
-**得分：⭐⭐⭐⭐（深度推断）**
+**得分：<-待评分->**
 
 **证据**：
 - **Schema 定义即数据源**：`typescript-graphql-schemas/garph/src/schema.ts`（第 23-66 行）通过 `g.type()` 等方法定义 Schema
@@ -202,7 +202,7 @@ const schema = buildSchema({ g, resolvers })
 
 #### 2.2 枚举与字符串联合支持（Enum & String Union Types）
 
-**得分：⭐⭐⭐⭐（轻量映射）**
+**得分：<-待评分->**
 
 **证据**：
 - **`as const` 数组支持**：`typescript-graphql-schemas/garph/src/schema.ts`（第 15-19 行）使用 `g.enumType('OrderStatus', ['PENDING', 'COMPLETED', 'CANCELLED'] as const)`
@@ -234,7 +234,7 @@ g.enumType('Fruits', Fruits)
 
 #### 2.3 接口继承与联合类型体验（Interface & Union）
 
-**得分：⭐⭐⭐⭐（智能继承）**
+**得分：<-待评分->**
 
 **证据**：
 - **接口字段自动继承**：`typescript-graphql-schemas/garph/src/schema.ts`（第 34-51 行）展示接口实现
@@ -292,7 +292,7 @@ createCoffee: (_, { name, price, sugarLevel, origin }) => {
 
 #### 2.4 类型推断强度与显式声明平衡
 
-**得分：⭐⭐⭐⭐（强大推断）**
+**得分：<-待评分->**
 
 **证据**：
 - **自动推断基础类型**：`garph/src/index.ts`（第 108-118 行）的 `InferShallow` 自动处理 String、Int、Float、Boolean、ID、Enum 等基础类型
@@ -343,13 +343,13 @@ const resolvers: InferResolvers<
 
 ### 类型定义综合评分
 
-**得分：4.0 / 5.0**（⭐⭐⭐⭐）
+**得分：<-待评分->**
 
 **评分依据**：
-- SSOT 实现度：4/5（深度推断，但验证逻辑分离）
-- 枚举支持：4/5（轻量映射，但需要 `as const`）
-- 接口继承：4/5（智能继承，但 Union 需要手动处理）
-- 类型推断强度：4/5（强大推断，但需要显式类型注解）
+- SSOT 实现度：<-待评分->（深度推断，但验证逻辑分离）
+- 枚举支持：<-待评分->（轻量映射，但需要 `as const`）
+- 接口继承：<-待评分->（智能继承，但 Union 需要手动处理）
+- 类型推断强度：<-待评分->（强大推断，但需要显式类型注解）
 
 **优势**：
 1. **类型推断强大**：从 Schema 定义自动推断 TypeScript 类型，支持复杂场景
@@ -376,7 +376,7 @@ Garph 的 Resolver 定义采用 **显式类型注解 + 自动类型推断** 的�
 
 #### 3.1 开发体验（代码简洁度）
 
-**得分：⭐⭐⭐⭐（代码简洁）**
+**得分：<-待评分->**
 
 **证据**：
 - **Resolver 定义简洁**：`typescript-graphql-schemas/garph/src/schema.ts`（第 161-178 行）Query Resolver 定义直观
@@ -424,7 +424,7 @@ const resolvers: InferResolvers<
 
 #### 3.2 模块化设计（领域驱动开发支持）
 
-**得分：⭐⭐⭐（无模块化考虑）**
+**得分：<-待评分->**
 
 **证据**：
 - **按操作类型组织**：`typescript-graphql-schemas/garph/src/schema.ts`（第 152-304 行）所有 Resolver 都在一个对象中，按 `Query`、`Mutation`、`User`、`Order` 组织
@@ -469,7 +469,7 @@ const resolvers: InferResolvers<...> = {
 
 #### 3.3 参数定义与类型推导
 
-**得分：⭐⭐⭐⭐（参数类型大部分自动推断）**
+**得分：<-待评分->**
 
 **证据**：
 - **参数定义在字段中**：`typescript-graphql-schemas/garph/src/schema.ts`（第 80-82 行）参数通过 `.args()` 定义在字段中
@@ -504,7 +504,7 @@ const resolvers: InferResolvers<{ Query: typeof queryType }, {}> = {
 
 #### 3.4 输入验证机制
 
-**得分：⭐⭐（无内置验证，需要完全手动实现）**
+**得分：<-待评分->**
 
 **证据**：
 - **无内置验证**：`typescript-graphql-schemas/garph/src/schema.ts`（第 181、192、250-260 行）所有验证逻辑都需要手动编写
@@ -554,7 +554,7 @@ const username = g.scalarType<string, string>('Username', {
 
 #### 3.5 批量加载（DataLoader）集成
 
-**得分：⭐⭐⭐⭐⭐（原生内置支持，无缝调用）**
+**得分：<-待评分->**
 
 **证据**：
 - **原生内置支持**：`garph/src/schema.ts`（第 193-220 行）的 `addResolver` 函数自动处理 `load` 和 `loadBatch` 方法
@@ -598,14 +598,14 @@ const resolvers: InferResolvers<{ Query: typeof queryType, Dog: typeof Dog }, {}
 
 ### 解析器与验证综合评分
 
-**得分：3.4 / 5.0**（四舍五入为 **⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- 开发体验：4/5（代码简洁，但需要显式类型注解）
-- 模块化设计：3/5（无模块化考虑，按操作类型组织）
-- 参数定义与类型推导：4/5（参数类型大部分自动推断）
-- 输入验证机制：2/5（无内置验证，需要完全手动实现）
-- DataLoader 集成：5/5（原生内置支持，无缝调用）
+- 开发体验：<-待评分->（代码简洁，但需要显式类型注解）
+- 模块化设计：<-待评分->（无模块化考虑，按操作类型组织）
+- 参数定义与类型推导：<-待评分->（参数类型大部分自动推断）
+- 输入验证机制：<-待评分->（无内置验证，需要完全手动实现）
+- DataLoader 集成：<-待评分->（原生内置支持，无缝调用）
 
 **优势**：
 1. **参数类型自动推断**：通过 `InferResolvers` 自动推断参数类型，IDE 支持完善
@@ -833,7 +833,7 @@ const yoga = createYoga({ schema, context })
 
 ### 内置功能综合评分
 
-**得分：3.0 / 5.0**（⭐⭐⭐）
+**得分：<-待评分->**
 
 **评分依据**：
 - 核心功能支持良好：Context、DataLoader、Subscriptions、Custom Scalars 都提供原生支持
@@ -860,7 +860,7 @@ Garph 采用 **标准 GraphQL Schema 输出 + 手动集成** 的策略。通过 
 
 #### 5.1 ORM 集成深度（ORM Integration Depth）
 
-**得分：⭐⭐（弱集成）**
+**得分：<-待评分->**
 
 **证据**：
 - **无官方插件**：未找到 Prisma、Drizzle、TypeORM 等 ORM 的官方插件
@@ -893,7 +893,7 @@ const resolvers: InferResolvers<...> = {
 
 #### 5.2 验证库集成（Validation Library Integration）
 
-**得分：⭐⭐（弱集成）**
+**得分：<-待评分->**
 
 **证据**：
 - **支持 Zod，但需手动集成**：`garph/www/docs/advanced/validation.md`（第 35-70 行）展示使用 Zod 验证，但需要在 Scalar 的 `parseValue` 中手动调用
@@ -924,7 +924,7 @@ const username = g.scalarType<string, string>('Username', {
 
 #### 5.3 GraphQL Server 兼容性（Server Compatibility）
 
-**得分：⭐⭐⭐⭐（标准兼容）**
+**得分：<-待评分->**
 
 **证据**：
 - **输出标准 GraphQL Schema**：`garph/src/schema.ts`（第 17-21 行）的 `buildSchema()` 函数输出标准 `GraphQLSchema`
@@ -951,7 +951,7 @@ const server = new ApolloServer({ schema })  // Apollo Server
 
 #### 5.4 Web 框架适配（Web Framework Adapter）
 
-**得分：⭐⭐⭐（标准集成）**
+**得分：<-待评分->**
 
 **证据**：
 - **通过 GraphQL Server 集成**：`garph/www/docs/integration/examples/nextjs.md` 展示通过 graphql-yoga 集成到 Next.js
@@ -977,13 +977,13 @@ server.listen(4000, () => {
 
 ### 生态集成综合评分
 
-**得分：2.75 / 5.0**（四舍五入为 **⭐⭐⭐**）
+**得分：<-待评分->**
 
 **评分依据**：
-- ORM 集成深度：2/5（弱集成，需要大量胶水代码）
-- 验证库集成：2/5（弱集成，需要大量样板代码）
-- GraphQL Server 兼容性：4/5（标准兼容，但需要手动适配）
-- Web 框架适配：3/5（标准集成，但需要手动配置）
+- ORM 集成深度：<-待评分->（弱集成，需要大量胶水代码）
+- 验证库集成：<-待评分->（弱集成，需要大量样板代码）
+- GraphQL Server 兼容性：<-待评分->（标准兼容，但需要手动适配）
+- Web 框架适配：<-待评分->（标准集成，但需要手动配置）
 
 **优势**：
 1. **标准兼容**：输出标准 GraphQL Schema，可以与任何 GraphQL Server 集成
@@ -1000,14 +1000,14 @@ server.listen(4000, () => {
 
 ### 综合评分
 
-**总分：3.43 / 5.0**（⭐⭐⭐）
+**总分：<-待评分->**
 
 **各维度得分**：
-- 架构模式：4.0 / 5.0（⭐⭐⭐⭐）
-- 类型定义：4.0 / 5.0（⭐⭐⭐⭐）
-- 解析器与验证：3.4 / 5.0（⭐⭐⭐）
-- 内置功能：3.0 / 5.0（⭐⭐⭐）
-- 生态集成：2.75 / 5.0（⭐⭐⭐）
+- 架构模式：<-待评分->
+- 类型定义：<-待评分->
+- 解析器与验证：<-待评分->
+- 内置功能：<-待评分->
+- 生态集成：<-待评分->
 
 ### 核心优势
 

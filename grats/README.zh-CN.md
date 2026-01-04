@@ -16,7 +16,7 @@
 | :------------------ | :--------- | :----------------------------------------------------------------- |
 | **1. 架构模式**     | **3.5**    | 轻量依赖，使用标准 JSDoc 注释，但需要构建步骤，配置略显复杂        |
 | **2. 类型定义**     | **4.5**    | 完全支持原生 TypeScript 语法，强大的类型推断，接口字段自动继承     |
-| **3. 解析器与验证** | <-待评分-> | 函数式 API 简洁，参数类型自动推断，但无内置验证和 DataLoader       |
+| **3. 解析器与验证** | **2.8**    | 函数式 API 简洁，参数类型自动推断，但无内置验证和 DataLoader       |
 | **4. 内置功能**     | <-待评分-> | 核心功能完善（Directives、Scalars、Subscriptions），但高级功能缺失 |
 | **5. 生态集成**     | <-待评分-> | GraphQL Server 兼容性极佳，但 ORM 和验证库需要手动集成             |
 
@@ -602,7 +602,7 @@ Grats 的 Resolver 定义采用 **函数式 API + JSDoc 注释** 的方式。所
 
 ### 3.1 开发体验（代码简洁度）
 
-**评分：<-待评分->**
+**评分：4.0**
 
 **证据**：
 - **函数式 API**：`typescript-graphql-schemas/grats/src/models/user.ts` 中的 Resolver 都是普通函数
@@ -654,7 +654,7 @@ export function createUser(name: string, email: string): User {
 
 ### 3.2 模块化设计（领域驱动开发支持）
 
-**评分：<-待评分->**
+**评分：4.0**
 
 **证据**：
 - **按领域组织**：`typescript-graphql-schemas/grats/src/models/` 目录按领域模块组织（`user.ts`、`menu.ts`、`order.ts`）
@@ -706,7 +706,7 @@ export function createUser(name: string, email: string): User { ... }
 
 ### 3.3 参数定义与类型推导
 
-**评分：<-待评分->**
+**评分：4.0**
 
 **证据**：
 - **参数类型自动推断**：`typescript-graphql-schemas/grats/src/models/user.ts` 第 28 行的 `user(id: Int)` 中，`id` 类型自动推断为 `Int`
@@ -783,7 +783,7 @@ export function currentUser(vc: VC): User {
 
 ### 3.4 输入验证机制
 
-**评分：<-待评分->**
+**评分：2.0**
 
 **证据**：
 - **无内置验证**：`typescript-graphql-schemas/grats/src/models/user.ts`（第 43-44、58-60 行）所有验证逻辑都需要手动编写
@@ -847,7 +847,7 @@ export function createOrder(userId: Int, items: Int[]): Order {
 
 ### 3.5 批量加载（DataLoader）集成
 
-**评分：<-待评分->**
+**评分：0.0**
 
 **证据**：
 - **无内置 DataLoader 支持**：框架源码中未找到 DataLoader 相关实现
@@ -900,7 +900,7 @@ export function user(post: Post, vc: VC): User {
 
 #### 3.1 开发体验（代码简洁度）
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **理由**：
 - 函数式 API 简洁直观，符合 TypeScript 最佳实践
@@ -910,7 +910,7 @@ export function user(post: Post, vc: VC): User {
 
 #### 3.2 模块化设计（领域驱动开发支持）
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **理由**：
 - 支持按领域模块组织代码，类型定义和 Resolver 在同一模块中
@@ -920,7 +920,7 @@ export function user(post: Post, vc: VC): User {
 
 #### 3.3 参数定义与类型推导
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **理由**：
 - 参数类型大部分自动推断：通过 TypeScript 类型系统自动推断参数类型
@@ -930,7 +930,7 @@ export function user(post: Post, vc: VC): User {
 
 #### 3.4 输入验证机制
 
-**得分：<-待评分->**
+**得分：2.0**
 
 **理由**：
 - 无内置验证：所有验证逻辑都需要手动编写
@@ -940,7 +940,7 @@ export function user(post: Post, vc: VC): User {
 
 #### 3.5 批量加载（DataLoader）集成
 
-**得分：<-待评分->**
+**得分：0.0**
 
 **理由**：
 - 无内置支持：框架不提供任何 DataLoader 相关的 API 或工具
@@ -950,7 +950,7 @@ export function user(post: Post, vc: VC): User {
 
 ### 综合评分
 
-**解析器与验证总分：<-待评分->**
+**解析器与验证总分：2.8**
 
 **优势**：
 - 函数式 API 简洁直观，符合 TypeScript 最佳实践

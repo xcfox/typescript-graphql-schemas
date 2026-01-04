@@ -16,7 +16,7 @@
 | :------------------ | :--------- | :------------------------------------------------------ |
 | **1. 架构模式**     | **3.0** | 装饰器模式，中等依赖，轻量构建，特性依赖，良好集成      |
 | **2. 类型定义**     | **2.0** | 逻辑关联，显式注册，逻辑决议，强力绑定，大量显式声明    |
-| **3. 解析器与验证** | <-待评分-> | 天然领域模块化，但大量显式声明，DataLoader 无内置支持   |
+| **3. 解析器与验证** | **2.6**    | 天然领域模块化，但大量显式声明，DataLoader 无内置支持   |
 | **4. 内置功能**     | <-待评分-> | 核心功能完善，但 DataLoader 和深度限制无内置支持        |
 | **5. 生态集成**     | <-待评分-> | GraphQL Server 完全兼容，验证库深度集成，ORM 需手动配置 |
 
@@ -596,7 +596,7 @@ TypeGraphQL 采用 **装饰器 + 类方法** 的方式实现解析器定义。Re
 
 #### 3.1 开发体验（代码简洁度）
 
-**得分：<-待评分->**
+**得分：2.0**
 
 **证据**：
 - **需要大量装饰器**：每个参数都需要 `@Arg()` 装饰器，每个方法都需要 `@Query()` 或 `@Mutation()` 装饰器
@@ -653,7 +653,7 @@ createUser(@Args(() => CreateUserArgs) { name, email }: CreateUserArgs): User {
 
 #### 3.2 模块化设计（领域驱动开发支持）
 
-**得分：<-待评分->**
+**得分：5.0**
 
 **证据**：
 - **按 Resolver 类组织**：`typescript-graphql-schemas/typegraphql/src/resolvers/` 目录按领域拆分文件（`user.resolver.ts`, `menu.resolver.ts`, `order.resolver.ts`）
@@ -701,7 +701,7 @@ export class MenuResolver {
 
 #### 3.3 参数定义与类型推导
 
-**得分：<-待评分->**
+**得分：2.0**
 
 **证据**：
 - **每个参数都需要显式类型函数**：`typescript-graphql-schemas/typegraphql/src/resolvers/menu.resolver.ts`（第 47-50 行）每个参数都需要 `@Arg('name', () => String)` 显式声明类型
@@ -753,7 +753,7 @@ createUser(@Args(() => CreateUserArgs) { name, email }: CreateUserArgs): User {
 
 #### 3.4 输入验证机制
 
-**得分：<-待评分->**
+**得分：4.0**
 
 **证据**：
 - **支持 class-validator 装饰器**：`typescript-graphql-schemas/typegraphql/src/resolvers/user.resolver.ts`（第 30 行）使用 `@IsEmail()` 装饰器进行验证
@@ -853,7 +853,7 @@ export async function validateArg(
 
 #### 3.5 批量加载（DataLoader）集成
 
-**得分：<-待评分->**
+**得分：0.0**
 
 **证据**：
 - **需要手动创建 DataLoader 实例**：`typescript-graphql-schemas/typegraphql/src/context.ts`（第 11-23 行）需要手动创建 DataLoader 实例
@@ -903,14 +903,14 @@ async orders(@Root() user: User, @Ctx() { loaders }: MyContext): Promise<Order[]
 
 ### 解析器与验证综合评分
 
-**得分：<-待评分->**
+**得分：2.6**
 
 **评分依据**：
-- 开发体验：<-待评分->（代码量中等，模板代码较多）
-- 模块化设计：<-待评分->（天然领域模块化，强制按领域组织）
-- 参数定义与类型推导：<-待评分->（参数类型需要大量显式声明，类型推导有限）
-- 输入验证机制：<-待评分->（支持声明式验证，但需要额外配置）
-- 批量加载（DataLoader）集成：<-待评分->（没有提供任何内置的 dataloader 支持）
+- 开发体验：2.0（代码量中等，模板代码较多）
+- 模块化设计：5.0（天然领域模块化，强制按领域组织）
+- 参数定义与类型推导：2.0（参数类型需要大量显式声明，类型推导有限）
+- 输入验证机制：4.0（支持声明式验证，但需要额外配置）
+- 批量加载（DataLoader）集成：0.0（没有提供任何内置的 dataloader 支持）
 
 **优势**：
 1. **天然领域模块化**：通过 Resolver 类创建明确的模块边界，类型定义、Query、Mutation、Field Resolver 都在同一模块中

@@ -1,4 +1,4 @@
-# Pylon 评估报告 (2026)
+# Pylon 评估报告 (2026 年 1 月)
 
 > 本报告基于实际业务代码 (`typescript-graphql-schemas/pylon/src`) 及官方示例 (`@pylon/examples`) 生成。
 

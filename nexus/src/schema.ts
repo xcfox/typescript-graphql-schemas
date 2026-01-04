@@ -3,23 +3,8 @@ import { DateTimeResolver } from 'graphql-scalars'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// Import all schema modules
-import './schema/user.ts'
-import './schema/menu.ts'
-import './schema/order.ts'
-
-// Import query and mutation extensions
-import { UserQuery, UserMutation } from './schema/user.ts'
-import {
-  MenuQuery,
-  MenuMutation,
-  Food,
-  Coffee,
-  Dessert,
-  MenuItem,
-  SugarLevel,
-} from './schema/menu.ts'
-import { OrderQuery, OrderMutation } from './schema/order.ts'
+// Import all schema types and extensions from schema/index.ts
+import * as allTypes from './schema/index.ts'
 
 // DateTime scalar
 const DateTime = scalarType({
@@ -53,22 +38,12 @@ const Mutation = mutationType({
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 export const schema = makeSchema({
-  types: [
+  types: {
     DateTime,
     Query,
     Mutation,
-    UserQuery,
-    UserMutation,
-    Food,
-    Coffee,
-    Dessert,
-    MenuItem,
-    SugarLevel,
-    MenuQuery,
-    MenuMutation,
-    OrderQuery,
-    OrderMutation,
-  ],
+    ...allTypes,
+  },
   outputs: {
     schema: join(__dirname, '../schema.graphql'),
     typegen: join(__dirname, './nexus-typegen.d.ts'),

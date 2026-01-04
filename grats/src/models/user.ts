@@ -36,6 +36,8 @@ export function orders(user: User): Order[] {
   return getOrdersByUserId(user.id)
 }
 
+// --- Mutations ---
+
 /** @gqlMutationField */
 export function createUser(name: string, email: string): User {
   if (!email.includes('@')) {

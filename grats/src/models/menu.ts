@@ -1,25 +1,13 @@
 import { MENU_ITEMS, incrementId } from '@coffee-shop/shared'
 import { GraphQLError } from 'graphql'
 import type { Int, Float } from 'grats'
+import type { Food } from '../interfaces/Food.ts'
 
 /**
  * Sugar level for coffee
  * @gqlEnum
  */
 export type SugarLevel = 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH'
-
-/**
- * Food interface with common fields
- * @gqlInterface
- */
-export interface Food {
-  /** @gqlField */
-  id: Int
-  /** @gqlField */
-  name: string
-  /** @gqlField */
-  price: Float
-}
 
 /**
  * Coffee menu item
@@ -97,6 +85,8 @@ export function menuItem(id: Int): MenuItem | null {
   if (!item) throw new GraphQLError('Menu item not found')
   return item
 }
+
+// --- Mutations ---
 
 /** @gqlMutationField */
 export function createCoffee(

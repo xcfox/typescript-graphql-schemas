@@ -4,7 +4,7 @@
  */
 
 import type { GqlScalar } from "grats";
-import type { DateTime as DateTimeInternal } from "./models/scalars.ts";
+import type { DateTime as DateTimeInternal } from "./graphql/CustomScalars.ts";
 import { GraphQLSchema, GraphQLObjectType, GraphQLList, GraphQLNonNull, GraphQLUnionType, GraphQLInt, GraphQLString, GraphQLFloat, GraphQLEnumType, GraphQLInterfaceType, GraphQLScalarType } from "graphql";
 import { menu as queryMenuResolver, menuItem as queryMenuItemResolver, createCoffee as mutationCreateCoffeeResolver, createDessert as mutationCreateDessertResolver, deleteMenuItem as mutationDeleteMenuItemResolver, updateCoffee as mutationUpdateCoffeeResolver, updateDessert as mutationUpdateDessertResolver } from "./models/menu.ts";
 import { items as orderItemsResolver, user as orderUserResolver, order as queryOrderResolver, orders as queryOrdersResolver, ordersByStatus as queryOrdersByStatusResolver, createOrder as mutationCreateOrderResolver, deleteOrder as mutationDeleteOrderResolver, updateOrder as mutationUpdateOrderResolver } from "./models/order.ts";

@@ -5,7 +5,7 @@ import type { User } from './user.ts'
 import { menuMap } from './menu.ts'
 import type { MenuItem } from './menu.ts'
 import type { Int } from 'grats'
-import type { DateTime } from './scalars.ts'
+import type { DateTime } from '../graphql/CustomScalars.ts'
 
 /**
  * Order status
@@ -70,6 +70,8 @@ export function items(order: Order): MenuItem[] {
     return item
   })
 }
+
+// --- Mutations ---
 
 /** @gqlMutationField */
 export function createOrder(userId: Int, items: Int[]): Order {

@@ -1,141 +1,149 @@
-# GQTX 评估报告
+# gqtx 评估报告
 
-## 📋 基本信息
+## 概述
 
-- **仓库地址**: [https://github.com/sikanhe/gqtx](https://github.com/sikanhe/gqtx)
-- **首次 Release**: 2019-10-14 (v0.1.0)
-- **最新 Release**: 2023-12-05 (v0.9.3)
+`gqtx` 是一个轻量级的 TypeScript GraphQL Schema 构建库，它在 `graphql-js` 之上提供了一层类型安全的抽象。本报告将从 5 个核心技术维度对 gqtx 进行全面评估。
 
-## 📐 对比维度解析
+---
 
-在评估 GraphQL Schema 构建库时，我们主要关注以下 6 个核心技术维度。这些维度直接影响开发者的编码体验（DX）、代码的可维护性以及运行时的性能。
+## 1. 架构模式
 
-### 1. 架构模式
+### 1.1 架构类型
 
-**评估结果：Builder（构建器）模式**
+gqtx 采用 **Builder（构建器）模式**，通过函数式 API 显式构建 GraphQL Schema 的中间表示（Intermediate Representation），然后在运行时将其转换为标准的 `graphql-js` Schema。
 
-GQTX 采用典型的 **Builder（构建器）模式**，通过函数式 API 显式构建类型定义。
+### 1.2 Schema 构建过程
 
-#### 实现方式
+gqtx 的 Schema 构建分为两个阶段：
 
-- **类型定义**：使用 `Gql.Object<T>()`、`Gql.Field()`、`Gql.Enum()` 等函数式 API 定义类型
-  ```typescript
-  export const UserType = Gql.Object<User>({
-    name: 'User',
-    fields: () => [
-      Gql.Field({ name: 'id', type: Gql.NonNull(Gql.Int) }),
-      Gql.Field({ name: 'name', type: Gql.NonNull(Gql.String) }),
-      Gql.Field({ name: 'email', type: Gql.NonNull(Gql.String) }),
-    ],
-  })
-  ```
-- **Schema 构建**：通过 `buildGraphQLSchema()` 组装最终的可执行 GraphQL Schema
-  ```typescript
-  export const schema = buildGraphQLSchema({
-    query: Query,
-    mutation: Mutation,
-  })
-  ```
+1. **定义阶段**：使用 `Gql` 命名空间下的辅助函数（如 `Gql.Object`、`Gql.Field`、`Gql.Enum` 等）创建类型安全的中间表示
+2. **构建阶段**：调用 `buildGraphQLSchema()` 将中间表示转换为 `graphql.GraphQLSchema` 实例
 
-#### 优势
+核心构建逻辑位于 `build.ts`：
 
-- ✅ **无运行时反射**：不依赖反射元数据，运行时开销小
-- ✅ **代码纯净**：纯函数式 API，易于测试和调试
-- ✅ **模块化构建**：Schema 定义和 Resolver 可以分离，支持大型项目的模块化组织
-- ✅ **轻量级**：API 简洁，学习曲线平缓
+```ts
+export function buildGraphQLSchema<RootSrc>(
+  schema: Schema<RootSrc>
+): graphql.GraphQLSchema {
+  const typeMap = new Map();
+  return new graphql.GraphQLSchema({
+    query: toGraphQLOutputType<RootSrc>(
+      schema.query,
+      typeMap
+    ) as graphql.GraphQLObjectType,
+    mutation:
+      schema.mutation &&
+      (toGraphQLOutputType<RootSrc>(
+        schema.mutation,
+        typeMap
+      ) as graphql.GraphQLObjectType<RootSrc>),
+    subscription:
+      schema.subscription &&
+      toGraphQLSubscriptionObject(schema.subscription, typeMap),
+    types:
+      schema.types &&
+      schema.types.map(
+        (type) =>
+          toGraphQLOutputType(type, typeMap) as graphql.GraphQLObjectType<
+            any,
+            any
+          >
+      ),
+    directives: schema.directives,
+  });
+}
+```
 
-#### 劣势
+构建过程使用类型映射表（`typeMap`）来避免重复构建和循环引用，通过递归转换函数（`toGraphQLOutputType`、`toGraphQLInputType`）将中间表示转换为 `graphql-js` 类型。
 
-- ⚠️ **类型安全有限**：在 Schema 组装层面（如合并多个字段数组时）需要使用 `unknown` 类型和类型断言，失去了部分类型安全。但在单个 resolver 内部，类型推断是完善的
-- ⚠️ **显式定义**：需要手动定义每个字段，代码量较多
-- ⚠️ **类型重复**：TypeScript 类型定义和 GraphQL Schema 定义需要分别维护
+### 1.3 类型安全机制
 
-**代码示例**：
-```typescript
-// gqtx/src/resolvers/types.ts (lines 77-92)
-export const UserType = Gql.Object<User>({
-  name: 'User',
-  description: 'User information',
-  fields: () => [
-    Gql.Field({ name: 'id', type: Gql.NonNull(Gql.Int) }),
-    Gql.Field({ name: 'name', type: Gql.NonNull(Gql.String) }),
-    Gql.Field({ name: 'email', type: Gql.NonNull(Gql.String) }),
-    Gql.Field({
-      name: 'orders',
-      type: Gql.NonNull(Gql.List(Gql.NonNull(OrderType))),
-      resolve: (user) => {
-        return Array.from(orderMap.values()).filter((o) => o.userId === user.id)
-      },
-    }),
-  ],
+gqtx 通过 TypeScript 的泛型和条件类型实现类型安全，无需运行时反射或元数据：
+
+- **Resolver 参数类型推导**：通过 `TOfArgMap<ArgMap<TArg>>` 自动推导参数类型
+- **返回值类型校验**：通过 `OutputType<Out>` 确保 resolver 返回值与字段类型匹配
+- **Source 类型校验**：通过泛型参数 `<Src>` 确保 resolver 的 source 参数类型正确
+
+示例：
+
+```ts
+Gql.Field({
+  name: 'userById',
+  type: UserType,
+  args: {
+    id: Gql.Arg({ type: Gql.NonNullInput(Gql.ID) }),
+  },
+  resolve: (_, args, ctx) => {
+    // `args` 自动推导为 { id: string }
+    // `ctx` 自动推导为 GqlContext（可通过模块扩展自定义）
+    const user = ctx.users.find((u) => u.id === args.id);
+    return user // 类型检查确保返回 User | null | undefined
+  },
 })
 ```
 
-```typescript
-// gqtx/src/schema.ts (lines 25-28)
+### 1.4 依赖复杂度
+
+**依赖情况**：
+
+- **运行时依赖**：仅 `graphql`（peer dependency，版本要求 `^16.7.0`）
+- **开发依赖**：TypeScript、Rollup、Jest 等构建和测试工具
+- **无运行时魔法**：
+  - ❌ 不需要 `reflect-metadata`
+  - ❌ 不需要装饰器支持（`experimentalDecorators`）
+  - ❌ 不需要代码生成工具
+  - ❌ 不需要编译时插件
+
+**安装即用**：gqtx 实现了真正的"安装即用"，只需安装 `gqtx` 和 `graphql` 即可开始使用，无需任何额外配置。
+
+### 1.5 模块化构建
+
+gqtx 支持模块化组织 Schema，可以将 Query、Mutation 和类型定义拆分到不同文件：
+
+```ts
+// schema.ts
+const Query = Gql.Query({
+  fields: () =>
+    [...userQueryFields, ...menuQueryFields, ...orderQueryFields] as FieldArray
+})
+
+const Mutation = Gql.Mutation({
+  fields: () =>
+    [...userMutationFields, ...menuMutationFields, ...orderMutationFields] as FieldArray
+})
+
 export const schema = buildGraphQLSchema({
   query: Query,
   mutation: Mutation,
 })
 ```
 
-```typescript
-// gqtx/src/schema.ts (lines 9-15)
-const Query = Gql.Query({
-  fields: () =>
-    ([...userQueryFields, ...menuQueryFields, ...orderQueryFields] as FieldArray) as [
-      Field<unknown, unknown>,
-      ...Field<unknown, unknown>[],
-    ],
-})
-```
+### 1.6 架构模式评估总结
+
+**优点**：
+- ✅ 纯函数式 API，无副作用，易于测试
+- ✅ 零运行时开销，无需反射或元数据
+- ✅ 依赖极简，仅需 `graphql` 作为 peer dependency
+- ✅ 类型安全完全由 TypeScript 编译时保证
+- ✅ 支持模块化组织，适合大型项目
+
+**缺点**：
+- ⚠️ 需要显式调用 `buildGraphQLSchema()` 进行构建（但这是运行时一次性操作，性能影响可忽略）
+- ⚠️ 字段定义需要手动指定类型，无法从 TypeScript 类型自动推断（这是设计选择，保证了显式性和可控性）
+
+**评分**：⭐⭐⭐⭐⭐（5/5）
+
+gqtx 的架构模式非常优秀，实现了"零魔法"的类型安全 GraphQL Schema 构建，依赖极简，完全符合现代 TypeScript 开发的最佳实践。
 
 ---
 
-### 2. 依赖复杂度
+## 2. 类型定义
 
-**评估结果：依赖较少，轻量级**
+### 2.1 对象类型（ObjectType）
 
-#### 核心依赖
+gqtx 通过 `Gql.Object<Src>()` 定义对象类型，需要显式指定 TypeScript 类型作为泛型参数：
 
-- `gqtx` - 核心库
-- `graphql` - GraphQL 运行时
-
-#### 额外依赖
-
-- `graphql-scalars` - 用于自定义标量类型（如 DateTime）
-- `graphql-yoga` - GraphQL 服务器（仅用于示例，非必需）
-
-#### 评估
-
-- ✅ **无强制依赖**：不依赖反射元数据（reflect-metadata）、类验证器（class-validator）等
-- ✅ **轻量级**：核心依赖仅 2 个，体积小
-- ✅ **灵活选择**：可以自由选择 GraphQL 服务器（Apollo Server、Yoga 等）
-
-**依赖清单**：
-```json
-// gqtx/package.json (lines 10-16)
-  "dependencies": {
-    "@coffee-shop/shared": "workspace:*",
-    "gqtx": "^0.9.0",
-    "graphql": "^16.12.0",
-    "graphql-scalars": "^1.25.0",
-    "graphql-yoga": "^5.18.0"
-  }
-```
-
----
-
-### 3. 类型定义
-
-**评估结果：支持完整，但类型安全不足**
-
-#### 对象类型
-
-使用 `Gql.Object<T>()` 定义对象类型，需要手动定义每个字段：
-
-```typescript
-// gqtx/src/resolvers/types.ts (lines 77-92)
+```ts
 export const UserType = Gql.Object<User>({
   name: 'User',
   description: 'User information',
@@ -143,46 +151,26 @@ export const UserType = Gql.Object<User>({
     Gql.Field({ name: 'id', type: Gql.NonNull(Gql.Int) }),
     Gql.Field({ name: 'name', type: Gql.NonNull(Gql.String) }),
     Gql.Field({ name: 'email', type: Gql.NonNull(Gql.String) }),
-    Gql.Field({
-      name: 'orders',
-      type: Gql.NonNull(Gql.List(Gql.NonNull(OrderType))),
-      resolve: (user) => {
-        return Array.from(orderMap.values()).filter((o) => o.userId === user.id)
-      },
-    }),
   ],
 })
 ```
 
-- ⚠️ **类型安全有限**：虽然使用了泛型 `Gql.Object<User>`，但字段定义与 TypeScript 类型之间缺乏编译时检查。gqtx 的类型安全主要体现在 resolver 的参数和返回值层面，而不是 Schema 定义层面
-- ⚠️ **类型重复**：需要同时维护 TypeScript 类型定义（如 `type User`）和 GraphQL Schema 定义
+**特点**：
+- ✅ 通过泛型 `<Src>` 绑定 TypeScript 类型，确保类型安全
+- ✅ 字段定义使用函数式 API，支持循环引用（通过函数延迟求值）
+- ⚠️ **需要手动定义每个字段**：无法从 TypeScript 类型自动推断字段
+- ⚠️ **不是单一数据源**：需要同时维护 TypeScript 类型定义和 GraphQL 字段定义
 
-#### 联合类型 (Union)
+**类型映射机制**：
+- TypeScript 类型（如 `User`）仅用于类型检查和 resolver 的类型推导
+- GraphQL Schema 完全由 `Gql.Object` 和 `Gql.Field` 的调用决定
+- 两者需要手动保持同步，TypeScript 编译器无法自动检测不一致
 
-支持 Union 类型定义，但需要手动实现 `resolveType`：
+### 2.2 接口（Interface）
 
-```typescript
-// gqtx/src/resolvers/types.ts (lines 133-140)
-export const MenuItemType = Gql.Union({
-  name: 'MenuItem',
-  description: 'Menu item union type',
-  types: [CoffeeType, DessertType],
-  resolveType: (value: MenuItem) => {
-    return value.__typename === 'Coffee' ? 'Coffee' : 'Dessert'
-  },
-})
-```
+gqtx 通过 `Gql.InterfaceType<Src>()` 定义接口，使用 `Gql.AbstractField` 定义抽象字段：
 
-- ✅ **支持内联片段**：完全支持 GraphQL 内联片段查询
-- ⚠️ **手动实现**：需要手动实现 `resolveType` 函数，依赖 `__typename` 字段
-- ⚠️ **类型安全不足**：`resolveType` 的返回值类型需要手动维护
-
-#### 接口 (Interface)
-
-支持 Interface 定义和实现：
-
-```typescript
-// gqtx/src/resolvers/types.ts (lines 95-103)
+```ts
 export const FoodInterface = Gql.InterfaceType({
   name: 'Food',
   description: 'Food interface with common fields',
@@ -194,31 +182,72 @@ export const FoodInterface = Gql.InterfaceType({
 })
 ```
 
-```typescript
-// gqtx/src/resolvers/types.ts (lines 106-117)
+**实现接口**：
+
+```ts
 export const CoffeeType = Gql.Object<Coffee>({
   name: 'Coffee',
   description: 'Coffee menu item',
   interfaces: [FoodInterface],
   fields: () => [
+    // 需要重复定义接口字段
     Gql.Field({ name: 'id', type: Gql.NonNull(Gql.Int) }),
     Gql.Field({ name: 'name', type: Gql.NonNull(Gql.String) }),
     Gql.Field({ name: 'price', type: Gql.NonNull(Gql.Float) }),
+    // 特有字段
     Gql.Field({ name: 'sugarLevel', type: Gql.NonNull(SugarLevelEnum) }),
     Gql.Field({ name: 'origin', type: Gql.NonNull(Gql.String) }),
   ],
 })
 ```
 
-- ✅ **支持接口实现**：通过 `interfaces` 数组实现接口
-- ⚠️ **需要重复定义**：接口字段需要在实现类型中重复定义（id、name、price），无法自动继承
+**特点**：
+- ✅ 支持接口定义和实现
+- ✅ 支持多接口实现（通过数组传递）
+- ⚠️ **需要重复定义接口字段**：实现接口的类型必须显式定义接口的所有字段，无法自动继承
+- ⚠️ 接口字段和实现字段需要手动保持同步
 
-#### 枚举类型 (Enum)
+### 2.3 联合类型（Union）
 
-使用 `Gql.Enum()` 定义枚举，需要手动定义 values：
+gqtx 通过 `Gql.Union<Src>()` 定义联合类型，需要手动实现 `resolveType` 函数：
 
-```typescript
-// gqtx/src/resolvers/types.ts (lines 12-21)
+```ts
+export const MenuItemType = Gql.Union({
+  name: 'MenuItem',
+  description: 'Menu item union type',
+  types: [CoffeeType, DessertType],
+  resolveType: (value: MenuItem) => {
+    return value.__typename === 'Coffee' ? 'Coffee' : 'Dessert'
+  },
+})
+```
+
+**特点**：
+- ✅ 支持 Union 类型定义
+- ✅ `resolveType` 返回字符串类型名（符合 graphql-js v16 规范）
+- ✅ 支持前向引用（`types` 可以是函数）
+- ⚠️ **需要手动实现 `resolveType`**：必须根据数据判断返回哪个类型名
+- ⚠️ **需要手动添加 `__typename`**：返回的数据必须包含 `__typename` 字段用于类型区分
+
+**业务代码中的使用**：
+
+```ts
+// 创建时必须手动添加 __typename
+const newItem: Coffee = {
+  __typename: 'Coffee',  // 必须手动添加
+  id,
+  name,
+  price,
+  sugarLevel,
+  origin,
+}
+```
+
+### 2.4 枚举类型（Enum）
+
+gqtx 通过 `Gql.Enum<Src>()` 定义枚举，需要手动指定每个枚举值的名称和值：
+
+```ts
 export const SugarLevelEnum = Gql.Enum({
   name: 'SugarLevel',
   description: 'Sugar level for coffee',
@@ -231,108 +260,86 @@ export const SugarLevelEnum = Gql.Enum({
 })
 ```
 
-- ⚠️ **手动定义**：需要手动定义每个枚举值，无法直接复用 TypeScript 枚举或 `as const` 对象
-- ⚠️ **类型不同步**：TypeScript 枚举类型（如 `type Coffee['sugarLevel']`）和 GraphQL 枚举定义需要分别维护，容易出现不同步问题
+**特点**：
+- ✅ 支持枚举定义
+- ⚠️ **不支持直接使用 TypeScript enum**：不能直接传入 TypeScript `enum`，需要手动转换为 `values` 数组
+- ⚠️ **不支持 `as const` 数组**：不能直接使用 `['NONE', 'LOW'] as const`，需要手动转换为对象数组
+- ⚠️ **需要手动维护枚举值**：TypeScript 类型定义和 GraphQL Enum 定义需要手动保持同步
 
-#### 类型推断
+**对比其他库**：
+- **Garph**：支持 `g.enumType('Status', ['PENDING', 'COMPLETED'] as const)`
+- **GQLoom**：支持 `z.enum(['PENDING', 'COMPLETED'])`
+- **gqtx**：需要手动转换为 `[{ name: 'PENDING', value: 'PENDING' }, ...]`
 
-- ⚠️ **部分支持类型推断**：在 resolver 函数内部，参数类型和上下文类型是自动推断的（这是 gqtx 的核心优势）。但无法从 Schema 定义反向推断 TypeScript 类型（即无法从 `UserType` 推断出 `User` 类型）
-- ❌ **单一数据源缺失**：TypeScript 类型定义和 GraphQL Schema 定义需要分别维护，容易出现不同步问题。需要先定义 TypeScript 类型（如 `type User`），再定义 GraphQL 类型（如 `Gql.Object<User>`）
+### 2.5 输入对象类型（InputObject）
 
----
+gqtx 通过 `Gql.InputObject<Src>()` 定义输入类型：
 
-### 4. 解析器定义与输入验证
-
-**评估结果：模块化组织良好，但类型安全不足，验证需要手动实现**
-
-解析器（Resolver）是业务逻辑的核心所在。优秀的解析器定义应当能够自动推断输入参数类型、提供强类型的返回值校验，并能优雅地集成验证逻辑。
-
-#### Resolver 定义方式
-
-使用 `Gql.Field()` 定义字段和 resolver，类型定义和 resolver 可以分离：
-
-```typescript
-// gqtx/src/resolvers/user.ts (lines 7-24)
-export const userQueryFields = [
-  Gql.Field({
-    name: 'users',
-    type: Gql.NonNull(Gql.List(Gql.NonNull(UserType))),
-    resolve: () => Array.from(userMap.values()),
+```ts
+const CreateUserInput = Gql.InputObject({
+  name: 'CreateUserInput',
+  fields: (self) => ({
+    name: { type: Gql.NonNullInput(Gql.String) },
+    email: { type: Gql.NonNullInput(Gql.String) },
   }),
-  Gql.Field({
-    name: 'user',
-    type: UserType,
-    args: {
-      id: Gql.Arg({ type: Gql.NonNullInput(Gql.Int) }),
-    },
-    resolve: (_, { id }) => {
-      const user = userMap.get(id)
-      if (!user) throw new GraphQLError('User not found')
-      return user
-    },
-  }),
-]
-```
-
-- ✅ **模块化组织**：支持按领域模块化组织（user、menu、order）
-- ✅ **高内聚**：每个模块包含完整的 Query、Mutation 和关联 Resolver
-- ⚠️ **类型安全有限**：在单个 resolver 内部，参数和返回值类型是自动推断的（这是 gqtx 的亮点）。但在 Schema 组装层面，由于使用了 `unknown` 类型和类型断言，失去了部分类型安全
-
-#### Schema 组装
-
-在 `schema.ts` 中统一组装所有模块：
-
-```typescript
-// gqtx/src/schema.ts (lines 9-15)
-const Query = Gql.Query({
-  fields: () =>
-    [...userQueryFields, ...menuQueryFields, ...orderQueryFields] as FieldArray as [
-      Field<unknown, unknown>,
-      ...Field<unknown, unknown>[],
-    ],
 })
 ```
 
-- ⚠️ **类型断言**：需要使用 `as` 类型断言，使用了 `unknown` 类型，失去了类型安全
-- ✅ **易于维护**：业务逻辑与 Schema 定义分离，支持大型项目的模块化组织
+**特点**：
+- ✅ 支持输入对象类型定义
+- ✅ 支持默认值（通过 `defaultValue` 字段）
+- ⚠️ 同样需要手动定义字段，无法从 TypeScript 类型自动推断
 
-#### 关联查询
+### 2.6 类型定义评估总结
 
-支持在类型定义中直接定义关联字段的 resolver：
+| 特性                | 评估       | 说明                                                      |
+| ------------------- | ---------- | --------------------------------------------------------- |
+| **单一数据源**      | ⭐⭐ (2/5)   | 需要同时维护 TypeScript 类型和 GraphQL 定义，无法自动同步 |
+| **ObjectType 定义** | ⭐⭐⭐ (3/5)  | 直观但需要手动定义所有字段                                |
+| **Union 支持**      | ⭐⭐⭐⭐ (4/5) | 支持良好，但需要手动实现 `resolveType`                    |
+| **Interface 支持**  | ⭐⭐⭐ (3/5)  | 支持但需要重复定义接口字段                                |
+| **Enum 支持**       | ⭐⭐ (2/5)   | 不支持 TypeScript enum 或 `as const`，需要手动转换        |
+| **类型推断**        | ⭐⭐ (2/5)   | 无法从 TypeScript 类型自动推断 GraphQL Schema             |
 
-```typescript
-// gqtx/src/resolvers/types.ts (lines 151-170)
+**优点**：
+- ✅ 类型安全：通过泛型确保 TypeScript 类型与 GraphQL 类型的一致性
+- ✅ 显式控制：所有类型定义都是显式的，易于理解和调试
+- ✅ 支持复杂类型：Union、Interface、循环引用等都能良好支持
+
+**缺点**：
+- ⚠️ **不是单一数据源**：最大的问题是需要同时维护 TypeScript 类型定义和 GraphQL Schema 定义，两者需要手动保持同步
+- ⚠️ **样板代码较多**：每个字段都需要手动定义，无法自动推断
+- ⚠️ **Enum 定义繁琐**：不支持直接使用 TypeScript enum 或 `as const` 数组
+- ⚠️ **接口字段重复**：实现接口时需要重复定义接口的所有字段
+
+**评分**：⭐⭐⭐ (3/5)
+
+gqtx 的类型定义功能完整，但缺乏自动推断能力，需要较多的样板代码。对于追求"单一数据源"和"零配置"的开发者来说，这可能是一个痛点。
+
+---
+
+## 3. 解析器定义与输入验证
+
+### 3.1 解析器定义
+
+gqtx 通过 `Gql.Field` 的 `resolve` 函数定义解析器，支持 Query、Mutation 和 Field Resolver：
+
+```ts
+// Query Resolver
 Gql.Field({
   name: 'user',
-  type: Gql.NonNull(UserType),
-  resolve: (order) => {
-    const user = userMap.get(order.userId)
-    if (!user) throw new Error('User not found')
+  type: UserType,
+  args: {
+    id: Gql.Arg({ type: Gql.NonNullInput(Gql.Int) }),
+  },
+  resolve: (_, { id }) => {
+    const user = userMap.get(id)
+    if (!user) throw new GraphQLError('User not found')
     return user
   },
-}),
-Gql.Field({
-  name: 'items',
-  type: Gql.NonNull(Gql.List(Gql.NonNull(MenuItemType))),
-  resolve: (order) => {
-    return order.itemIds.map((id) => {
-      const item = menuItemMap.get(id)
-      if (!item) throw new Error(`Menu item ${id} not found`)
-      return item
-    })
-  },
-}),
-```
+})
 
-- ✅ **支持关联查询**：可以方便地定义关联字段的 resolver
-- ⚠️ **类型安全有限**：parent 参数类型（如 `order`）在 resolver 内部是自动推断的，但需要确保 TypeScript 类型定义与 GraphQL Schema 定义保持一致
-
-#### 参数定义
-
-使用 `Gql.Arg()` 定义参数，支持可选参数：
-
-```typescript
-// gqtx/src/resolvers/user.ts (lines 27-42)
+// Mutation Resolver
 Gql.Field({
   name: 'createUser',
   type: Gql.NonNull(UserType),
@@ -341,94 +348,198 @@ Gql.Field({
     email: Gql.Arg({ type: Gql.NonNullInput(Gql.String) }),
   },
   resolve: (_, { name, email }) => {
-    if (!email.includes('@')) throw new GraphQLError('Invalid email format')
+    // 业务逻辑
     const id = incrementId()
     const newUser: User = { id, name, email }
     userMap.set(id, newUser)
     return newUser
   },
-}),
+})
+
+// Field Resolver（关联查询）
+Gql.Field({
+  name: 'orders',
+  type: Gql.NonNull(Gql.List(Gql.NonNull(OrderType))),
+  resolve: (user) => {
+    return Array.from(orderMap.values()).filter((o) => o.userId === user.id)
+  },
+})
 ```
 
-```typescript
-// gqtx/src/resolvers/user.ts (lines 43-61)
+**特点**：
+- ✅ 支持模块化组织：可以将 Query、Mutation 和类型定义拆分到不同文件
+- ✅ 支持默认 Resolver：如果字段名与 source 对象的属性名匹配，且类型一致，可以不提供 `resolve` 函数（使用 GraphQL 默认解析器）
+- ✅ 类型安全：Resolver 的参数和返回值类型完全由 TypeScript 类型系统保证
+
+### 3.2 参数定义与类型推导
+
+gqtx 通过 `Gql.Arg()` 定义参数，参数类型通过 `TOfArgMap<ArgMap<TArg>>` 自动推导：
+
+```ts
 Gql.Field({
   name: 'updateUser',
   type: UserType,
   args: {
-    id: Gql.Arg({ type: Gql.NonNullInput(Gql.Int) }),
-    name: Gql.Arg({ type: Gql.String }),
-    email: Gql.Arg({ type: Gql.String }),
+    id: Gql.Arg({ type: Gql.NonNullInput(Gql.Int) }),      // 必需参数
+    name: Gql.Arg({ type: Gql.String }),                  // 可选参数
+    email: Gql.Arg({ type: Gql.String }),                   // 可选参数
   },
   resolve: (_, { id, name, email }) => {
-    const user = userMap.get(id)
-    if (!user) throw new GraphQLError('User not found')
-    if (name !== undefined && name !== null) user.name = name
-    if (email !== undefined && email !== null) {
-      if (!email.includes('@')) throw new GraphQLError('Invalid email format')
-      user.email = email
-    }
-    return user
+    // id: number (自动推导)
+    // name: string | null | undefined (自动推导)
+    // email: string | null | undefined (自动推导)
   },
-}),
+})
 ```
 
-- ✅ **参数定义清晰**：使用 `Gql.Arg()` 定义参数，支持可选参数（不传 `Gql.NonNullInput` 即为可选）
-- ⚠️ **类型推导有限**：需要手动定义 GraphQL 类型（如 `Gql.NonNullInput(Gql.String)`），但在 resolver 函数中，参数类型是自动推断的（如 `{ name, email }` 的类型）。IDE 提示在 resolver 内部是完善的，但在 Schema 定义层面需要手动维护
+**类型推导机制**：
 
-#### 格式验证
+```ts
+// 类型定义（types.ts）
+export type ArgMapValue<TArg> = TArg extends DefaultArgument<infer Src>
+  ? Src
+  : TArg extends Argument<infer Src>
+  ? Src extends null
+    ? Maybe<Src>
+    : Src
+  : never;
 
-验证逻辑需要在 resolve 函数中手动实现：
+export type TOfArgMap<TArgMap> = {
+  [K in keyof TArgMap]: ArgMapValue<TArgMap[K]>;
+};
 
-```typescript
-// gqtx/src/resolvers/user.ts (line 36)
-if (!email.includes('@')) throw new GraphQLError('Invalid email format')
-```
-
-- ⚠️ **手动验证**：需要在 resolver 中手动编写验证逻辑
-- ⚠️ **无法复用**：验证逻辑无法复用，容易出现重复代码
-- ⚠️ **无声明式验证**：不支持声明式验证，需要过程式 `if-throw` 逻辑
-
-#### 自定义验证
-
-复杂业务逻辑验证需要在 resolver 中手动实现：
-
-```typescript
-// gqtx/src/resolvers/order.ts (lines 35-40)
-resolve: (_, { userId, items }) => {
-  if (items.length === 0) throw new GraphQLError('At least one item is required')
-  if (!userMap.has(userId)) throw new GraphQLError('User not found')
-  for (const itemId of items) {
-    if (!menuItemMap.has(itemId)) throw new GraphQLError(`Menu item not found`)
-  }
-  // ...
+// Field 类型定义
+export type Field<Src, Out, TArg extends object = {}> = {
+  resolve?: (
+    src: Src,
+    args: TOfArgMap<ArgMap<TArg>>,  // 自动推导参数类型
+    ctx: GqlContext,
+    info: graphql.GraphQLResolveInfo
+  ) => Out | Promise<Out>;
 }
 ```
 
-- ⚠️ **手动实现**：所有业务验证都需要在 resolver 中手动实现
-- ⚠️ **无验证框架集成**：不支持与 Zod、Valibot、Yup 等验证库集成
-- ⚠️ **代码冗长**：验证逻辑与业务逻辑混合，代码可读性较差
+**特点**：
+- ✅ **完整的类型推导**：参数类型完全自动推断，无需手动声明
+- ✅ **支持可选参数**：通过 `Gql.String`（可空）和 `Gql.NonNullInput(Gql.String)`（非空）区分
+- ✅ **支持默认值**：通过 `Gql.Arg({ type: Gql.String, default: 'defaultValue' })` 设置默认值
+- ✅ **支持列表类型**：通过 `Gql.ListInput(Gql.NonNullInput(Gql.Int))` 定义列表参数
 
-#### 评估
+### 3.3 格式验证
 
-- ✅ **参数定义清晰**：使用 `Gql.Arg()` 定义参数，API 直观
-- ⚠️ **类型推导不足**：缺乏完整的类型推导能力，IDE 提示不够完善
-- ❌ **验证能力弱**：不支持声明式验证，无法与验证库集成，验证逻辑需要手动实现
+gqtx **不提供内置的格式验证功能**，所有格式验证都需要在 Resolver 内部手动编写。
 
----
+#### 手动验证（当前实现方式）
 
-### 5. 内置功能
+```ts
+Gql.Field({
+  name: 'createUser',
+  type: Gql.NonNull(UserType),
+  args: {
+    name: Gql.Arg({ type: Gql.NonNullInput(Gql.String) }),
+    email: Gql.Arg({ type: Gql.NonNullInput(Gql.String) }),
+  },
+  resolve: (_, { name, email }) => {
+    // 手动编写格式验证
+    if (!email.includes('@')) {
+      throw new GraphQLError('Invalid email format')
+    }
+    // ... 业务逻辑
+  },
+})
+```
 
-**评估结果：核心功能支持，高级功能缺失**
+#### 通过自定义 Scalar 实现验证
 
-#### 上下文 (Context)
+gqtx 支持通过自定义 Scalar 类型实现格式验证：
 
-支持在 Resolver 中注入上下文，并通过 TypeScript 模块声明实现类型推导。这是 gqtx 的一个亮点功能。
+```ts
+const EmailScalar = Gql.Scalar({
+  name: 'Email',
+  serialize: (value) => value,
+  parseValue: (value: unknown) => {
+    if (typeof value !== 'string' || !value.includes('@')) {
+      throw new GraphQLError('Invalid email format')
+    }
+    return value
+  },
+  parseLiteral: (ast) => {
+    if (ast.kind !== 'StringValue') {
+      throw new GraphQLError('Email must be a string')
+    }
+    if (!ast.value.includes('@')) {
+      throw new GraphQLError('Invalid email format')
+    }
+    return ast.value
+  },
+})
 
-**实现方式**：
-根据文档，可以通过 `declare module "gqtx"` 扩展 `GqlContext` 接口：
+// 使用自定义 Scalar
+Gql.Field({
+  name: 'createUser',
+  args: {
+    email: Gql.Arg({ type: Gql.NonNullInput(EmailScalar) }),
+  },
+  resolve: (_, { email }) => {
+    // email 已经通过验证
+  },
+})
+```
 
-```typescript
+**验证特点**：
+- ❌ **无内置验证**：不提供声明式验证 API（如 `.refine()`, `.validate()`）
+- ✅ **支持自定义 Scalar**：可以通过 Scalar 实现格式验证
+- ⚠️ **验证逻辑分散**：格式验证需要在 Resolver 或 Scalar 中手动实现，难以复用
+
+### 3.4 自定义验证（业务逻辑验证）
+
+gqtx **不提供 Schema 级别的自定义验证功能**，所有业务逻辑验证都需要在 Resolver 内部手动编写。
+
+#### 当前实现方式
+
+```ts
+Gql.Field({
+  name: 'createOrder',
+  type: Gql.NonNull(OrderType),
+  args: {
+    userId: Gql.Arg({ type: Gql.NonNullInput(Gql.Int) }),
+    items: Gql.Arg({ type: Gql.NonNullInput(Gql.ListInput(Gql.NonNullInput(Gql.Int))) }),
+  },
+  resolve: (_, { userId, items }) => {
+    // 1. 手动验证数组非空
+    if (items.length === 0) {
+      throw new GraphQLError('At least one item is required')
+    }
+    
+    // 2. 手动验证用户是否存在
+    if (!userMap.has(userId)) {
+      throw new GraphQLError('User not found')
+    }
+    
+    // 3. 手动验证所有菜单项是否存在
+    for (const itemId of items) {
+      if (!menuItemMap.has(itemId)) {
+        throw new GraphQLError('Menu item not found')
+      }
+    }
+    
+    // ... 业务逻辑
+  },
+})
+```
+
+**验证特点**：
+- ❌ **无声明式验证**：不支持在 Schema 定义阶段注入验证函数（如 `.refine()`）
+- ❌ **验证逻辑重复**：需要在每个 Resolver 中手动编写验证代码
+- ⚠️ **过程式验证**：验证逻辑是过程式的 `if-throw` 模式，不够声明式
+- ⚠️ **难以复用**：验证逻辑无法提取为可复用的函数或中间件
+
+### 3.5 Context（上下文）支持
+
+gqtx 支持通过模块扩展（Module Augmentation）自定义 Context 类型：
+
+```ts
+// 全局定义 Context 类型
 declare module "gqtx" {
   interface GqlContext {
     viewerId: number;
@@ -436,165 +547,579 @@ declare module "gqtx" {
   }
 }
 
-const Query = Gql.Query({
-  fields: [
-    Gql.Field({
-      name: 'userById',
-      type: UserType,
-      args: {
-        id: Gql.Arg({ type: Gql.NonNullInput(Gql.ID) }),
-      },
-      resolve: (_, args, ctx) => {
-        // `ctx` 自动推断为 { viewerId: number, users: User[] }
-        const user = ctx.users.find((u) => u.id === args.id);
-        return user;
-      },
-    }),
-  ],
-});
+// 在 Resolver 中使用
+Gql.Field({
+  name: 'userById',
+  resolve: (_, args, ctx) => {
+    // ctx 自动推导为 { viewerId: number, users: User[] }
+    const user = ctx.users.find((u) => u.id === args.id)
+    return user
+  },
+})
 ```
 
-**文档参考**：[Getting Started | GQTX](https://github.com/sikanhe/gqtx#getting-started)
+**特点**：
+- ✅ **类型安全**：Context 类型全局定义，所有 Resolver 自动推断
+- ✅ **集中管理**：Context 类型定义集中在一个地方，易于维护
+- ⚠️ **需要模块扩展**：必须使用 TypeScript 的模块扩展语法
 
-- ✅ **类型推导**：通过 TypeScript 模块声明实现上下文类型推导，所有 resolver 自动推断
-- ✅ **全局定义**：上下文类型只需定义一次，无需在每个 resolver 中重复声明
-- ✅ **类型安全**：编译时确保上下文类型正确
-- ⚠️ **实际使用**：当前示例代码中未使用 context，但 API 支持
+### 3.6 解析器定义与输入验证评估总结
 
-#### 自定义标量 (Scalars)
+| 特性             | 评估        | 说明                                        |
+| ---------------- | ----------- | ------------------------------------------- |
+| **参数类型推导** | ⭐⭐⭐⭐⭐ (5/5) | 完整的类型推导，参数类型完全自动推断        |
+| **格式验证**     | ⭐⭐ (2/5)    | 无内置验证，需要手动编写或使用自定义 Scalar |
+| **自定义验证**   | ⭐⭐ (2/5)    | 无声明式验证，需要在 Resolver 中手动编写    |
+| **验证复用性**   | ⭐⭐ (2/5)    | 验证逻辑难以复用和组合                      |
+| **模块化组织**   | ⭐⭐⭐⭐ (4/5)  | 支持将 Resolver 拆分到不同文件              |
 
-支持定义自定义标量类型，可以集成第三方标量库。
+**优点**：
+- ✅ **强大的类型推导**：参数和返回值类型完全自动推断，提供完整的 IDE 提示
+- ✅ **模块化组织**：支持将 Query、Mutation 和 Field Resolver 拆分到不同文件
+- ✅ **类型安全**：Resolver 的类型安全完全由 TypeScript 编译时保证
+- ✅ **支持自定义 Scalar**：可以通过自定义 Scalar 实现格式验证
 
-**实现方式**：
-```typescript
-// gqtx/src/resolvers/types.ts (lines 5-10)
+**缺点**：
+- ❌ **无内置验证功能**：不提供声明式验证 API，格式验证和业务逻辑验证都需要手动编写
+- ❌ **验证逻辑分散**：验证代码分散在各个 Resolver 中，难以复用和组合
+- ❌ **过程式验证**：验证逻辑是过程式的 `if-throw` 模式，不够声明式
+- ⚠️ **验证难以复用**：无法将验证逻辑提取为可复用的函数或中间件
+
+**评分**：⭐⭐⭐ (3/5)
+
+gqtx 在类型推导方面表现优秀，但在验证功能方面较为薄弱。对于需要复杂验证逻辑的项目，开发者需要手动编写大量验证代码，这可能会影响开发效率和代码可维护性。
+
+---
+
+## 4. 内置功能
+
+### 4.1 Directives（指令）
+
+**支持情况**：✅ **基础支持**
+
+gqtx 支持通过 `schema.directives` 传递 GraphQL Directives：
+
+```ts
+const schema = buildGraphQLSchema({
+  query: Query,
+  mutation: Mutation,
+  directives: [
+    // 自定义 Directives
+    new graphql.GraphQLDirective({
+      name: 'auth',
+      locations: [graphql.DirectiveLocation.FIELD_DEFINITION],
+    }),
+  ],
+})
+```
+
+**Extensions 配置支持**：
+
+gqtx 支持通过 `extensions` 字段配置扩展信息（包括 Directives）：
+
+```ts
+Gql.Object<User>({
+  name: 'User',
+  extensions: {
+    directives: {
+      key: { fields: 'id' },
+    },
+  },
+  fields: () => [...],
+})
+
+Gql.Field({
+  name: 'secret',
+  type: Gql.String,
+  extensions: {
+    directives: {
+      auth: { role: 'admin' },
+    },
+  },
+})
+```
+
+**特点**：
+- ✅ 支持 Schema 级别的 Directives 配置
+- ✅ 支持通过 Extensions 配置字段和对象类型的 Directives
+- ⚠️ **无高级 API**：不提供定义自定义 Directives 的高级 API，需要直接使用 `graphql.GraphQLDirective`
+- ⚠️ **Federation 支持有限**：虽然可以通过 Extensions 配置 Federation Directives，但没有专门的 Federation 支持包
+
+### 4.2 Extensions（扩展）
+
+**支持情况**：✅ **完整支持**
+
+gqtx 支持字段级别和对象类型级别的 Extensions：
+
+```ts
+// 字段级别扩展
+Gql.Field({
+  name: 'complexField',
+  type: Gql.String,
+  extensions: {
+    complexity: 10,
+    customField: 'value',
+  },
+})
+
+// 对象类型级别扩展
+Gql.Object<User>({
+  name: 'User',
+  extensions: {
+    directives: {
+      key: { fields: 'id' },
+    },
+    customTypeExtension: 'value',
+  },
+  fields: () => [...],
+})
+```
+
+**特点**：
+- ✅ 支持标准的 GraphQL Extensions 配置
+- ✅ 类型安全：Extensions 配置类型安全
+- ✅ 可以用于查询复杂度、权限等扩展需求
+
+### 4.3 批量加载（Batching / DataLoader）
+
+**支持情况**：❌ **不提供内置支持**
+
+gqtx **不提供内置的 DataLoader 支持**，但提供了 Relay Connection 模式的辅助函数，可以用于实现分页：
+
+```ts
+import { connectionDefinitions, connectionArgs } from 'gqtx/relay'
+
+const { connectionType } = connectionDefinitions({
+  nodeType: UserType,
+})
+
+Gql.Field({
+  name: 'users',
+  type: connectionType,
+  args: connectionArgs,
+  resolve: async (_, args) => {
+    // 需要手动实现批量加载逻辑
+    const users = await fetchUsers(args)
+    return createConnectionFromArray(users, args)
+  },
+})
+```
+
+**特点**：
+- ❌ **无内置 DataLoader**：不提供类似 `dataloader` 的批量加载和缓存机制
+- ✅ **Relay Connection 支持**：提供 Relay Connection 模式的辅助函数
+- ⚠️ **需要手动实现**：批量加载逻辑需要开发者手动实现，无法自动解决 N+1 查询问题
+
+**对比其他库**：
+- **GQLoom**：内置 `LoomDataLoader`，自动批量加载
+- **Pothos**：提供 DataLoader 插件
+- **gqtx**：需要手动实现或集成第三方 DataLoader 库
+
+### 4.4 自定义标量（Scalars）
+
+**支持情况**：✅ **完整支持**
+
+gqtx 通过 `Gql.Scalar()` 定义自定义标量：
+
+```ts
+import { GraphQLDateTime } from 'graphql-scalars'
+
 export const DateTime = Gql.Scalar({
   name: 'DateTime',
   serialize: GraphQLDateTime.serialize,
   parseValue: GraphQLDateTime.parseValue,
   parseLiteral: GraphQLDateTime.parseLiteral,
 })
+
+// 使用自定义标量
+Gql.Field({
+  name: 'createdAt',
+  type: Gql.NonNull(DateTime),
+})
 ```
 
-- ✅ **易于定义**：通过 `Gql.Scalar()` 简洁定义
-- ✅ **灵活集成**：可以集成第三方标量库（如 `graphql-scalars`）
-- ⚠️ **类型安全**：标量类型需要手动维护，缺乏自动类型推导
+**特点**：
+- ✅ 支持完整的 Scalar 定义（`serialize`、`parseValue`、`parseLiteral`）
+- ✅ 可以轻松集成 `graphql-scalars` 等标量库
+- ✅ 类型安全：Scalar 类型与 TypeScript 类型绑定
 
-#### 批量加载 (Batching)
+**内置标量**：
+- `Gql.String`、`Gql.Int`、`Gql.Float`、`Gql.Boolean`、`Gql.ID`
+- 不提供 `DateTime`、`JSON` 等常用标量，需要手动定义或集成第三方库
 
-- ❌ **无原生支持**：文档和代码中未看到 DataLoader 的原生集成
-- ⚠️ **可手动实现**：可以通过 context 手动集成 DataLoader，但缺乏官方支持
-- ⚠️ **无文档说明**：未看到解决 N+1 查询问题的官方方案
+### 4.5 订阅（Subscription）
 
-#### 订阅 (Subscription)
+**支持情况**：✅ **完整支持**
 
-- ❓ **未明确支持**：文档中未看到 GraphQL Subscriptions 的相关说明
-- ⚠️ **可能支持**：由于 gqtx 生成标准的 `graphql-js` schema，理论上可以支持订阅，但缺乏文档和示例
-- ⚠️ **无示例代码**：示例代码中未包含订阅相关的实现
+gqtx 通过 `Gql.Subscription()` 和 `Gql.SubscriptionField()` 定义订阅：
 
-#### Directives 和 Extensions
+```ts
+const Subscription = Gql.Subscription({
+  fields: () => [
+    Gql.SubscriptionField({
+      name: 'orderStatusChanged',
+      type: OrderType,
+      args: {
+        orderId: Gql.Arg({ type: Gql.NonNullInput(Gql.Int) }),
+      },
+      subscribe: async function* (_, { orderId }) {
+        // 返回 AsyncIterableIterator
+        while (true) {
+          const order = await getOrder(orderId)
+          yield order
+          await sleep(1000)
+        }
+      },
+    }),
+  ],
+})
 
-- ❓ **未明确支持**：文档中未明确提及 GraphQL Directives 的支持情况
-- ❓ **Extensions**：文档中未明确提及 GraphQL Extensions 的支持情况
-- ❓ **查询复杂度**：未看到声明查询复杂度的相关文档
+const schema = buildGraphQLSchema({
+  query: Query,
+  subscription: Subscription,
+})
+```
 
-#### 中间件 (Middleware)
+**特点**：
+- ✅ 支持完整的 GraphQL Subscription 功能
+- ✅ 支持 `AsyncIterableIterator` 模式
+- ✅ 类型安全：订阅字段的参数和返回值类型完全自动推断
+- ⚠️ **需要手动实现**：订阅的发布-订阅逻辑需要开发者手动实现
 
-- ❌ **无官方支持**：文档中未看到 Resolver 中间件的相关 API
-- ⚠️ **可能通过 Context 实现**：可以通过 Context 注入中间件逻辑，但缺乏官方中间件 API
-- ⚠️ **无文档说明**：未看到在解析过程中注入额外逻辑（如日志记录、权限检查）的官方方案
+### 4.6 Context（上下文）
 
-#### 联邦架构 (Federation)
+**支持情况**：✅ **完整支持**
 
-- ❌ **未支持**：文档中未提及 GraphQL Federation 的支持
+已在维度 3 中详细评估，此处不再重复。
 
-#### 扩展机制
+### 4.7 中间件（Middleware）
 
-- ❌ **无插件系统**：缺乏灵活的插件系统来扩展功能
-- ⚠️ **基于 graphql-js**：由于生成标准的 `graphql-js` schema，可以通过标准 GraphQL 扩展机制扩展
+**支持情况**：❌ **不提供内置支持**
 
-#### 总结
+gqtx **不提供内置的中间件系统**，无法在 Resolver 执行前后注入中间件逻辑。
 
-- ✅ **核心功能支持**：上下文、自定义标量等核心功能有良好支持
-- ✅ **类型安全**：上下文类型推导是亮点，通过 TypeScript 模块声明实现全局类型推导
-- ❌ **高级功能缺失**：批量加载、订阅、Directives、中间件等高级功能缺乏官方支持或文档
-- ⚠️ **文档可改进**：许多功能的支持情况需要更明确的文档说明
+**替代方案**：
+1. **在 Resolver 内部手动实现**：在每个 Resolver 中手动调用中间件函数
+2. **使用 GraphQL Server 的中间件**：在 Server 层面（如 Apollo Server、GraphQL Yoga）使用中间件
+3. **封装 Resolver 函数**：创建高阶函数包装 Resolver
+
+**示例（手动实现）**：
+
+```ts
+function withAuth<T extends (...args: any[]) => any>(resolver: T): T {
+  return ((...args: any[]) => {
+    const ctx = args[2] // context
+    if (!ctx.user) {
+      throw new GraphQLError('Unauthorized')
+    }
+    return resolver(...args)
+  }) as T
+}
+
+Gql.Field({
+  name: 'secret',
+  type: Gql.String,
+  resolve: withAuth((_, args, ctx) => {
+    return 'secret data'
+  }),
+})
+```
+
+**特点**：
+- ❌ **无内置中间件系统**：不提供声明式的中间件 API
+- ⚠️ **需要手动实现**：中间件逻辑需要开发者手动实现，无法统一管理
+
+### 4.8 内置功能评估总结
+
+| 功能             | 支持情况   | 评估        | 说明                               |
+| ---------------- | ---------- | ----------- | ---------------------------------- |
+| **Directives**   | ✅ 基础支持 | ⭐⭐⭐ (3/5)   | 支持 Extensions 配置，但无高级 API |
+| **Extensions**   | ✅ 完整支持 | ⭐⭐⭐⭐⭐ (5/5) | 类型安全，功能完整                 |
+| **Batching**     | ❌ 不支持   | ⭐⭐ (2/5)    | 无内置 DataLoader，需要手动实现    |
+| **Scalars**      | ✅ 完整支持 | ⭐⭐⭐⭐ (4/5)  | 支持自定义，但无常用标量内置       |
+| **Subscription** | ✅ 完整支持 | ⭐⭐⭐⭐⭐ (5/5) | API 清晰，类型安全                 |
+| **Context**      | ✅ 完整支持 | ⭐⭐⭐⭐⭐ (5/5) | 类型安全，集中管理                 |
+| **Middleware**   | ❌ 不支持   | ⭐⭐ (2/5)    | 无内置中间件系统                   |
+
+**优点**：
+- ✅ **Extensions 支持完整**：可以满足查询复杂度、权限等扩展需求
+- ✅ **Subscription 支持完整**：API 清晰，类型安全
+- ✅ **Scalar 支持灵活**：可以轻松集成常用标量库
+
+**缺点**：
+- ❌ **无内置 DataLoader**：无法自动解决 N+1 查询问题
+- ❌ **无内置中间件系统**：无法统一管理中间件逻辑
+- ⚠️ **Directives 支持有限**：虽然支持，但无高级 API
+
+**评分**：⭐⭐⭐ (3/5)
+
+gqtx 在核心功能（Subscription、Context、Extensions）方面支持完整，但在高级功能（DataLoader、Middleware）方面较为薄弱。对于需要批量加载和中间件的项目，开发者需要手动实现或集成第三方库。
 
 ---
 
-### 6. 生态集成
+## 5. 生态集成
 
-**评估结果：Server 兼容性优秀，验证库和 ORM 集成待完善**
+### 5.1 ORM 集成
 
-#### Server 兼容性
+**支持情况**：❌ **无官方插件**
 
-GQTX 对主流 GraphQL Server 有优秀的兼容性支持。
+gqtx **不提供官方的 ORM 集成插件**（如 Prisma、Drizzle、TypeORM 插件）。
 
-**支持的 Server**：
-根据文档示例，gqtx 可以与任何标准的 GraphQL Server 集成：
+**影响**：
+- 无法直接复用数据库模型定义
+- 无法自动生成高效的数据库查询
+- 需要在 Resolver 中手动编写数据库查询逻辑
 
-- ✅ **express-graphql**：文档示例中使用
-- ✅ **GraphQL Yoga**：示例代码中使用
-- ✅ **Apollo Server**：理论上支持（生成标准 `graphql-js` schema）
+**替代方案**：
 
-**实现方式**：
-```typescript
-// gqtx/src/server.ts (lines 6-8)
-const yoga = createYoga({ schema })
-const server = createServer(yoga)
+可以在 Resolver 中手动使用 ORM（如 Prisma Client）进行数据库查询：
+
+```ts
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+
+Gql.Field({
+  name: 'users',
+  type: Gql.NonNull(Gql.List(Gql.NonNull(UserType))),
+  resolve: async () => {
+    // 手动使用 Prisma Client
+    return await prisma.user.findMany()
+  },
+})
 ```
 
-文档示例（express-graphql）：
-```typescript
-import express from 'express';
-import graphqlHTTP from 'express-graphql';
+**特点**：
+- ❌ **无官方插件**：不提供类似 Pothos Prisma 插件或 GQLoom Prisma 集成的高级功能
+- ⚠️ **需要手动映射**：需要手动将数据库模型映射为 GraphQL 类型
+- ⚠️ **无法自动生成**：无法自动生成 CRUD 操作，需要手动编写
 
-const app = express();
+**对比其他库**：
+- **Pothos**：提供 Prisma 插件，自动生成类型和查询
+- **GQLoom**：提供 `@gqloom/prisma` 包，深度集成 Prisma
+- **gqtx**：需要手动使用 ORM，无官方插件
+
+### 5.2 验证库集成
+
+**支持情况**：✅ **支持（通过自定义 Scalar）**
+
+gqtx 支持与验证库（如 Zod、Yup）集成，但需要通过自定义 Scalar 实现。
+
+#### Zod 集成示例
+
+```ts
+import { z } from 'zod'
+import { Gql } from 'gqtx'
+import { GraphQLError } from 'graphql'
+
+// 定义 Zod Schema
+const emailValidator = z.string().email()
+
+// 创建自定义 Scalar
+const EmailScalar = Gql.Scalar({
+  name: 'Email',
+  serialize: (value) => value,
+  parseValue: (value: unknown) => {
+    if (typeof value !== 'string' || !emailValidator.safeParse(value).success) {
+      throw new GraphQLError('Invalid email format')
+    }
+    return value
+  },
+  parseLiteral: (ast) => {
+    if (ast.kind !== 'StringValue') {
+      throw new GraphQLError('Email must be a string')
+    }
+    if (!emailValidator.safeParse(ast.value).success) {
+      throw new GraphQLError('Invalid email format')
+    }
+    return ast.value
+  },
+})
+
+// 使用自定义 Scalar
+Gql.Field({
+  name: 'createUser',
+  args: {
+    email: Gql.Arg({ type: Gql.NonNullInput(EmailScalar) }),
+  },
+  resolve: (_, { email }) => {
+    // email 已经通过 Zod 验证
+  },
+})
+```
+
+**特点**：
+- ✅ **支持 Zod 集成**：可以通过自定义 Scalar 使用 Zod 进行验证
+- ⚠️ **需要手动实现**：需要为每个验证规则创建自定义 Scalar
+- ⚠️ **验证与 Schema 分离**：验证逻辑在 Scalar 中，不在 Schema 定义层面
+- ⚠️ **无法声明式验证**：不支持类似 Pothos validation 插件的声明式验证 API
+
+**对比其他库**：
+- **Pothos**：提供 validation 插件，支持声明式验证
+- **GQLoom**：通过 Weaver 模式深度集成 Zod，自动验证
+- **gqtx**：需要手动创建自定义 Scalar，验证逻辑分散
+
+### 5.3 Server 兼容性
+
+**支持情况**：✅ **广泛支持**
+
+gqtx 生成的 Schema 是标准的 `graphql.GraphQLSchema`，可以用于任何 GraphQL Server。
+
+#### GraphQL Server
+
+**GraphQL Yoga**（业务代码中使用）
+
+```ts
+import { createYoga } from 'graphql-yoga'
+import { createServer } from 'node:http'
+import { schema } from './schema.ts'
+
+const yoga = createYoga({ schema })
+const server = createServer(yoga)
+
+server.listen(4000, () => {
+  console.info('Server is running on http://localhost:4000/graphql')
+})
+```
+
+**Express + express-graphql**（官方示例中使用）
+
+```ts
+import express from 'express'
+import graphqlHTTP from 'express-graphql'
+import { schema } from './schema'
+
+const app = express()
+
 app.use(
   '/graphql',
   graphqlHTTP({
     schema,
     graphiql: true,
   })
-);
+)
+
+app.listen(4000)
 ```
 
-- ✅ **无服务器绑定**：gqtx 本身不绑定特定服务器，可以自由选择
-- ✅ **易于集成**：通过 `buildGraphQLSchema()` 生成的 Schema 可以用于任何 GraphQL Server
-- ✅ **标准兼容**：生成标准的 `graphql-js` schema，兼容性极佳
+**Apollo Server**
 
-#### 验证库集成
+```ts
+import { ApolloServer } from 'apollo-server'
+import { schema } from './schema'
 
-- ❌ **无官方支持**：文档中未看到与 Zod、Valibot、Yup 等验证库的集成示例
-- ⚠️ **可手动实现**：可以在 resolver 中手动使用验证库，但缺乏深度集成
-- ⚠️ **无自动类型推导**：无法直接从验证库 Schema 自动推导 GraphQL 类型
-- ⚠️ **无单一数据源**：验证逻辑、类型定义和 GraphQL Schema 需要分别维护
+const server = new ApolloServer({
+  schema,
+})
 
-#### ORM 集成
+server.listen().then(({ url }) => {
+  console.log(`Server ready at ${url}`)
+})
+```
 
-- ❌ **未明确支持**：文档中未看到与 Prisma、Drizzle、TypeORM 等 ORM 的深度整合
-- ❌ **缺乏官方插件**：未看到类似 Pothos Prisma 插件的官方 ORM 集成方案
-- ⚠️ **需要手动集成**：需要手动编写 Resolver 来连接 ORM，缺乏自动化支持
-- ⚠️ **无 ResolverFactory**：未提供快速生成 CRUD 接口的工具
+**特点**：
+- ✅ **标准 GraphQL Schema**：生成的 Schema 是标准的 `graphql.GraphQLSchema`，兼容所有 GraphQL Server
+- ✅ **无框架绑定**：不绑定特定的 Server 实现，可以自由选择
+- ✅ **广泛兼容**：支持 Apollo Server、GraphQL Yoga、express-graphql 等主流 Server
 
-#### Web 框架集成
+#### Web 框架
 
-- ✅ **Express**：文档示例中使用 express-graphql
-- ✅ **Node.js HTTP**：示例代码中使用原生 Node.js HTTP 服务器
-- ❓ **其他框架**：未明确看到 Next.js、Hono、Fastify 等框架的集成文档
+gqtx 生成的 Schema 可以用于任何支持 GraphQL 的 Web 框架：
 
-#### 客户端集成
+- ✅ **Next.js**：可以通过 API Routes 使用
+- ✅ **Fastify**：可以通过 `@fastify/apollo` 使用
+- ✅ **Hono**：可以通过 GraphQL 适配器使用
+- ✅ **其他框架**：任何支持 GraphQL 的框架都可以使用
 
-- ✅ **标准 GraphQL**：生成标准的 GraphQL Schema，可以与任何 GraphQL 客户端集成
-- ❓ **特定客户端**：未明确看到 Apollo Client、urql、GQty 等特定客户端的集成文档
+### 5.4 生态集成评估总结
 
-#### 总结
+| 功能              | 支持情况   | 评估        | 说明                                 |
+| ----------------- | ---------- | ----------- | ------------------------------------ |
+| **ORM 集成**      | ❌ 不支持   | ⭐⭐ (2/5)    | 无官方插件，需要手动使用 ORM         |
+| **验证库集成**    | ✅ 支持     | ⭐⭐⭐ (3/5)   | 通过自定义 Scalar，需要手动实现      |
+| **Server 兼容性** | ✅ 广泛支持 | ⭐⭐⭐⭐⭐ (5/5) | 标准 GraphQL Schema，兼容所有 Server |
 
-- ✅ **Server 兼容性优秀**：支持主流 GraphQL Server，无服务器绑定，兼容性极佳
-- ⚠️ **验证库集成待完善**：缺乏官方验证库集成方案，需要手动实现
-- ❌ **ORM 集成缺失**：缺乏官方 ORM 集成方案，需要手动编写 Resolver
-- ✅ **标准兼容**：基于标准 `graphql-js`，可以与整个 GraphQL 生态集成
+**优点**：
+- ✅ **Server 兼容性优秀**：生成的 Schema 是标准 GraphQL Schema，兼容所有 GraphQL Server
+- ✅ **无框架绑定**：不绑定特定的 Server 实现，可以自由选择
+- ✅ **验证库集成支持**：虽然需要手动实现，但可以通过自定义 Scalar 集成验证库
 
-**参考链接**：
-- [GQTX GitHub](https://github.com/sikanhe/gqtx)
-- [GQTX 设计理念 (WHY.md)](https://github.com/sikanhe/gqtx/blob/master/WHY.md)
+**缺点**：
+- ❌ **无 ORM 集成**：不提供官方的 ORM 插件，无法直接复用数据库模型
+- ⚠️ **验证集成需要手动实现**：虽然支持 Zod 集成，但需要为每个验证规则创建自定义 Scalar
+- ⚠️ **无法自动生成**：无法自动生成 CRUD 操作，需要手动编写
+
+**评分**：⭐⭐⭐ (3/5)
+
+gqtx 在 Server 兼容性方面表现优秀，生成的 Schema 是标准 GraphQL Schema，可以无缝集成到任何 GraphQL Server 和框架中。但在 ORM 集成方面支持不足，需要手动编写数据库查询逻辑。验证库集成虽然支持，但需要手动实现，不如提供声明式验证 API 的库方便。
+
+---
+
+## 总结
+
+### 总体评分
+
+| 维度                        | 评分        | 说明                                          |
+| --------------------------- | ----------- | --------------------------------------------- |
+| **1. 架构模式**             | ⭐⭐⭐⭐⭐ (5/5) | Builder 模式，零运行时开销，依赖极简          |
+| **2. 类型定义**             | ⭐⭐⭐ (3/5)   | 功能完整但需要较多样板代码，不是单一数据源    |
+| **3. 解析器定义与输入验证** | ⭐⭐⭐ (3/5)   | 类型推导优秀，但验证功能较弱                  |
+| **4. 内置功能**             | ⭐⭐⭐ (3/5)   | 核心功能完整，但缺少 DataLoader 和 Middleware |
+| **5. 生态集成**             | ⭐⭐⭐ (3/5)   | Server 兼容性优秀，但无 ORM 集成              |
+
+**综合评分**：⭐⭐⭐ (3.4/5)
+
+### 核心优势
+
+1. **极简依赖**：仅 `graphql` 作为 peer dependency，安装即用，无需任何额外配置
+2. **零运行时开销**：纯函数式 API，无反射或元数据，完全由 TypeScript 编译时保证类型安全
+3. **强大的类型推导**：参数和返回值类型完全自动推断，提供完整的 IDE 提示
+4. **标准 GraphQL Schema**：生成的 Schema 是标准的 `graphql.GraphQLSchema`，兼容所有 GraphQL Server
+5. **模块化组织**：支持将 Query、Mutation 和类型定义拆分到不同文件，适合大型项目
+
+### 主要不足
+
+1. **不是单一数据源**：需要同时维护 TypeScript 类型定义和 GraphQL Schema 定义，两者需要手动保持同步
+2. **验证功能较弱**：不提供声明式验证 API，格式验证和业务逻辑验证都需要手动编写
+3. **无内置 DataLoader**：无法自动解决 N+1 查询问题，需要手动实现或集成第三方库
+4. **无 ORM 集成**：不提供官方的 ORM 插件，无法直接复用数据库模型
+5. **样板代码较多**：每个字段都需要手动定义，无法自动推断
+
+### 适用场景
+
+**适合的项目**：
+- ✅ 追求极简依赖和零运行时开销的项目
+- ✅ 需要完全控制 Schema 定义的项目
+- ✅ 不需要复杂验证逻辑的项目
+- ✅ 不需要 ORM 集成的项目（或愿意手动使用 ORM）
+- ✅ 需要与多种 GraphQL Server 集成的项目
+
+**不适合的项目**：
+- ❌ 需要自动从数据库模型生成 Schema 的项目
+- ❌ 需要复杂验证逻辑的项目
+- ❌ 需要批量加载和缓存的项目（除非愿意手动实现）
+- ❌ 追求"单一数据源"和"零配置"的项目
+
+### 最终评价
+
+gqtx 是一个**轻量级、类型安全**的 GraphQL Schema 构建库，在架构设计和类型推导方面表现优秀。它实现了"零魔法"的类型安全，依赖极简，完全符合现代 TypeScript 开发的最佳实践。
+
+然而，gqtx 在**验证功能**、**ORM 集成**和**批量加载**方面较为薄弱，需要开发者手动实现大量功能。对于追求"单一数据源"和"零配置"的开发者来说，gqtx 可能不是最佳选择。
+
+**推荐使用场景**：
+- 小型到中型的 GraphQL API 项目
+- 需要完全控制 Schema 定义的项目
+- 不需要复杂验证和 ORM 集成的项目
+- 追求极简依赖和零运行时开销的项目
+
+**不推荐使用场景**：
+- 需要从数据库模型自动生成 Schema 的项目
+- 需要复杂验证逻辑的项目
+- 需要批量加载和缓存的项目
+- 追求"单一数据源"和"零配置"的项目
+
+---
+
+**报告完成时间**：2026年1月
+**评估版本**：gqtx 0.9.3
+

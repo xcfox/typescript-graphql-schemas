@@ -1,10 +1,16 @@
 type Query {
-  orders: [Order!]!
-  order(id: Int!): Order
-  menu: [MenuItem!]!
-  menuItem(id: Int!): MenuItem
   users: [User!]!
   user(id: Int!): User!
+  menu: [MenuItem!]!
+  menuItem(id: Int!): MenuItem
+  orders: [Order!]!
+  order(id: Int!): Order
+}
+type User {
+  id: Int!
+  name: String!
+  email: String!
+  orders: [Order!]!
 }
 type Order {
   id: Int!
@@ -14,12 +20,6 @@ type Order {
   createdAt: Date!
   user: User!
   items: [MenuItem!]!
-}
-type User {
-  id: Int!
-  name: String!
-  email: String!
-  orders: [Order!]!
 }
 type Coffee implements MenuItem {
   id: Int!
@@ -35,9 +35,9 @@ type Dessert implements MenuItem {
   calories: Number!
 }
 type Mutation {
-  createOrder(userId: Int!, items: [Int!]!): Order!
-  updateOrder(id: Int!, status: OrderStatusInput!): Order
-  deleteOrder(id: Int!): Order
+  createUser(name: String!, email: String!): User!
+  updateUser(id: Int!, name: String, email: String): User!
+  deleteUser(id: Int!): User
   createCoffee(
     name: String!
     price: Number!
@@ -54,9 +54,9 @@ type Mutation {
   createDessert(name: String!, price: Number!, calories: Number!): Dessert!
   updateDessert(id: Int!, name: String, price: Number, calories: Number): Dessert
   deleteMenuItem(id: Int!): MenuItem
-  createUser(name: String!, email: String!): User!
-  updateUser(id: Int!, name: String, email: String): User!
-  deleteUser(id: Int!): User
+  createOrder(userId: Int!, items: [Int!]!): Order!
+  updateOrder(id: Int!, status: OrderStatusInput!): Order
+  deleteOrder(id: Int!): Order
 }
 interface MenuItem {
   id: Int!
@@ -86,14 +86,14 @@ enum SugarLevel {
   MEDIUM
   HIGH
 }
-enum OrderStatusInput {
-  PENDING
-  COMPLETED
-  CANCELLED
-}
 enum SugarLevelInput {
   NONE
   LOW
   MEDIUM
   HIGH
+}
+enum OrderStatusInput {
+  PENDING
+  COMPLETED
+  CANCELLED
 }

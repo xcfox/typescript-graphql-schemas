@@ -962,31 +962,51 @@ const server = new ApolloServer({ schema })  // Apollo Server
 - ⚠️ 需要手动适配：虽然兼容，但需要手动适配，没有提供官方适配器
 - ⚠️ 文档主要展示 graphql-yoga：其他 Server 的集成文档不完整
 
-#### 5.4 Web 框架适配（Web Framework Adapter）
+#### 5.4 工具链集成（Toolchain Integration）
 
 **得分：<-待评分->**
 
 **证据**：
-- **通过 GraphQL Server 集成**：`garph/www/docs/integration/examples/nextjs.md` 展示通过 graphql-yoga 集成到 Next.js
-- **有示例但无官方适配器**：提供 Next.js、Nuxt、Remix 的示例，但都是通过 graphql-yoga 集成
-- **需要手动配置**：`typescript-graphql-schemas/garph/src/server.ts` 展示需要手动创建 HTTP Server
+
+**TypeScript/JavaScript 支持**：
+- **TypeScript 原生**：`garph/src/index.ts`、`garph/src/schema.ts` 等核心文件均为 TypeScript 编写
+- **编译为 JavaScript**：`garph/package.json` 第 10 行 `"main": "dist/index.js"` 表明编译为 JavaScript 输出
+- **TypeScript 配置**：`garph/tsconfig.json` 显示 `target: "ESNext"`, `module: "NodeNext"`，使用现代 ES 模块
+- **所有示例为 TypeScript**：`garph/examples/` 目录下所有示例文件均为 `.ts` 文件，无纯 JavaScript 示例
+
+**运行时环境支持**：
+- **Node.js**：明确支持。所有官方示例（`garph/examples/demo.ts`、`garph/examples/context.ts` 等）均使用 Node.js 的 `createServer` 和 `http` 模块
+- **Bun**：文档中提及支持。`garph/www/docs/integration/server/graphql-yoga.md` 第 26-28 行提供 `bun i graphql-yoga` 安装方式，`garph/www/docs/index.md` 第 41-43 行也提供 bun 安装示例
+- **Deno/Cloudflare Workers**：无明确证据。源码和文档中未发现 Deno 或 Cloudflare Workers 的示例或配置
+- **浏览器**：不支持。核心代码 `garph/src/schema.ts` 依赖 `graphql-compose` 和 `single-user-cache`，这些依赖可能包含 Node.js 特定 API；所有示例均为服务器端代码；无浏览器运行示例或文档
+
+**构建工具支持**：
+- **无明确配置**：源码和文档中未发现 webpack、vite、rspack 等构建工具的配置示例
+- **使用 TypeScript 编译器**：`garph/package.json` 第 15 行构建脚本为 `"build": "tsc -p tsconfig.json"`，仅使用 TypeScript 编译器
+- **文档使用 VitePress**：`garph/package.json` 第 12-14 行显示文档使用 VitePress（基于 Vite），但这是文档构建工具，非框架本身的构建工具集成
 
 **代码示例**：
 ```typescript
-// 通过 graphql-yoga 集成
+// garph/examples/demo.ts - Node.js 环境
+import { g, InferResolvers, buildSchema } from '../src/index'
+import { createYoga } from 'graphql-yoga'
+import { createServer } from 'http'  // Node.js 特定 API
+
 const schema = buildSchema({ g, resolvers })
 const yoga = createYoga({ schema })
-const server = createServer(yoga)  // 手动创建 HTTP Server
+const server = createServer(yoga)  // 需要 Node.js http 模块
 server.listen(4000, () => {
   console.info('Server is running on http://localhost:4000/graphql')
 })
 ```
 
 **分析**：
-- ✅ 可以通过标准 GraphQL Server 集成：通过 graphql-yoga 可以集成到任何 Web 框架
-- ⚠️ 需要手动配置：需要手动创建 HTTP Server 或通过 graphql-yoga 集成
-- ⚠️ 无官方适配器：不提供 Express、Fastify、Hono、Koa 等的官方适配器
-- ⚠️ 集成文档有限：主要提供 Next.js、Nuxt、Remix 的示例，其他框架需要自行适配
+- ✅ **TypeScript 原生支持**：框架完全用 TypeScript 编写，编译为 JavaScript
+- ✅ **支持 Node.js 和 Bun**：明确支持 Node.js，文档提及 Bun 支持
+- ⚠️ **不支持浏览器**：核心依赖可能包含 Node.js 特定 API，无浏览器运行证据
+- ⚠️ **Deno/Cloudflare Workers 支持不明确**：无相关示例或文档
+- ⚠️ **构建工具集成缺失**：无 webpack、vite、rspack 等构建工具的配置示例或文档
+- ⚠️ **主要面向服务器端**：所有示例和文档均为服务器端使用场景
 
 ### 生态集成综合评分
 
@@ -996,7 +1016,7 @@ server.listen(4000, () => {
 - ORM 集成深度：<-待评分->（弱集成，需要大量胶水代码）
 - 验证库集成：<-待评分->（弱集成，需要大量样板代码）
 - GraphQL Server 兼容性：<-待评分->（标准兼容，但需要手动适配）
-- Web 框架适配：<-待评分->（标准集成，但需要手动配置）
+- 工具链集成：<-待评分->（主要支持 TypeScript 和 Node.js/Bun，不支持浏览器，构建工具集成缺失）
 
 **优势**：
 1. **标准兼容**：输出标准 GraphQL Schema，可以与任何 GraphQL Server 集成
@@ -1006,8 +1026,9 @@ server.listen(4000, () => {
 **劣势**：
 1. **ORM 集成弱**：无官方插件，需要大量胶水代码
 2. **验证库集成弱**：需要手动集成，验证逻辑与 Schema 定义分离
-3. **无官方适配器**：不提供 Web 框架的官方适配器，需要手动配置
-4. **集成文档有限**：主要展示 graphql-yoga，其他 Server 和框架的文档不完整
+3. **工具链支持有限**：不支持浏览器环境，Deno/Cloudflare Workers 支持不明确，无构建工具集成示例
+4. **主要面向服务器端**：所有示例和文档均为服务器端使用场景，客户端使用受限
+5. **集成文档有限**：主要展示 graphql-yoga，其他 Server 和框架的文档不完整
 
 ## 📝 总结
 

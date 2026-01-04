@@ -14,8 +14,8 @@
 ## 📊 综合评分
 | 维度                | 得分 (1-5) | 简评                                                         |
 | :------------------ | :--------- | :----------------------------------------------------------- |
-| **1. 架构模式**     | **2.5** | Inference 模式，必须构建，深度集成 Hono                      |
-| **2. 类型定义**     | **2.5** | 深度推断，零配置枚举，智能接口检测                           |
+| **1. 架构模式**     | **2.5**    | Inference 模式，必须构建，深度集成 Hono                      |
+| **2. 类型定义**     | **2.5**    | 深度推断，零配置枚举，智能接口检测                           |
 | **3. 解析器与验证** | **2.5**    | 代码简洁，类型自动推断，但验证和 DataLoader 需手动实现       |
 | **4. 内置功能**     | **3.1**    | Context/Middleware/Subscriptions 完善，DataLoader 无内置支持 |
 | **5. 生态集成**     | <-待评分-> | ORM 基础集成，验证库无集成，框架绑定严重                     |
@@ -1477,49 +1477,190 @@ const yoga = createYoga({
 
 **结论**：绑定特定 Server。强制绑定特定 GraphQL Server（GraphQL Yoga），无法集成到其他 Server。
 
-#### 5.4 Web 框架适配（Web Framework Adapter）
+#### 5.4 工具链集成（Toolchain Integration）
 
 **评分：<-待评分->**
 
-**证据**：
-- **绑定 Hono**：`packages/pylon/src/app/index.ts`（第 6 行）`app` 是 Hono 实例，无法更换
-- **支持多种运行时**：支持 Node.js、Bun、Deno、Cloudflare Workers（`README.md` 第 167-173 行）
-- **无法集成到其他框架**：核心实现依赖 Hono，无法集成到其他 Web 框架（如 Express、Fastify、Next.js）
+##### TypeScript/JavaScript 支持
 
-**核心实现**（`packages/pylon/src/app/index.ts`）：
+**TypeScript 支持**：
+- **✅ 核心语言**：所有官方模板和示例均使用 TypeScript（`.ts` 文件）
+  - `packages/create-pylon/templates/node/default/src/index.ts`
+  - `packages/create-pylon/templates/bun/default/src/index.ts`
+  - `packages/create-pylon/templates/cf-workers/default/src/index.ts`
+  - `packages/create-pylon/templates/deno/default/src/index.ts`
+- **✅ TypeScript 配置**：提供官方 TypeScript 配置模板 `tsconfig.pylon.json`
+  - `packages/pylon/tsconfig.pylon.json`（第 1-24 行）包含完整的 TypeScript 配置
+  - 所有模板项目均继承此配置（`packages/create-pylon/templates/shared/tsconfig.json` 第 2 行）
+
+**JavaScript 支持**：
+- **⚠️ 部分支持**：`tsconfig.pylon.json` 中设置 `allowJs: true`（第 13 行），允许在 TypeScript 中导入 JavaScript 文件
+- **⚠️ 但无纯 JavaScript 示例**：
+  - 所有官方模板和示例均为 TypeScript 文件
+  - 构建工具（`pylon-builder`）使用 `esbuild` 的 `loader: 'ts'`（`packages/pylon-builder/src/bundler/bundler.ts` 第 64 行），主要处理 TypeScript
+  - 文档和示例中未提供纯 JavaScript 的使用指南
+
+**代码证据**：
+
+`packages/pylon/tsconfig.pylon.json`（第 12-13 行）：
+```json
+"jsx": "react-jsx", // support JSX
+"allowJs": true, // allow importing `.js` from `.ts`
+```
+
+`packages/pylon-builder/src/bundler/bundler.ts`（第 63-64 行）：
 ```typescript
-// 第 6 行：app 是 Hono 实例
-export const app = new Hono<Env>()
+return {
+  loader: 'ts',
+  contents: contents + `...`
+}
+```
 
-// 第 8 行：使用 Hono 中间件
-app.use('*', sentry())
+##### 运行时环境支持
 
-// 第 10-20 行：使用 Hono 中间件
-app.use('*', async (c, next) => {
-  return new Promise((resolve, reject) => {
-    asyncContext.run(c, async () => {
-      try {
-        resolve(await next())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  })
+**Node.js**：
+- **✅ 明确支持**：提供官方 Node.js 模板和示例
+  - `packages/create-pylon/templates/node/default/` 提供完整的 Node.js 模板
+  - `examples/nodejs-subscriptions/package.json`（第 13 行）使用 `@hono/node-server` 适配 Node.js
+  - `examples/nodejs-subscriptions/package.json`（第 8 行）开发命令：`"dev": "pylon dev -c \"node --enable-source-maps .pylon/index.js\""`
+
+**Bun**：
+- **✅ 明确支持**：提供官方 Bun 模板和示例
+  - `packages/create-pylon/templates/bun/default/` 提供完整的 Bun 模板
+  - `examples/bun-testing/package.json`（第 8 行）开发命令：`"dev": "pylon dev -c 'bun run .pylon/index.js'"`
+  - `README.md`（第 171-173 行）明确列出 Bun 作为支持的运行时
+
+**Deno**：
+- **✅ 明确支持**：提供官方 Deno 模板
+  - `packages/create-pylon/templates/deno/default/` 提供完整的 Deno 模板
+  - `packages/create-pylon/templates/deno/default/deno.json`（第 7 行）开发命令：`"dev": "pylon dev -c 'deno run -A .pylon/index.js --config tsconfig.json'"`
+  - `packages/create-pylon/templates/deno/default/src/index.ts`（第 12-17 行）使用 `Deno.serve()` 启动服务
+
+**Cloudflare Workers**：
+- **✅ 明确支持**：提供官方 Cloudflare Workers 模板和示例
+  - `packages/create-pylon/templates/cf-workers/default/` 提供完整的 Cloudflare Workers 模板
+  - `examples/cloudflare-drizzle-d1/package.json`（第 6 行）部署命令：`"deploy": "pylon build && wrangler deploy"`
+  - `README.md`（第 155 行）明确说明 "Pylon is fully compatible with Cloudflare Workers"
+
+**浏览器**：
+- **❌ 不支持**：Pylon 是服务器端 GraphQL 框架，无法在浏览器环境中运行
+  - 核心实现依赖 Hono（`packages/pylon/src/app/index.ts` 第 2 行），这是服务器端 Web 框架
+  - 依赖 GraphQL Yoga（`packages/pylon/package.json` 第 33 行），这是服务器端 GraphQL Server
+  - 所有示例和模板均为服务器端代码，无浏览器运行示例或文档
+
+**代码证据**：
+
+`packages/create-pylon/templates/node/default/src/index.ts`（第 1-15 行）：
+```typescript
+import {app} from '@getcronit/pylon'
+import {serve} from '@hono/node-server'
+
+export const graphql = {
+  Query: {
+    hello: () => {
+      return 'Hello, world!'
+    }
+  },
+  Mutation: {}
+}
+
+serve(app, info => {
+  console.log(`Server running at ${info.port}`)
 })
 ```
 
-**运行时支持**（`README.md`）：
-- Node.js：通过 `@hono/node-server` 支持（`examples/nodejs-subscriptions`）
-- Bun：原生支持
-- Deno：原生支持
-- Cloudflare Workers：原生支持（`examples/cloudflare-drizzle-d1`）
+`packages/create-pylon/templates/deno/default/src/index.ts`（第 12-17 行）：
+```typescript
+Deno.serve(
+  {
+    port: 3000
+  },
+  app.fetch
+)
+```
+
+##### 构建工具支持
+
+**esbuild**：
+- **✅ 核心构建工具**：Pylon 的构建系统完全基于 esbuild
+  - `packages/pylon-builder/src/bundler/bundler.ts`（第 4 行）导入 `esbuild`
+  - `packages/pylon-builder/src/bundler/bundler.ts`（第 94-109 行）使用 `esbuild.build()` 进行构建
+  - `packages/pylon-builder/package.json`（第 25 行）依赖 `"esbuild": "^0.23.1"`
+  - 用户必须使用 `pylon build` 或 `pylon dev` 命令，这些命令内部使用 esbuild
+
+**Webpack**：
+- **⚠️ 无官方配置示例**：
+  - 文档和示例中未提供 webpack 配置示例
+  - 用户项目无法直接使用 webpack 构建 Pylon 服务器代码
+  - 必须使用 `pylon build` 命令生成构建产物，然后可以手动集成到 webpack 工作流中
+
+**Vite**：
+- **⚠️ 无官方配置示例**：
+  - 文档和示例中未提供 vite 配置示例
+  - `examples/cloudflare-pages-worker-monorepo/apps/vite-project/` 中的 vite 项目是客户端项目，不是 Pylon 服务器本身
+  - 用户项目无法直接使用 vite 构建 Pylon 服务器代码
+  - 必须使用 `pylon build` 命令生成构建产物
+
+**Rspack**：
+- **⚠️ 无官方配置示例**：
+  - 文档和示例中未提供 rspack 配置示例
+  - 无 rspack 相关配置文件或文档
+  - 用户项目无法直接使用 rspack 构建 Pylon 服务器代码
+
+**构建流程限制**：
+- **⚠️ 必须使用 Pylon CLI**：用户必须使用 `pylon build` 或 `pylon dev` 命令
+  - `packages/pylon-dev/src/index.ts`（第 19-37 行）实现 `build` 命令
+  - `packages/pylon-dev/src/index.ts`（第 40-278 行）实现 `dev` 命令
+  - 这些命令内部调用 `@getcronit/pylon-builder` 进行构建
+  - 无法绕过 Pylon CLI 直接使用其他构建工具
+
+**代码证据**：
+
+`packages/pylon-builder/src/bundler/bundler.ts`（第 94-109 行）：
+```typescript
+const output = await build({
+  logLevel: 'silent',
+  metafile: true,
+  entryPoints: [inputPath],
+  outdir: dir,
+  bundle: true,
+  format: 'esm',
+  sourcemap: 'inline',
+  packages: 'external',
+  plugins: [
+    injectCodePlugin,
+    esbuildPluginTsc({
+      tsconfigPath: path.join(process.cwd(), 'tsconfig.json')
+    })
+  ]
+})
+```
+
+`packages/pylon-dev/src/index.ts`（第 19-37 行）：
+```typescript
+program
+  .command('build')
+  .description('Build the Pylon Schema')
+  .action(async () => {
+    consola.start('[Pylon]: Building schema')
+
+    const {totalFiles, totalSize, duration} = await build({
+      sfiFilePath: './src/index.ts',
+      outputFilePath: './.pylon'
+    })
+    // ...
+  })
+```
 
 **分析**：
-- ⚠️ **强制绑定 Hono**：核心实现依赖 Hono，无法更换
-- ✅ **支持多种运行时**：虽然绑定 Hono，但 Hono 支持多种运行时
-- ⚠️ **无法集成到其他框架**：无法集成到 Express、Fastify、Next.js 等其他 Web 框架
+- ✅ **TypeScript 支持完善**：所有官方模板和示例均使用 TypeScript，提供完整的 TypeScript 配置
+- ⚠️ **JavaScript 支持有限**：虽然允许导入 JavaScript 文件，但无纯 JavaScript 示例，构建工具主要处理 TypeScript
+- ✅ **多运行时支持良好**：明确支持 Node.js、Bun、Deno、Cloudflare Workers，提供官方模板和示例
+- ❌ **浏览器不支持**：Pylon 是服务器端框架，无法在浏览器环境中运行
+- ✅ **esbuild 作为核心构建工具**：构建系统完全基于 esbuild
+- ⚠️ **其他构建工具支持有限**：无 webpack、vite、rspack 的官方配置示例，用户必须使用 Pylon CLI 进行构建
 
-**结论**：框架绑定。强制绑定特定 Web 框架（Hono），无法集成到其他框架或需要大量手动适配。
+**结论**：基础支持。主要支持 TypeScript，可在部分主流运行时运行，支持部分构建工具，但需要特定配置，灵活性有限。
 
 ### 生态集成综合评分
 
@@ -1529,17 +1670,20 @@ app.use('*', async (c, next) => {
 - ORM 集成深度：<-待评分->（基础集成，支持 Prisma 和 Drizzle，但需要手动集成）
 - 验证库集成：<-待评分->（无集成，需要手动实现验证逻辑）
 - GraphQL Server 兼容性：<-待评分->（绑定 GraphQL Yoga，无法更换）
-- Web 框架适配：<-待评分->（绑定 Hono，无法更换）
+- 工具链集成：<-待评分->（主要支持 TypeScript，可在部分主流运行时运行，支持部分构建工具，但需要特定配置，灵活性有限）
 
 **优势**：
 1. **ORM 支持良好**：官方推荐 Prisma，提供集成指南和 `prisma-extended-models` 包
-2. **多运行时支持**：虽然绑定 Hono，但 Hono 支持多种运行时（Node.js、Bun、Deno、Cloudflare Workers）
+2. **多运行时支持**：明确支持 Node.js、Bun、Deno、Cloudflare Workers，提供官方模板和示例
 3. **Envelop 插件支持**：支持通过 Envelop 插件扩展功能
+4. **TypeScript 支持完善**：所有官方模板和示例均使用 TypeScript，提供完整的 TypeScript 配置
 
 **劣势**：
 1. **验证库无集成**：完全不支持主流验证库，需要手动实现验证逻辑
 2. **框架绑定严重**：强制绑定 Hono 和 GraphQL Yoga，无法更换
 3. **ORM 集成需要手动配置**：虽然支持 ORM，但需要手动集成和配置，不是零样板代码
+4. **构建工具灵活性有限**：必须使用 Pylon CLI 和 esbuild，无 webpack、vite、rspack 的官方配置示例
+5. **浏览器不支持**：Pylon 是服务器端框架，无法在浏览器环境中运行
 
 ## 📝 总结
 

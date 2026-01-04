@@ -1476,78 +1476,272 @@ const yoga = createYoga({ schema })  // 直接使用标准 GraphQLSchema
 
 **结论**：完全兼容。输出标准 `GraphQLSchema`，与所有主流 GraphQL Server 兼容，无需适配器。
 
-### 5.4 Web 框架适配（Web Framework Adaptation）
+### 5.4 工具链集成（Toolchain Integration）
 
 **评分：<-待评分->**
 
-**实现方式**：
-- **通过 GraphQL Server 集成**：通过标准 GraphQL Server 与 Web 框架集成
-- **支持多种框架**：可以与 Express、Fastify、Next.js、Hono 等框架集成
-- **无需官方适配器**：不需要官方适配器，通过标准 GraphQL Server 集成
+#### TypeScript/JavaScript 支持
 
-**实际使用证据**：
-```typescript
-// examples/with-prisma/api.ts
-import { ApolloServer } from 'apollo-server-express'
-import express from 'express'
-import { makeSchema } from 'nexus'
+**TypeScript 支持**：
+- **✅ 核心支持**：Nexus 完全用 TypeScript 编写（`src/` 目录下所有文件均为 `.ts`），编译为 JavaScript，支持 CommonJS 和 ESM 双格式输出
+- **✅ 双格式输出**：`package.json`（第 29-30 行）提供 `"main": "dist"`（CommonJS）和 `"module": "dist-esm"`（ESM）两种格式
+- **✅ 类型定义**：`package.json`（第 31 行）提供 `"types": "dist/index.d.ts"`，完整的 TypeScript 类型支持
+- **✅ 所有官方示例均为 TypeScript**：除 `githunt-api` 外，所有示例（`with-prisma`、`kitchen-sink`、`star-wars`、`apollo-fullstack`、`ts-ast-reader`、`ghost`、`zeit-typescript`）均使用 TypeScript
 
-const apollo = new ApolloServer({
-  context: () => ({ prisma }),
-  schema: makeSchema({ /* ... */ }),
+**JavaScript 支持**：
+- **✅ 官方文档明确支持**：`docs/content/040-adoption-guides/020-nexus-framework-users.mdx`（第 19-21 行）明确说明："If you had been using TypeScript before only because Nexus Framework forced you to, then know that you can use JavaScript with `nexus` if you want."
+- **✅ 官方示例验证**：`examples/githunt-api/` 提供完整的 JavaScript 使用示例
+  - `src/index.js`：使用 CommonJS `require()` 导入 Nexus
+  - `src/schema.js`：使用 JavaScript 定义 GraphQL Schema
+  - `jsconfig.json`：配置 `"checkJs": true` 启用 JavaScript 类型检查
+- **⚠️ 但主要面向 TypeScript**：文档首页（`docs/content/index.mdx` 第 9 行）描述为 "TypeScript/JavaScript"，但所有其他示例和文档均以 TypeScript 为主
+
+**代码证据**：
+
+```javascript
+// examples/githunt-api/src/index.js
+// @ts-check
+const { ApolloServer } = require('apollo-server')
+const path = require('path')
+const { makeSchema } = require('nexus')
+const types = require('./schema')
+
+const schema = makeSchema({
+  types,
+  outputs: {
+    schema: path.join(__dirname, '../githunt-api-schema.graphql'),
+    typegen: path.join(__dirname, './githunt-typegen.ts'),
+  },
+  prettierConfig: require.resolve('../../../.prettierrc'),
 })
 
-const app = express()
-apollo.applyMiddleware({ app })  // 与 Express 集成
-
-app.listen(4000, () => {
-  console.log(`🚀 GraphQL service ready at http://localhost:4000/graphql`)
+const server = new ApolloServer({
+  // @ts-ignore
+  schema,
 })
+
+const port = process.env.PORT || 4000
+
+server.listen({ port }, () => console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`))
 ```
 
-**Next.js 集成**：
+```json
+// package.json
+{
+  "main": "dist",
+  "module": "dist-esm",
+  "types": "dist/index.d.ts"
+}
+```
+
+#### 运行时环境支持
+
+**Node.js**：
+- **✅ 明确支持**：所有官方示例均为 Node.js 环境
+  - `examples/with-prisma/api.ts`：使用 Express 和 Apollo Server
+  - `examples/kitchen-sink/package.json`：使用 `ts-node` 运行
+  - `examples/star-wars/package.json`：使用 `ts-node-dev` 运行
+- **✅ 源码依赖 Node.js API**：源码中大量使用 Node.js 特定 API
+  - `src/node.ts`：提供 `nodeImports()` 函数，使用 `require('fs')` 和 `require('path')`
+  - `src/typegenUtils.ts`（第 12 行）：使用 `process.cwd()` 获取当前工作目录
+  - `src/makeSchema.ts`（第 43、47 行）：使用 `process.exit()` 退出进程
+  - `src/plugins/connectionPlugin.ts`（第 350、354 行）：使用 `Buffer.from()` 进行 base64 编码/解码
+  - `src/utils.ts`（第 472 行）：使用 `require('../package.json')` 读取包信息
+- **✅ 类型生成依赖文件系统**：`src/typegenMetadata.ts` 使用 `fs.promises.readFile()` 和 `fs.promises.writeFile()` 读写文件
+
+**Bun**：
+- **⚠️ 理论上支持但未验证**：
+  - Nexus 输出标准 JavaScript 代码，理论上可以在 Bun 运行
+  - 但源码中大量使用 Node.js 特定 API（`fs`、`path`、`process`、`Buffer`、`require`），这些在 Bun 中可能不兼容
+  - 无 Bun 相关文档、示例或配置
+  - 所有示例项目均为 Node.js 环境
+
+**Deno**：
+- **⚠️ 理论上支持但未验证**：
+  - Nexus 输出标准 JavaScript 代码，理论上可以在 Deno 运行
+  - 但源码中大量使用 Node.js 特定 API，需要 Deno 兼容层支持
+  - 无 Deno 相关文档、示例或配置
+  - 所有示例项目均为 Node.js 环境
+
+**Cloudflare Workers**：
+- **❌ 不支持**：
+  - 类型生成功能依赖文件系统（`fs`、`path`），Cloudflare Workers 不支持文件系统访问
+  - 使用 `process`、`Buffer` 等 Node.js 特定 API，Cloudflare Workers 环境不支持
+  - 无 Cloudflare Workers 相关文档、示例或配置
+
+**浏览器**：
+- **❌ 不支持**：
+  - 类型生成功能依赖文件系统，浏览器环境不支持文件系统访问
+  - 使用 `process`、`Buffer`、`require` 等 Node.js 特定 API，浏览器环境不支持
+  - 无浏览器运行示例或文档
+
+**代码证据**：
+
 ```typescript
-// 通过 API Route 集成
-import { createYoga } from 'graphql-yoga'
-import { schema } from './schema'
+// src/node.ts
+export function nodeImports() {
+  const fs = require('fs') as typeof import('fs')
+  const path = require('path') as typeof import('path')
+  return {
+    fs,
+    path,
+  }
+}
+```
 
-const yoga = createYoga({ schema })
+```typescript
+// src/typegenUtils.ts
+function getOutputPaths() {
+  const defaultSDLFilePath = nodeImports().path.join(process.cwd(), 'schema.graphql')
+  // ...
+}
+```
 
-export default yoga
+```typescript
+// src/makeSchema.ts
+typegenPromise
+  .then(() => {
+    console.log(`Generated Artifacts:
+    TypeScript Types  ==> ${typegenPath}
+    GraphQL Schema    ==> ${typegenConfig.outputs.schema || '(not enabled)'}`)
+    process.exit(0)
+  })
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+```
+
+```typescript
+// src/plugins/connectionPlugin.ts
+function base64Encode(str: string) {
+  return Buffer.from(str, 'utf8').toString('base64')
+}
+
+function base64Decode(str: string) {
+  return Buffer.from(str, 'base64').toString('utf8')
+}
+```
+
+#### 构建工具支持
+
+**TypeScript 编译器（tsc）**：
+- **✅ 核心构建方式**：所有官方示例均使用 TypeScript 编译器（`tsc`）进行构建
+  - `examples/with-prisma/package.json`（第 6 行）：`"build": "yarn build:reflection && tsc"`
+  - `examples/kitchen-sink/package.json`（第 6 行）：`"build": "ts-node --log-error src/index.ts"`
+  - 框架自身构建：`package.json`（第 33 行）：`"build": "yarn -s clean && tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json"`
+- **✅ 双格式输出配置**：
+  - `tsconfig.cjs.json`：输出 CommonJS 格式（`"module": "CommonJS"`）
+  - `tsconfig.esm.json`：输出 ESM 格式（`"module": "ES2015"`）
+
+**esbuild**：
+- **✅ 文档提及支持**：`docs/content/040-adoption-guides/020-nexus-framework-users.mdx`（第 172-174 行）明确列出 `esbuild` 作为推荐的打包工具之一
+- **✅ 测试验证**：`tests/esm/standalone.spec.ts` 提供 esbuild 集成测试示例
+- **⚠️ 但无官方配置示例**：文档仅提及可以使用，未提供完整的配置示例
+
+**其他打包工具**：
+- **✅ 文档提及支持**：`docs/content/040-adoption-guides/020-nexus-framework-users.mdx`（第 172-174 行）列出 `spack` 和 `ncc` 作为可选打包工具
+- **⚠️ 但无官方配置示例**：文档仅提及可以使用，未提供完整的配置示例
+
+**Webpack**：
+- **⚠️ 无官方配置示例**：
+  - 文档和示例中未提供 webpack 配置示例
+  - `docs/package.json` 包含 `webpack` 依赖，但这是用于文档网站构建（Gatsby），不是框架本身的构建工具集成
+  - 理论上可以通过 TypeScript 编译器集成，但需要用户自行配置
+
+**Vite**：
+- **⚠️ 无官方配置示例**：
+  - 文档和示例中未提供 vite 配置示例
+  - 无 vite 相关配置文件或文档
+  - 理论上可以通过 TypeScript 编译器集成，但需要用户自行配置
+
+**Rspack**：
+- **⚠️ 无官方配置示例**：
+  - 文档和示例中未提供 rspack 配置示例
+  - 无 rspack 相关配置文件或文档
+  - 理论上可以通过 TypeScript 编译器集成，但需要用户自行配置
+
+**代码证据**：
+
+```markdown
+<!-- docs/content/040-adoption-guides/020-nexus-framework-users.mdx -->
+3. Optional: Run a bundler yourself
+
+   This is probably something you don't need to do. Nexus Framework took a packages-bundled approach to dependencies and this mean a large package size that bloated deployments necessitating techniques like tree-shaking (e.g. TypeScript dependency is over 50mb). This problem generally goes away when using the Nexus library directly. However bundling for serverless deployments can still be desirable especially if your non-development dependencies are heavy and not fully used at runtime. If you were relying on Nexus Framework bundling here are some tools you can try out yourself:
+
+   - [`spack`](https://swc-project.github.io/docs/usage-spack-cli)
+   - [`esbuild`](https://github.com/evanw/esbuild)
+   - [`ncc`](https://github.com/vercel/ncc)
+
+   These tools take care of TypeScript transpilation so you should be able to skip using `tsc` manually with the above tools.
+
+   When you are bundling your app you may need to tweak your `tsconfig.json` to output ES modules rather than CJS modules. The options you will need to think about are [`module`](https://www.typescriptlang.org/tsconfig#module), [`moduleResolution`](https://www.typescriptlang.org/tsconfig#moduleResolution), and [`target`](https://www.typescriptlang.org/tsconfig#target). There are few ways to go about this, the following is one:
+
+   ```json
+   {
+     "compilerOptions": {
+       "moduleResolution": "Node",
+       "target": "ES2015",
+       "module": "ES2015"
+     }
+   }
+   ```
+```
+
+```typescript
+// tests/esm/standalone.spec.ts
+it('should build the esbuild', async () => {
+  const out = await esbuild.build({
+    bundle: true,
+    format: 'esm',
+    target: 'esnext',
+    // minify: true,
+    mainFields: ['module', 'main'],
+    external: ['path', 'fs', 'prettier'],
+    entryPoints: [path.join(__dirname, 'esm-entry.js')],
+    outdir: path.join(__dirname, 'out'),
+    outExtension: { '.js': '.mjs' },
+    metafile: true,
+  })
+})
 ```
 
 **分析**：
-- ✅ 支持多种框架：可以与 Express、Fastify、Next.js、Hono 等框架集成
-- ✅ 无需官方适配器：通过标准 GraphQL Server 集成，不需要官方适配器
-- ✅ 灵活集成：可以根据业务需求选择最适合的 GraphQL Server 和 Web 框架组合
-
-**结论**：完全兼容。通过标准 GraphQL Server 与 Web 框架集成，支持多种框架，无需官方适配器。
+- ✅ **TypeScript 原生支持**：框架完全用 TypeScript 编写，编译为 JavaScript，支持 ESM 和 CommonJS 双格式输出
+- ✅ **JavaScript 支持**：官方文档明确支持，提供完整的 JavaScript 使用示例（`githunt-api`）
+- ✅ **Node.js 明确支持**：所有官方示例均为 Node.js 环境，源码大量使用 Node.js 特定 API
+- ⚠️ **其他运行时环境受限**：Bun、Deno 理论上支持但未验证；浏览器、Cloudflare Workers 不支持（依赖文件系统）
+- ✅ **TypeScript 编译器核心支持**：所有示例均使用 `tsc` 构建，框架自身也使用 `tsc` 构建
+- ✅ **esbuild 文档支持**：文档明确提及支持，提供测试示例
+- ⚠️ **其他构建工具无官方配置**：webpack、vite、rspack 等无官方配置示例，需要用户自行配置
 
 ### 生态集成总结
 
-| 评估项                    | 得分       | 说明                                                      |
-| :------------------------ | :--------- | :-------------------------------------------------------- |
-| **ORM 集成深度**          | <-待评分-> | 支持通过插件或手动方式集成 Prisma，需要较多配置和样板代码 |
-| **验证库集成**            | <-待评分-> | 仅能通过手动方式使用验证库，需要大量样板代码              |
-| **GraphQL Server 兼容性** | <-待评分-> | 完全兼容，输出标准 GraphQLSchema，无需适配器              |
-| **Web 框架适配**          | <-待评分-> | 完全兼容，通过标准 GraphQL Server 与 Web 框架集成         |
+| 评估项                    | 得分       | 说明                                                                                         |
+| :------------------------ | :--------- | :------------------------------------------------------------------------------------------- |
+| **ORM 集成深度**          | <-待评分-> | 支持通过插件或手动方式集成 Prisma，需要较多配置和样板代码                                    |
+| **验证库集成**            | <-待评分-> | 仅能通过手动方式使用验证库，需要大量样板代码                                                 |
+| **GraphQL Server 兼容性** | <-待评分-> | 完全兼容，输出标准 GraphQLSchema，无需适配器                                                 |
+| **工具链集成**            | <-待评分-> | 支持 TypeScript 和 JavaScript，主要支持 Node.js，支持 tsc 和 esbuild，其他构建工具需自行配置 |
 
 **综合评分：<-待评分->**
 
 **评分依据**：
-- GraphQL Server 和 Web 框架兼容性优秀：输出标准 `GraphQLSchema`，与所有主流 GraphQL Server 和 Web 框架兼容
+- GraphQL Server 兼容性优秀：输出标准 `GraphQLSchema`，与所有主流 GraphQL Server 兼容
+- 工具链集成基础：支持 TypeScript 和 JavaScript，但主要面向 Node.js 环境，其他运行时环境支持有限
 - ORM 集成基础：支持 Prisma 插件，但需要手动编写 Resolver 逻辑，不支持其他 ORM
 - 验证库集成弱：无内置验证支持，需要手动实现，验证逻辑与 Schema 定义分离
 
 **优势**：
 1. **完全兼容 GraphQL Server**：输出标准 `GraphQLSchema`，与所有主流 GraphQL Server 兼容
-2. **灵活集成**：可以与任何 Web 框架集成，无需官方适配器
+2. **TypeScript/JavaScript 双支持**：官方文档明确支持 JavaScript，提供完整示例
 3. **插件系统**：通过插件系统可以扩展功能（如 Prisma 集成）
 
 **劣势**：
-1. **ORM 集成有限**：仅支持 Prisma，不支持其他 ORM（如 Drizzle、TypeORM、MikroORM）
-2. **验证库集成弱**：无内置验证支持，需要手动实现，验证逻辑与 Schema 定义分离
-3. **需要样板代码**：ORM 和验证库集成需要大量样板代码
+1. **运行时环境受限**：主要支持 Node.js，浏览器和 Cloudflare Workers 不支持，Bun/Deno 未验证
+2. **ORM 集成有限**：仅支持 Prisma，不支持其他 ORM（如 Drizzle、TypeORM、MikroORM）
+3. **验证库集成弱**：无内置验证支持，需要手动实现，验证逻辑与 Schema 定义分离
+4. **构建工具配置有限**：除 tsc 和 esbuild 外，其他构建工具（webpack、vite、rspack）无官方配置示例
 
 ## 📝 总结
 

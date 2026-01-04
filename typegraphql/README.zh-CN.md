@@ -14,8 +14,8 @@
 ## 📊 综合评分
 | 维度                | 得分 (1-5) | 简评                                                    |
 | :------------------ | :--------- | :------------------------------------------------------ |
-| **1. 架构模式**     | **3.0** | 装饰器模式，中等依赖，轻量构建，特性依赖，良好集成      |
-| **2. 类型定义**     | **2.0** | 逻辑关联，显式注册，逻辑决议，强力绑定，大量显式声明    |
+| **1. 架构模式**     | **3.0**    | 装饰器模式，中等依赖，轻量构建，特性依赖，良好集成      |
+| **2. 类型定义**     | **2.0**    | 逻辑关联，显式注册，逻辑决议，强力绑定，大量显式声明    |
 | **3. 解析器与验证** | **2.6**    | 天然领域模块化，但大量显式声明，DataLoader 无内置支持   |
 | **4. 内置功能**     | **3.6**    | 核心功能完善，但 DataLoader 和深度限制无内置支持        |
 | **5. 生态集成**     | <-待评分-> | GraphQL Server 完全兼容，验证库深度集成，ORM 需手动配置 |
@@ -1471,50 +1471,124 @@ const gateway = new ApolloGateway({
 
 **结论**：完全兼容。与所有主流 GraphQL Server（Apollo Server、GraphQL Yoga、Envelop、Hono 等）完全兼容，提供官方适配器示例，零配置即可使用。
 
-#### 5.4 Web 框架适配（Web Framework Adapter）
+#### 5.4 工具链集成（Toolchain Integration）
 
 **得分：<-待评分->**
 
 **证据**：
-- **NestJS 官方集成**：`type-graphql/docs/nestjs.md`（第 6-36 行）展示通过 `typegraphql-nestjs` 包集成 NestJS
-- **标准 GraphQL Server 集成**：通过标准 GraphQL Server（如 Apollo Server、GraphQL Yoga）可以集成到任何 Web 框架
-- **Express/Fastify/Koa 集成**：通过 Apollo Server 或 GraphQL Yoga 可以集成到 Express、Fastify、Koa 等框架
-- **Next.js 集成**：通过标准 GraphQL Server 可以集成到 Next.js
 
-**代码示例**：
+**TypeScript/JavaScript 支持**：
+- **必须使用 TypeScript**：TypeGraphQL 的核心特性依赖 TypeScript 装饰器，无法使用纯 JavaScript
+  - 文档明确说明：`type-graphql/docs/types-and-fields.md`（第 5 行）"The main idea of TypeGraphQL is to automatically create GraphQL schema definitions from TypeScript classes. To avoid the need for schema definition files and interfaces describing the schema, we use decorators and a bit of reflection magic."
+  - 所有官方示例均为 TypeScript：`type-graphql/examples/` 目录下所有文件均为 `.ts` 文件
+  - 必须启用装饰器：`type-graphql/docs/installation.md`（第 37-44 行）要求 `experimentalDecorators: true` 和 `emitDecoratorMetadata: true`
+- **不支持纯 JavaScript**：装饰器是 TypeScript 实验性特性，JavaScript 不支持装饰器语法
+- **TypeScript 配置要求**：`type-graphql/docs/installation.md`（第 46-52 行）要求 `target: "es2021"` 或更高版本
+
+**运行时环境支持**：
+- **Node.js**：✅ **明确支持**
+  - `type-graphql/package.json`（第 188-189 行）指定 `"engines": { "node": ">= 20.11.1" }`
+  - 所有官方示例均为 Node.js 环境：`type-graphql/examples/simple-usage/index.ts`（第 2 行）使用 `import path from "node:path"`
+  - 文档明确说明：`type-graphql/docs/installation.md`（第 46 行）"TypeGraphQL is designed to work with Node.js LTS and the latest stable releases"
+- **Bun**：⚠️ **理论上支持但未验证**
+  - 源码中使用了 Node.js 特定 API：`type-graphql/src/utils/buildSchema.ts`（第 1、20 行）使用 `import path from "node:path"` 和 `process.cwd()`
+  - 无 Bun 相关文档、示例或配置
+  - 所有示例项目均为 Node.js 环境
+- **Deno**：⚠️ **理论上支持但未验证**
+  - 源码中使用了 Node.js 特定 API（`node:path`、`process.cwd()`），需要 Deno 兼容层支持
+  - 无 Deno 相关文档、示例或配置
+  - 所有示例项目均为 Node.js 环境
+- **Cloudflare Workers**：⚠️ **理论上支持但未验证**
+  - 有 Azure Functions 集成示例：`type-graphql/docs/azure-functions.md` 展示服务器less环境集成
+  - 但无 Cloudflare Workers 相关文档、示例或配置
+  - 源码使用 Node.js 特定 API（`node:path`、`process.cwd()`），在 Cloudflare Workers 中可能不兼容
+- **浏览器**：⚠️ **有限支持（仅共享类定义）**
+  - 提供 shim 机制：`type-graphql/src/shim.ts` 提供装饰器的空实现，用于在浏览器中共享类定义
+  - 文档明确说明：`type-graphql/docs/browser-usage.md`（第 7-9 行）"Since TypeGraphQL is a Node.js framework, it doesn't work in a browser environment"
+  - 使用场景限制：`type-graphql/docs/browser-usage.md`（第 7 行）说明仅用于"reusing the args or input classes with `class-validator` decorators or the object type classes with some helpful custom methods"
+  - 不能运行完整框架：浏览器中无法执行 `buildSchema()` 等核心功能
+
+**构建工具支持**：
+- **TypeScript 编译器（tsc）**：✅ **核心构建方式**
+  - 所有官方示例均使用 TypeScript 编译器：`type-graphql/examples/tsconfig.json` 展示标准 TypeScript 配置
+  - 框架自身构建：`type-graphql/package.json`（第 57 行）使用 `tsc --build` 构建，输出 CommonJS 和 ESM 两种格式
+  - 双格式输出：`type-graphql/tsconfig.cjs.json` 和 `type-graphql/tsconfig.esm.json` 分别输出 CommonJS 和 ESM 格式
+- **Webpack**：✅ **有官方文档和配置示例**
+  - 官方文档：`type-graphql/docs/browser-usage.md`（第 14-28 行）提供 Webpack 配置示例
+  - 配置方式：使用 `webpack.NormalModuleReplacementPlugin` 将 `type-graphql` 替换为 `type-graphql/shim`
+  - 使用场景：主要用于浏览器环境，使用 shim 避免打包完整框架代码
+- **Vite**：⚠️ **无官方配置示例**
+  - 文档和示例中未提供 Vite 配置示例
+  - 无 Vite 相关配置文件或文档
+  - 理论上可以通过 TypeScript 编译器集成，但需要用户自行配置
+- **Rspack**：⚠️ **无官方配置示例**
+  - 文档和示例中未提供 Rspack 配置示例
+  - 无 Rspack 相关配置文件或文档
+  - 理论上可以通过 TypeScript 编译器集成，但需要用户自行配置
+
+**代码证据**：
+
+`type-graphql/src/utils/buildSchema.ts`（第 1-2 行）：
 ```typescript
-// NestJS 集成 - 官方包
-@Module({
-  imports: [
-    TypeGraphQLModule.forRoot({
-      emitSchemaFile: true,
-      authChecker,
-      context: ({ req }) => ({ currentUser: req.user }),
+import path from "node:path";
+import { type GraphQLSchema } from "graphql";
+```
+
+`type-graphql/src/utils/buildSchema.ts`（第 20 行）：
+```typescript
+const defaultSchemaFilePath = path.resolve(process.cwd(), "schema.graphql");
+```
+
+`type-graphql/package.json`（第 188-189 行）：
+```json
+"engines": {
+  "node": ">= 20.11.1"
+}
+```
+
+`type-graphql/docs/installation.md`（第 37-44 行）：
+```markdown
+It's important to set these options in the `tsconfig.json` file of our project:
+
+{
+  "emitDecoratorMetadata": true,
+  "experimentalDecorators": true
+}
+```
+
+`type-graphql/docs/browser-usage.md`（第 7-9 行）：
+> Since TypeGraphQL is a Node.js framework, it doesn't work in a browser environment, so we may quickly get an error, e.g. `ERROR in ./node_modules/fs.realpath/index.js` or `utils1_promisify is not a function`, while trying to build our app e.g. with Webpack. To correct this, we have to configure bundler or compiler to use the decorator shim instead of the normal module.
+
+`type-graphql/docs/browser-usage.md`（第 14-28 行）：
+```markdown
+## CRA and similar
+
+We simply add this plugin code to our webpack config:
+```
+
+```javascript
+module.exports = {
+  // ... Rest of Webpack configuration
+  plugins: [
+    // ... Other existing plugins
+    new webpack.NormalModuleReplacementPlugin(/type-graphql$/, resource => {
+      resource.request = resource.request.replace(/type-graphql/, "type-graphql/shim");
     }),
-    RecipeModule,
-  ],
-})
-export default class AppModule {}
-
-// Express 集成 - 通过 Apollo Server
-const server = new ApolloServer({ schema })
-await server.start()
-
-app.use('/graphql', expressMiddleware(server))
-
-// Fastify 集成 - 通过 GraphQL Yoga
-const yoga = createYoga({ schema })
-app.register(yoga, { prefix: '/graphql' })
+  ];
+}
 ```
 
 **分析**：
-- ✅ 支持大部分主流 Web 框架，提供官方或社区适配器
-- ✅ NestJS 提供官方集成包（`typegraphql-nestjs`）
-- ✅ 通过标准 GraphQL Server 可以集成到 Express、Fastify、Koa、Next.js 等框架
-- ⚠️ 需要少量配置：需要手动配置 GraphQL Server 和 Web 框架的集成
-- ✅ 官方提供了丰富的集成示例，展示与各种框架的集成方式
+- ✅ **Node.js 明确支持**：官方指定 Node.js 版本要求，所有示例均为 Node.js 环境
+- ✅ **TypeScript 编译器支持完善**：核心构建方式，提供双格式输出（CommonJS 和 ESM）
+- ✅ **Webpack 有官方文档**：提供浏览器环境的 Webpack 配置示例
+- ⚠️ **必须使用 TypeScript**：无法使用纯 JavaScript，限制了语言选择
+- ⚠️ **其他运行时环境未验证**：Bun、Deno、Cloudflare Workers 无官方文档或示例
+- ⚠️ **浏览器支持有限**：仅支持通过 shim 共享类定义，不能运行完整框架
+- ⚠️ **其他构建工具无官方配置**：Vite、Rspack 无官方配置示例，需要用户自行配置
+- ⚠️ **Node.js 特定 API 依赖**：源码使用 `node:path` 和 `process.cwd()`，限制了跨平台兼容性
 
-**结论**：主流框架支持。支持大部分主流 Web 框架，提供官方或社区适配器，需要少量配置。NestJS 提供官方集成包，其他框架通过标准 GraphQL Server 集成。
+**结论**：基础支持。主要支持 TypeScript 和 Node.js，提供 TypeScript 编译器和 Webpack 的官方支持，但必须使用 TypeScript，其他运行时环境和构建工具需要用户自行配置，灵活性有限。
 
 ### 生态集成综合评分
 
@@ -1524,20 +1598,23 @@ app.register(yoga, { prefix: '/graphql' })
 - ORM 集成深度：<-待评分->（基础集成，需要较多配置和样板代码）
 - 验证库集成：<-待评分->（深度集成，`class-validator` 深度绑定）
 - GraphQL Server 兼容性：<-待评分->（完全兼容，所有主流 Server 支持）
-- Web 框架适配：<-待评分->（主流框架支持，NestJS 官方集成）
+- 工具链集成：<-待评分->（基础支持，主要支持 TypeScript 和 Node.js）
 
 **优势**：
 1. **GraphQL Server 完全兼容**：与所有主流 GraphQL Server 完全兼容，输出标准 GraphQL Schema
 2. **验证库深度集成**：`class-validator` 深度绑定，验证逻辑与 Schema 定义集成
 3. **官方集成示例丰富**：提供了大量集成示例，展示与各种框架和 ORM 的集成方式
-4. **NestJS 官方支持**：提供官方集成包 `typegraphql-nestjs`
-5. **灵活集成**：通过标准 GraphQL Schema 可以灵活集成到任何框架
+4. **TypeScript 编译器支持完善**：核心构建方式，提供双格式输出（CommonJS 和 ESM）
+5. **Webpack 有官方文档**：提供浏览器环境的 Webpack 配置示例
 
 **劣势**：
 1. **ORM 集成需要手动配置**：TypeORM、MikroORM、Typegoose 需要手动使用 ORM API，无法自动生成查询
 2. **Prisma 需要代码生成**：虽然支持 Prisma，但需要额外的代码生成步骤
 3. **类型同步需要手动维护**：无法自动同步 ORM 模型到 GraphQL Schema，需要手动维护
 4. **样板代码较多**：ORM 集成需要较多样板代码，无法实现零配置集成
+5. **必须使用 TypeScript**：无法使用纯 JavaScript，限制了语言选择
+6. **其他运行时环境未验证**：Bun、Deno、Cloudflare Workers 无官方文档或示例
+7. **其他构建工具无官方配置**：Vite、Rspack 无官方配置示例，需要用户自行配置
 
 ## 📝 总结
 

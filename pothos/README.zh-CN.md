@@ -1268,65 +1268,66 @@ const server = new ApolloServer({ schema })
 - ✅ 官方提供丰富的集成示例，展示与各种 Server 的集成方式
 - ✅ 不绑定特定 Server，可灵活选择底层实现
 
-#### 5.4 Web 框架适配（Web Framework Adapter）
+#### 5.4 工具链集成（Toolchain Integration）
 
 **得分：<-待评分->**
 
 **证据**：
-- **Next.js 官方示例**：`pothos/examples/nextjs/` 提供完整的 Next.js 集成示例
-- **NestJS 官方示例**：`pothos/examples/nestjs-apollo-middleware/` 提供 NestJS 集成示例
-- **Fastify 官方示例**：`pothos/examples/envelope-helix-fastify/` 提供 Fastify 集成示例
-- **通过标准 GraphQL Server 集成**：所有框架都通过标准 GraphQL Server（如 graphql-yoga、graphql-helix）集成
+
+**TypeScript/JavaScript 支持**：
+- **核心包构建输出**：`packages/core/package.json`（第 5-15 行）同时提供 CommonJS（`lib/index.js`）和 ESM（`esm/index.js`）两种格式，支持 `exports` 字段进行条件导出
+- **框架源码**：`tsconfig.options.json`（第 5 行）设置 `allowJs: false`，框架源码使用 TypeScript 编写
+- **示例项目支持**：`examples/nextjs/tsconfig.json`（第 6 行）设置 `allowJs: true`，说明项目可以使用 JavaScript
+- **构建工具**：`packages/core/package.json`（第 21-22 行）使用 SWC 编译 TypeScript 到 CommonJS 和 ESM
+
+**运行时环境支持**：
+- **Node.js**：✅ **明确支持**。所有官方示例（`examples/nextjs/`、`examples/complex-app/`、`examples/helix/` 等）均为 Node.js 环境；示例 `package.json` 中 `engines.node` 字段指定 Node.js 版本要求（如 `examples/nextjs/package.json` 第 36 行要求 `node >= 12.0.0`）
+- **Deno**：✅ **明确支持**。`packages/deno/` 目录包含 Deno 兼容的类型定义文件；`packages/plugin-zod/CHANGELOG.md`（第 467、533、538 行）和 `packages/plugin-sub-graph/CHANGELOG.md`（第 516 行）记录了对 Deno 兼容性的修复；`pnpm-lock.yaml`（第 8721 行）显示依赖包支持 `deno >= 1.30.0`
+- **Bun**：⚠️ **理论上支持但未明确说明**。`pnpm-lock.yaml`（第 8721 行）显示依赖包支持 `bun >= 1.0.0`，但框架文档和示例中未明确提及 Bun 支持
+- **Cloudflare Workers**：❓ **未明确说明**。框架核心代码中无 Cloudflare Workers 特定限制，但无官方示例或文档说明
+- **浏览器**：⚠️ **部分支持但有限制**。`packages/core/src/utils/base64.ts`（第 3-24 行）使用 `getGlobalThis()` 函数检测 `globalThis`、`self`、`window`、`global` 等全局对象，说明考虑了浏览器兼容性；但 GraphQL Schema 构建通常在服务端进行，浏览器中主要用于类型定义
+
+**Node.js 特定依赖分析**：
+- **无 Node.js 特定 API 依赖**：通过 grep 搜索 `packages/core/src` 目录，核心代码中无 `node:`、`fs`、`path`、`http`、`process`、`__dirname`、`__filename`、`require()` 等 Node.js 特定 API 的直接使用
+- **跨平台兼容性**：`packages/core/src/utils/base64.ts`（第 26-38、41-56 行）同时支持 Node.js 的 `Buffer` 和浏览器的 `btoa/atob` API，体现了跨平台设计
+
+**构建工具支持**：
+- **框架自身构建**：使用 SWC 进行编译（`packages/core/package.json` 第 21-22 行），输出 CommonJS 和 ESM 两种格式
+- **Next.js（基于 webpack）**：✅ **明确支持**。`examples/nextjs/` 提供完整的 Next.js 集成示例，使用 Next.js 默认的 webpack 配置（`examples/nextjs/next.config.js` 为默认配置）
+- **Webpack**：⚠️ **间接支持**。`package.json`（第 69 行）在 `pnpm.peerDependencyRules.ignoreMissing` 中忽略 `webpack`，说明框架不直接依赖 webpack，但可通过 Next.js 等框架间接使用
+- **Vite**：❓ **未明确说明**。无官方示例或文档说明 Vite 集成
+- **Rspack**：❓ **未明确说明**。无官方示例或文档说明 Rspack 集成
 
 **代码示例**：
 ```typescript
-// Next.js API Route
+// TypeScript 使用（推荐）
+import SchemaBuilder from '@pothos/core';
+
+const builder = new SchemaBuilder({});
+
+// ESM 导入（Node.js、Deno）
+import SchemaBuilder from '@pothos/core';
+
+// CommonJS 导入（Node.js）
+const SchemaBuilder = require('@pothos/core').default;
+
+// Next.js 集成（使用 webpack）
 // pages/api/graphql.ts
-import { schema } from '../../graphql/schema'
-import { createYoga } from 'graphql-yoga'
+import { schema } from '../../graphql/schema';
+import { createYoga } from 'graphql-yoga';
 
-const yoga = createYoga({ schema })
-
-export default yoga
-
-// Fastify
-import fastify from 'fastify'
-import { envelop, useSchema } from '@envelop/core'
-import { processRequest } from 'graphql-helix'
-
-const getEnveloped = envelop({
-  plugins: [useSchema(schema)],
-})
-
-app.route({
-  method: ['GET', 'POST'],
-  url: '/graphql',
-  handler: async (req, res) => {
-    const { schema, execute } = getEnveloped({ req })
-    // ...
-  },
-})
-
-// NestJS
-import { Module } from '@nestjs/common'
-import { GraphQLModule } from '@nestjs/graphql'
-
-@Module({
-  imports: [
-    GraphQLModule.forRoot({
-      schema,  // 直接使用 Pothos Schema
-    }),
-  ],
-})
-export class AppModule {}
+const yoga = createYoga({ schema });
+export default yoga;
 ```
 
 **分析**：
-- ✅ 支持大部分主流 Web 框架（Next.js、NestJS、Fastify 等）
-- ✅ 官方提供集成示例，展示与各种框架的集成方式
-- ✅ 通过标准 GraphQL Server 集成，类型安全
-- ⚠️ 需要手动配置：虽然提供示例，但需要手动配置，没有提供官方适配器
-- ⚠️ 集成文档有限：主要提供示例，其他框架需要自行适配
+- ✅ **TypeScript 优先**：框架专为 TypeScript 设计，充分利用类型推断和类型系统，提供最佳类型安全
+- ✅ **双格式输出**：同时提供 CommonJS 和 ESM 构建，兼容不同模块系统
+- ✅ **Node.js 和 Deno 支持**：明确支持 Node.js 和 Deno 运行时，Deno 支持有官方维护
+- ✅ **跨平台兼容**：核心代码无 Node.js 特定依赖，理论上可在多种运行时环境运行
+- ⚠️ **JavaScript 支持有限**：虽然示例项目允许 JavaScript，但框架主要面向 TypeScript，使用 JavaScript 会失去类型安全优势
+- ⚠️ **构建工具支持有限**：仅明确支持 Next.js（webpack），无 Vite、Rspack 等现代构建工具的官方示例
+- ⚠️ **边缘环境支持不明确**：Cloudflare Workers、Bun 等边缘运行时无明确文档或示例
 
 ### 生态集成综合评分
 
@@ -1336,19 +1337,20 @@ export class AppModule {}
 - ORM 集成深度：<-待评分->（深度整合，提供 Prisma 和 Drizzle 官方插件）
 - 验证库集成：<-待评分->（无缝集成，提供 Zod 官方插件，验证逻辑与 Schema 定义完全合一）
 - GraphQL Server 兼容性：<-待评分->（完全兼容，与所有主流 GraphQL Server 兼容）
-- Web 框架适配：<-待评分->（主流框架支持，提供官方示例，但需要手动配置）
+- 工具链集成：<-待评分->（TypeScript 优先，支持 Node.js 和 Deno，提供 CommonJS 和 ESM 双格式输出，但构建工具支持有限）
 
 **优势**：
 1. **ORM 深度整合**：提供 Prisma 和 Drizzle 官方插件，直接复用模型定义，类型完全同步，零样板代码
 2. **验证库无缝集成**：提供 Zod 官方插件，验证逻辑与 Schema 定义完全合一，支持格式验证和自定义验证
 3. **完全兼容所有 GraphQL Server**：输出标准 GraphQL Schema，与 Apollo Server、GraphQL Yoga、Envelop、GraphQL Helix 等完全兼容
-4. **主流框架支持**：提供 Next.js、NestJS、Fastify 等主流框架的官方示例
+4. **工具链灵活**：支持 TypeScript 和 JavaScript，同时提供 CommonJS 和 ESM 双格式输出，支持 Node.js 和 Deno 运行时
 5. **官方插件丰富**：提供 ORM、验证库、DataLoader、Federation、Tracing 等官方插件
 
 **劣势**：
-1. **需要手动配置**：虽然提供示例，但需要手动配置，没有提供官方适配器
-2. **集成文档有限**：主要提供示例，其他框架需要自行适配
-3. **需要安装插件**：虽然功能丰富，但需要安装和配置插件才能使用
+1. **TypeScript 优先**：虽然支持 JavaScript，但主要面向 TypeScript，使用 JavaScript 会失去类型安全优势
+2. **构建工具支持有限**：仅明确支持 Next.js（webpack），无 Vite、Rspack 等现代构建工具的官方示例
+3. **边缘环境支持不明确**：Cloudflare Workers、Bun 等边缘运行时无明确文档或示例
+4. **需要安装插件**：虽然功能丰富，但需要安装和配置插件才能使用
 
 ## 📝 总结
 

@@ -1188,73 +1188,91 @@ server.listen(4000)
 - ⚠️ **需要手动适配**：虽然兼容，但需要手动适配，没有提供官方适配器
 - ⚠️ **文档主要展示 express-graphql**：其他 Server 的集成文档不完整，需要参考官方示例
 
-#### 5.4 Web 框架适配（Web Framework Adapter）
+#### 5.4 工具链集成（Toolchain Integration）
 
-**得分：<-待评分-> - 主流框架支持**
+**得分：<-待评分->**
 
-**证据：**
-- **通过 GraphQL Server 集成**：通过标准 GraphQL Server 可以集成到任何 Web 框架
-- **官方示例展示 Express**：`gqtx/examples/starwars.ts`（第 365-378 行）展示与 Express 的集成
-- **实际业务使用 graphql-yoga**：`typescript-graphql-schemas/gqtx/src/server.ts` 展示使用 graphql-yoga
+**TypeScript/JavaScript 支持：**
+- **源码完全使用 TypeScript**：`gqtx/src/` 目录下所有文件均为 `.ts` 文件（`index.ts`、`build.ts`、`define.ts`、`types.ts`、`relay.ts`）
+- **构建输出支持 ESM 和 CommonJS**：`gqtx/package.json`（第 5-7 行）同时提供 `main: "cjs/index.cjs"` 和 `module: "index.js"`，`exports` 字段（第 8-30 行）同时支持 `import` 和 `require`
+- **使用标准 TypeScript 语法**：`gqtx/tsconfig.json`（第 1-19 行）显示使用 TypeScript 5.1.6，目标 ES2019，无特殊编译器特性（如 decorators、reflect-metadata）
+- **JavaScript 使用未明确说明**：文档和示例均为 TypeScript，未明确说明是否可以直接使用 JavaScript
 
-**代码示例**：
+**运行时环境支持：**
+- **Node.js**：✅ **明确支持**。官方示例 `gqtx/examples/starwars.ts`（第 365-378 行）展示与 Express 的集成；`gqtx/package.json`（第 45 行）包含 `@types/node` 作为开发依赖
+- **Bun**：⚠️ **理论上支持但未验证**。源码无 Node.js 特定 API（`gqtx/src/` 目录下无 `fs`、`path`、`http`、`process` 等导入），仅依赖 `graphql` 包，但无 Bun 相关文档或示例
+- **Deno**：⚠️ **理论上支持但未验证**。源码无 Node.js 特定 API，但无 Deno 相关文档、示例或配置
+- **Cloudflare Workers**：⚠️ **理论上支持但未验证**。源码无 Node.js 特定 API，但无 Cloudflare Workers 相关文档、示例或配置
+- **浏览器**：⚠️ **理论上支持但未验证**。源码无 Node.js 特定 API，但无浏览器运行示例或文档；`gqtx/README.md` 明确说明是 "GraphQL server" 库，主要面向服务器端
+
+**构建工具支持：**
+- **框架自身使用 Rollup**：`gqtx/rollup.config.js`（第 25-39 行）使用 Rollup 和 `@rollup/plugin-typescript` 构建，输出 ESM 和 CommonJS 两种格式
+- **用户项目构建工具**：⚠️ **无官方配置示例**。文档和示例中未提供 webpack、vite、rspack 等构建工具的配置示例；用户项目可以使用任何构建工具，但需要自行配置
+- **TypeScript 配置**：`gqtx/tsconfig.json`（第 1-19 行）显示使用 `target: "ES2019"`、`module: "ESNext"`、`moduleResolution: "NodeNext"`，用户项目需要根据目标环境调整配置
+
+**代码证据：**
 ```typescript
-// Express 集成（通过 express-graphql）
-import express from 'express'
-import graphqlHTTP from 'express-graphql'
+// gqtx/src/index.ts - 源码仅依赖 graphql，无 Node.js 特定 API
+export * from './types.js';
+export * from './define.js';
+export {
+  buildGraphQLSchema,
+  toGraphQLInputType,
+  toGraphQLOutputType,
+} from './build.js';
 
-const app = express()
-app.use(
-  '/graphql',
-  graphqlHTTP({
-    schema: buildGraphQLSchema(schema),
-    graphiql: true,
-  })
-)
-app.listen(4000)
+// gqtx/package.json - 同时支持 ESM 和 CommonJS
+{
+  "type": "module",
+  "main": "cjs/index.cjs",
+  "module": "index.js",
+  "exports": {
+    ".": {
+      "import": { "default": "./index.js" },
+      "require": { "default": "./cjs/index.cjs" }
+    }
+  }
+}
 
-// GraphQL Yoga 集成（支持所有框架）
-import { createYoga } from 'graphql-yoga'
-import { createServer } from 'node:http'
-
-const yoga = createYoga({ schema })
-const server = createServer(yoga)
-server.listen(4000)
-
-// 可以通过 graphql-yoga 集成到其他框架
-// - Next.js: 通过 API Route
-// - Fastify: 通过 graphql-yoga
-// - Koa: 通过 graphql-yoga
-// - Hono: 通过 graphql-yoga
+// gqtx/examples/starwars.ts - 仅展示 Node.js + Express 示例
+import express = require('express');
+import graphqlHTTP = require('express-graphql');
+const app = express();
+app.use('/graphql', graphqlHTTP({ schema: buildGraphQLSchema(schema) }));
+app.listen(5000);
 ```
 
 **分析：**
-- ✅ **可以通过标准 GraphQL Server 集成**：通过 express-graphql、graphql-yoga 等可以集成到任何 Web 框架
-- ✅ **支持主流框架**：Express、Next.js、Fastify、Koa、Hono 等都可以通过标准 GraphQL Server 集成
-- ⚠️ **需要手动配置**：需要手动创建 HTTP Server 或通过 GraphQL Server 集成
-- ⚠️ **无官方适配器**：不提供 Express、Fastify、Hono、Koa 等的官方适配器
-- ⚠️ **集成文档有限**：主要提供 express-graphql 的示例，其他框架需要自行适配
+- ✅ **TypeScript 原生支持**：框架完全用 TypeScript 编写，编译为 JavaScript，支持 ESM 和 CommonJS
+- ✅ **Node.js 明确支持**：官方示例和文档明确展示 Node.js 环境使用
+- ✅ **源码无运行时绑定**：源码仅依赖 `graphql` 包，无 Node.js 特定 API，理论上可在任何 JavaScript 环境运行
+- ⚠️ **其他运行时未验证**：Bun、Deno、Cloudflare Workers、浏览器等环境无文档、示例或配置，需要用户自行验证和适配
+- ⚠️ **构建工具集成缺失**：无 webpack、vite、rspack 等构建工具的官方配置示例，用户需要自行配置
+- ⚠️ **主要面向服务器端**：文档和示例均为服务器端使用场景，无浏览器或边缘环境的使用指南
 
 ### 5.5 生态集成总结
 
-| 评估项                    | 得分       | 说明                                                                |
-| :------------------------ | :--------- | :------------------------------------------------------------------ |
-| **ORM 集成深度**          | <-待评分-> | 弱集成，无官方插件，需要大量胶水代码，类型同步需手动维护            |
-| **验证库集成**            | <-待评分-> | 弱集成，无官方插件，验证逻辑与 Schema 定义分离，需要大量样板代码    |
-| **GraphQL Server 兼容性** | <-待评分-> | 标准兼容，与标准 GraphQL.js 完全兼容，可以集成到任何 GraphQL Server |
-| **Web 框架适配**          | <-待评分-> | 主流框架支持，通过标准 GraphQL Server 可以集成到任何 Web 框架       |
+| 评估项                    | 得分       | 说明                                                                      |
+| :------------------------ | :--------- | :------------------------------------------------------------------------ |
+| **ORM 集成深度**          | <-待评分-> | 弱集成，无官方插件，需要大量胶水代码，类型同步需手动维护                  |
+| **验证库集成**            | <-待评分-> | 弱集成，无官方插件，验证逻辑与 Schema 定义分离，需要大量样板代码          |
+| **GraphQL Server 兼容性** | <-待评分-> | 标准兼容，与标准 GraphQL.js 完全兼容，可以集成到任何 GraphQL Server       |
+| **工具链集成**            | <-待评分-> | TypeScript 原生支持，Node.js 明确支持，其他运行时未验证，构建工具集成缺失 |
 
 **综合得分：<-待评分->**
 
 **优势：**
 - GraphQL Server 兼容性极佳：与标准 GraphQL.js 完全兼容，可以集成到任何 GraphQL Server
-- Web 框架支持广泛：通过标准 GraphQL Server 可以集成到任何 Web 框架
+- TypeScript 原生支持：框架完全用 TypeScript 编写，编译为 JavaScript，支持 ESM 和 CommonJS
+- 源码无运行时绑定：源码仅依赖 `graphql` 包，无 Node.js 特定 API，理论上可在任何 JavaScript 环境运行
 - 完全中立：不绑定特定 Server 或框架，灵活性强
 
 **劣势：**
 - ORM 集成缺失：无官方插件，需要大量胶水代码，类型同步需手动维护
 - 验证库集成缺失：无官方插件，验证逻辑与 Schema 定义分离，需要大量样板代码
-- 集成文档有限：主要提供 express-graphql 的示例，其他框架需要自行适配
+- 其他运行时未验证：Bun、Deno、Cloudflare Workers、浏览器等环境无文档、示例或配置
+- 构建工具集成缺失：无 webpack、vite、rspack 等构建工具的官方配置示例
+- 集成文档有限：主要提供 express-graphql 的示例，其他环境需要自行适配
 
 ## 📝 总结
 

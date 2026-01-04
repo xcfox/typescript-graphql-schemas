@@ -1134,69 +1134,93 @@ app.use("/graphql", graphqlServer({ schema, graphiql: true }))
 
 **结论**：完全兼容。与所有主流 GraphQL Server（Apollo Server, GraphQL Yoga, Envelop, Hono 等）完全兼容，提供官方适配器示例，零配置即可使用。
 
-### 5.4 Web 框架适配（Web Framework Adapter）
+### 5.4 工具链集成（Toolchain Integration）
 
 **评分：<-待评分->**
 
-**实现方式**：
-- **全框架支持**：通过标准 GraphQL Server 可以集成到任何 Web 框架
-- **官方示例**：提供了与主流 Web 框架的集成示例
-- **类型安全**：集成过程类型安全
+**TypeScript/JavaScript 支持**：
+- **TypeScript 原生支持**：框架完全用 TypeScript 编写（`packages/core/src/` 目录下所有文件均为 `.ts`），编译为 JavaScript，支持 ESM 和 CommonJS 双格式输出
+- **源码直接使用**：`packages/core/package.json`（第 10-12 行）提供 `"source"` 字段，支持构建工具直接使用 TypeScript 源码，无需预编译
+- **JavaScript 支持情况**：⚠️ **理论上支持但未验证**。框架输出 JavaScript 代码，但文档和示例均为 TypeScript，未提供纯 JavaScript 使用示例；Prisma generator 支持生成 JavaScript 代码（`packages/prisma/src/generator/js.ts`），但这是生成的代码，非用户直接编写
 
-**Hono 集成**：
+**运行时环境支持**：
+- **Node.js**：✅ **明确支持**。官方示例 `examples/adapters/`、`examples/drizzle/` 等均为 Node.js 环境；文档 `website/docs/getting-started.md`（第 11 行）明确列出 Node.js 作为支持的运行时
+- **Bun**：✅ **文档支持**。文档 `website/docs/getting-started.md`（第 11 行）明确列出 Bun 作为支持的运行时；安装指南 `website/snippets/install-*.md` 提供 Bun 安装命令；⚠️ **但无实际运行示例**，所有示例项目均为 Node.js 环境
+- **Deno**：✅ **文档支持**。文档 `website/docs/getting-started.md`（第 11 行）明确列出 Deno 作为支持的运行时；安装指南提供 Deno 安装命令（`deno add npm:graphql npm:@gqloom/core`）；⚠️ **但无实际运行示例**，所有示例项目均为 Node.js 环境
+- **Cloudflare Workers**：⚠️ **理论上支持但有限制**。文档 `website/docs/context.md`（第 18 行）明确说明 Cloudflare Workers 不支持 `AsyncLocalStorage`，需使用 `resolverPayload` 中的 `context` 属性；⚠️ **但无实际运行示例**，所有示例项目均为 Node.js 环境
+- **浏览器**：⚠️ **理论上支持但有限制**。文档 `website/docs/context.md`（第 18 行）明确说明浏览器不支持 `AsyncLocalStorage`，需使用 `resolverPayload` 中的 `context` 属性；⚠️ **但无实际运行示例**，所有示例项目均为 Node.js 环境
+
+**Node.js 特定依赖分析**：
+- **AsyncLocalStorage 依赖**：`packages/core/src/context/context.ts`（第 1 行）导入 `node:async_hooks` 的 `AsyncLocalStorage`，这是 Node.js 特定 API
+- **Context 功能限制**：在不支持 `AsyncLocalStorage` 的环境（浏览器、Cloudflare Workers）中，`useContext()` 函数无法使用，需改用 `resolverPayload.context` 直接访问（`website/docs/context.md` 第 291-317 行提供示例）
+- **其他 Node.js API**：✅ **无其他 Node.js 特定依赖**。通过 grep 搜索确认，核心代码中无 `fs`、`path`、`http`、`process`、`Buffer` 等 Node.js 特定 API 的直接使用（`path` 在 `resolver-chain-factory.ts` 中仅为变量名）
+
+**构建工具支持**：
+- **框架自身构建**：使用 `tsdown` 进行编译（`packages/core/tsdown.config.ts`），输出 ESM（`.js`）和 CommonJS（`.cjs`）两种格式
+- **用户项目构建工具**：⚠️ **无官方配置示例**。文档和示例中未提供 webpack、vite、rspack 等构建工具的配置示例；`package.json` 的 `"source"` 字段理论上可配合任何支持该字段的构建工具使用，但需要用户自行配置
+- **TypeScript 配置**：根目录 `tsconfig.json`（第 4-6 行）显示使用 `target: "ESNext"`、`module: "ESNext"`、`moduleResolution: "bundler"`，用户项目需要根据目标环境调整配置
+
+**代码证据**：
 ```typescript
-// examples/adapters/src/hono.ts
-import { graphqlServer } from "@hono/graphql-server"
-import { Hono } from "hono"
-
-const schema = weave(helloResolver)
-app.use("/graphql", graphqlServer({ schema, graphiql: true }))
-```
-
-**Fastify 集成**（通过 Mercurius）：
-```typescript
-// examples/adapters/src/mercurius.ts
-import Fastify from "fastify"
-import mercurius from "mercurius"
-
-const schema = weave(helloResolver)
-app.register(mercurius, { schema })
-```
-
-**Express/Next.js/Koa 集成**：
-- 可以通过 Apollo Server、GraphQL Yoga 等标准 GraphQL Server 集成
-- 所有标准 GraphQL Server 都支持 Express、Next.js、Koa 等框架
-
-**Context 注入示例**：
-```typescript
-// examples/adapters/src/contexts/yoga.ts
-import { useContext } from "@gqloom/core/context"
-import type { YogaInitialContext } from "graphql-yoga"
-
-export function useAuthorization() {
-  return useContext<YogaInitialContext>().request.headers.get("Authorization")
+// packages/core/package.json - 支持源码直接使用和双格式输出
+{
+  "exports": {
+    ".": {
+      "source": {
+        "types": "./src/index.ts",
+        "default": "./src/index.ts"
+      },
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  }
 }
+
+// packages/core/src/context/context.ts - 使用 Node.js 特定 API
+import { AsyncLocalStorage } from "node:async_hooks"
+export const resolverPayloadStorage = new AsyncLocalStorage<...>()
+
+// website/docs/context.md - 浏览器/Cloudflare Workers 使用方式
+// For environments that do not support AsyncLocalStorage, such as browsers 
+// or Cloudflare Workers, you can use the context property in resolverPayload.
+const helloResolver = resolver({
+  hello: query(v.string()).resolve((_input, payload) => {
+    const user = (payload!.context as YogaInitialContext)
+      .request.headers.get("Authorization")
+    return `Hello, ${user ?? "World"}`
+  }),
+})
 ```
 
-**核心特性**：
-- **标准集成**：通过标准 GraphQL Server 集成到 Web 框架，无需特殊适配器
-- **类型安全**：Context 类型可以自动推导，IDE 提示完善
-- **支持所有主流框架**：Express、Fastify、Next.js、Hono、Koa 等
+**分析**：
+- ✅ **TypeScript 原生支持**：框架完全用 TypeScript 编写，编译为 JavaScript，支持 ESM 和 CommonJS
+- ✅ **Node.js 明确支持**：官方示例和文档明确展示 Node.js 环境使用
+- ✅ **源码直接使用**：提供 `"source"` 字段，构建工具可直接使用 TypeScript 源码
+- ⚠️ **JavaScript 使用未验证**：文档和示例均为 TypeScript，无纯 JavaScript 使用示例
+- ⚠️ **其他运行时支持有限**：Bun、Deno 在文档中列出，但无实际运行示例；Cloudflare Workers、浏览器需使用替代方案（`resolverPayload.context`），且无实际运行示例
+- ⚠️ **构建工具集成缺失**：无 webpack、vite、rspack 等构建工具的官方配置示例，用户需要自行配置
+- ⚠️ **AsyncLocalStorage 限制**：核心功能依赖 Node.js 特定 API，在不支持的环境中需要改用替代方案
 
-**结论**：全框架支持。通过标准 GraphQL Server 可以集成到任何 Web 框架（Express, Fastify, Next.js, Hono, Koa 等），集成简单，类型安全。
+**结论**：TypeScript 原生支持，Node.js 明确支持，提供源码直接使用能力。Bun、Deno 在文档中列出但无实际运行示例。Cloudflare Workers、浏览器理论上支持但需使用替代方案（`resolverPayload.context`），且无实际运行示例。构建工具集成缺失，无官方配置示例。
 
 ### 生态集成总结
 
-| 评估项                    | 得分       | 说明                                                                  |
-| :------------------------ | :--------- | :-------------------------------------------------------------------- |
-| **ORM 集成深度**          | <-待评分-> | 深度整合，提供官方插件直接复用 ORM 模型定义，类型完全同步，零样板代码 |
-| **验证库集成**            | <-待评分-> | 无缝集成，原生支持主流验证库，验证逻辑与 Schema 定义完全合一，零配置  |
-| **GraphQL Server 兼容性** | <-待评分-> | 完全兼容，与所有主流 GraphQL Server 兼容，提供官方适配器示例，零配置  |
-| **Web 框架适配**          | <-待评分-> | 全框架支持，通过标准 GraphQL Server 可以集成到任何 Web 框架，类型安全 |
+| 评估项                    | 得分       | 说明                                                                                    |
+| :------------------------ | :--------- | :-------------------------------------------------------------------------------------- |
+| **ORM 集成深度**          | <-待评分-> | 深度整合，提供官方插件直接复用 ORM 模型定义，类型完全同步，零样板代码                   |
+| **验证库集成**            | <-待评分-> | 无缝集成，原生支持主流验证库，验证逻辑与 Schema 定义完全合一，零配置                    |
+| **GraphQL Server 兼容性** | <-待评分-> | 完全兼容，与所有主流 GraphQL Server 兼容，提供官方适配器示例，零配置                    |
+| **工具链集成**            | <-待评分-> | TypeScript 原生支持，Node.js 明确支持，其他运行时文档支持但无实际示例，构建工具集成缺失 |
 
 **综合评分：<-待评分->**
 
-GQLoom 的生态集成能力优秀，通过官方插件系统实现了与主流 ORM 和验证库的深度整合，类型完全同步，零样板代码。GraphQL Server 兼容性和 Web 框架适配方面，通过标准 GraphQL.js 实现了完全兼容，可以集成到任何框架。
+GQLoom 的生态集成能力优秀，通过官方插件系统实现了与主流 ORM 和验证库的深度整合，类型完全同步，零样板代码。GraphQL Server 兼容性方面，通过标准 GraphQL.js 实现了完全兼容，可以集成到任何 GraphQL Server。工具链集成方面，TypeScript 和 Node.js 支持完善，但其他运行时（Bun、Deno、Cloudflare Workers、浏览器）虽有文档说明但缺乏实际运行示例，构建工具集成也需要用户自行配置。
 
 ## 📝 总结
 

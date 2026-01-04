@@ -3,22 +3,22 @@
 > This report is generated based on actual business code (`typescript-graphql-schemas/grats/src`) and official examples (`@grats/examples`).
 
 ## 📋 Basic Information
-| Item         | Content                                  |
-| :----------- | :------------------------------------ |
+| Item                | Content                               |
+| :------------------ | :------------------------------------ |
 | **Current Version** | 0.0.34                                |
-| **GitHub**   | https://github.com/captbaritone/grats |
+| **GitHub**          | https://github.com/captbaritone/grats |
 | **Documentation**   | https://grats.capt.dev                |
-| **First Commit** | 2023-03-05                            |
-| **Latest Commit** | 2025-12-21                            |
+| **First Commit**    | 2023-03-05                            |
+| **Latest Commit**   | 2025-12-21                            |
 
 ## 📊 Overall Score
-| Dimension                | Score (1-5) | Brief Comment                                                               |
-| :------------------ | :--------- | :----------------------------------------------------------------- |
-| **1. Architecture**     | **3.5**    | Lightweight dependencies, uses standard JSDoc comments, but requires build step, configuration is slightly complex        |
-| **2. Type Definition**     | **4.5**    | Fully supports native TypeScript syntax, powerful type inference, automatic interface field inheritance     |
-| **3. Resolvers & Validation** | **2.8**    | Functional API is concise, parameter types are automatically inferred, but no built-in validation and DataLoader       |
-| **4. Built-in Features**     | **2.4**    | Core features are complete (Directives, Scalars, Subscriptions), but advanced features are missing |
-| **5. Ecosystem Integration**     | **3.0**    | Excellent GraphQL Server compatibility, but ORM and validation libraries require manual integration             |
+| Dimension                     | Score (1-5) | Brief Comment                                                                                                      |
+| :---------------------------- | :---------- | :----------------------------------------------------------------------------------------------------------------- |
+| **1. Architecture**           | **3.5**     | Lightweight dependencies, uses standard JSDoc comments, but requires build step, configuration is slightly complex |
+| **2. Type Definition**        | **4.5**     | Fully supports native TypeScript syntax, powerful type inference, automatic interface field inheritance            |
+| **3. Resolvers & Validation** | **2.8**     | Functional API is concise, parameter types are automatically inferred, but no built-in validation and DataLoader   |
+| **4. Built-in Features**      | **2.4**     | Core features are complete (Directives, Scalars, Subscriptions), but advanced features are missing                 |
+| **5. Ecosystem Integration**  | **3.0**     | Excellent GraphQL Server compatibility, but ORM and validation libraries require manual integration                |
 
 ---
 
@@ -970,17 +970,17 @@ Grats provides some core built-in features, but advanced feature support is limi
 
 ### Feature Overview Table
 
-| Feature                           | Status            | Description                                                                                                                                                        |
-| :----------------------------- | :-------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Directive Support**     | ✅ Built-in      | Define directives through `@gqlDirective`, use directives through `@gqlAnnotate`, supports all GraphQL directive locations, API is concise and type-safe                                                  |
-| **Extension Support**     | ⚠️ Plugin/Additional Implementation | Not built-in, but can be implemented through `GraphQLError`'s `extensions` parameter, requires manual handling                                                                                  |
-| **Custom Scalars**      | ✅ Built-in      | Mark custom scalar types through `@gqlScalar`, API is intuitive and type-safe                                                                                                    |
-| **Subscription**       | ✅ Built-in      | Native GraphQL Subscriptions support, implemented through `@gqlSubscriptionField` and `AsyncIterable`, supports real-time data push, underlying transport protocol has good compatibility (WebSocket, SSE, etc.), API is concise |
-| **Context Injection**      | ✅ Built-in      | Native support for injecting context in Resolvers, mark Context type through `@gqlContext`, supports derived Context, type inference is complete, IDE hints are good                                        |
-| **Middleware**       | ⛔ Cannot Implement      | Completely does not support middleware mechanism, cannot inject logic before/after Resolver execution (such as logging, permission checks, performance monitoring)                                                                    |
-| **Query Complexity Analysis**             | ⛔ Cannot Implement      | Completely does not support query complexity analysis, cannot prevent complex query attacks                                                                                                              |
-| **Depth Limiting** | ⛔ Cannot Implement      | Completely does not support depth limiting, cannot prevent deep query attacks                                                                                                                    |
-| **Batch Loading (DataLoader)**     | ⛔ Cannot Implement      | No built-in support, need to manually create DataLoader instances (already evaluated in Phase 3)                                                                                             |
+| Feature                        | Status                             | Description                                                                                                                                                                                                                      |
+| :----------------------------- | :--------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Directive Support**          | ✅ Built-in                         | Define directives through `@gqlDirective`, use directives through `@gqlAnnotate`, supports all GraphQL directive locations, API is concise and type-safe                                                                         |
+| **Extension Support**          | ⚠️ Plugin/Additional Implementation | Not built-in, but can be implemented through `GraphQLError`'s `extensions` parameter, requires manual handling                                                                                                                   |
+| **Custom Scalars**             | ✅ Built-in                         | Mark custom scalar types through `@gqlScalar`, API is intuitive and type-safe                                                                                                                                                    |
+| **Subscription**               | ✅ Built-in                         | Native GraphQL Subscriptions support, implemented through `@gqlSubscriptionField` and `AsyncIterable`, supports real-time data push, underlying transport protocol has good compatibility (WebSocket, SSE, etc.), API is concise |
+| **Context Injection**          | ✅ Built-in                         | Native support for injecting context in Resolvers, mark Context type through `@gqlContext`, supports derived Context, type inference is complete, IDE hints are good                                                             |
+| **Middleware**                 | ⛔ Cannot Implement                 | Completely does not support middleware mechanism, cannot inject logic before/after Resolver execution (such as logging, permission checks, performance monitoring)                                                               |
+| **Query Complexity Analysis**  | ⛔ Cannot Implement                 | Completely does not support query complexity analysis, cannot prevent complex query attacks                                                                                                                                      |
+| **Depth Limiting**             | ⛔ Cannot Implement                 | Completely does not support depth limiting, cannot prevent deep query attacks                                                                                                                                                    |
+| **Batch Loading (DataLoader)** | ⛔ Cannot Implement                 | No built-in support, need to manually create DataLoader instances (already evaluated in Phase 3)                                                                                                                                 |
 
 ### Detailed Analysis
 
@@ -1710,13 +1710,13 @@ module.exports = nextConfig;
 
 ### Overall Score: 3.1/5.0
 
-| Dimension         | Score | Description                                                               |
-| ------------ | ---- | ------------------------------------------------------------------ |
-| Architecture     | 3.5  | Lightweight dependencies, uses standard JSDoc comments, but requires build step, configuration is slightly complex        |
-| Type Definition     | 4.5  | Fully supports native TypeScript syntax, powerful type inference, automatic interface field inheritance     |
-| Resolvers & Validation | 2.8  | Functional API is concise, parameter types are automatically inferred, but no built-in validation and DataLoader       |
-| Built-in Features     | 2.4  | Core features are complete (Directives, Scalars, Subscriptions), but advanced features are missing |
-| Ecosystem Integration     | 3.0  | Excellent GraphQL Server compatibility, but ORM and validation libraries require manual integration             |
+| Dimension              | Score | Description                                                                                                        |
+| ---------------------- | ----- | ------------------------------------------------------------------------------------------------------------------ |
+| Architecture           | 3.5   | Lightweight dependencies, uses standard JSDoc comments, but requires build step, configuration is slightly complex |
+| Type Definition        | 4.5   | Fully supports native TypeScript syntax, powerful type inference, automatic interface field inheritance            |
+| Resolvers & Validation | 2.8   | Functional API is concise, parameter types are automatically inferred, but no built-in validation and DataLoader   |
+| Built-in Features      | 2.4   | Core features are complete (Directives, Scalars, Subscriptions), but advanced features are missing                 |
+| Ecosystem Integration  | 3.0   | Excellent GraphQL Server compatibility, but ORM and validation libraries require manual integration                |
 
 ### Overall Evaluation
 

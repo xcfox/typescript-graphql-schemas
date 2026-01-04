@@ -17,7 +17,7 @@
 | **1. 架构模式**     | **3.5**    | 轻量依赖，使用标准 JSDoc 注释，但需要构建步骤，配置略显复杂        |
 | **2. 类型定义**     | **4.5**    | 完全支持原生 TypeScript 语法，强大的类型推断，接口字段自动继承     |
 | **3. 解析器与验证** | **2.8**    | 函数式 API 简洁，参数类型自动推断，但无内置验证和 DataLoader       |
-| **4. 内置功能**     | <-待评分-> | 核心功能完善（Directives、Scalars、Subscriptions），但高级功能缺失 |
+| **4. 内置功能**     | **2.4**    | 核心功能完善（Directives、Scalars、Subscriptions），但高级功能缺失 |
 | **5. 生态集成**     | <-待评分-> | GraphQL Server 兼容性极佳，但 ORM 和验证库需要手动集成             |
 
 ---
@@ -1220,7 +1220,20 @@ export function currentUser(vc: VC): User {
 
 ### 内置功能综合评分
 
-**得分：<-待评分->**
+**得分：2.4**
+
+**评分依据**：
+- Directives：✅ 内置支持（5分）- 通过 `@gqlDirective` 定义，支持所有 GraphQL 指令位置
+- Extensions：⚠️ 插件/额外实现（2分）- 可通过 `GraphQLError` 的 `extensions` 参数实现
+- DataLoader：⛔ 无法实现（0分）- 无内置支持，需要手动创建 DataLoader 实例
+- Scalars：✅ 内置支持（5分）- 通过 `@gqlScalar` 标记自定义标量类型
+- Subscription：✅ 内置支持（5分）- 原生支持，通过 `@gqlSubscriptionField` 和 `AsyncIterable`
+- Context：✅ 内置支持（5分）- 原生支持，通过 `@gqlContext` 标记 Context 类型
+- Middleware：⛔ 无法实现（0分）- 完全不支持中间件机制
+- Query Complexity：⛔ 无法实现（0分）- 完全不支持查询复杂度分析
+- Depth Limiting：⛔ 无法实现（0分）- 完全不支持深度限制
+
+**总分：22/45 = 2.4/5.0**
 
 **评分依据**：
 - 核心功能支持良好：Directives、Scalars、Subscriptions、Context 都提供原生支持

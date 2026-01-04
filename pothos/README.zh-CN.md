@@ -17,7 +17,7 @@
 | **1. 架构模式**     | **5.0**    | Builder 模式，极简依赖，零魔法，即写即用，完全中立                      |
 | **2. 类型定义**     | **4.0**    | 深度推断，$inferType 强大，接口自动继承，Union 需手动处理               |
 | **3. 解析器与验证** | **4.1**    | 参数完全自动推断，回调模式增加代码量，模块化灵活性受限，声明式验证支持  |
-| **4. 内置功能**     | <-待评分-> | 核心功能完善，插件系统强大，官方插件丰富，需要安装插件                  |
+| **4. 内置功能**     | **3.3**    | 核心功能完善，插件系统强大，官方插件丰富，需要安装插件                  |
 | **5. 生态集成**     | <-待评分-> | ORM 深度整合，验证库无缝集成，完全兼容所有 GraphQL Server，主流框架支持 |
 
 ---
@@ -1070,7 +1070,20 @@ class LoggingPlugin extends BasePlugin {
 
 ### 内置功能综合评分
 
-**得分：<-待评分->**
+**得分：3.3**
+
+**评分依据**：
+- Directives：⚠️ 插件/额外实现（2分）- 通过 `plugin-directives` 官方插件提供
+- Extensions：✅ 内置支持（5分）- 原生支持，通过 `extensions` 选项声明
+- DataLoader：⚠️ 插件/额外实现（2分）- 通过 `plugin-dataloader` 官方插件提供
+- Scalars：✅ 内置支持（5分）- 通过 `scalarType()` 和 `addScalarType()` 方法
+- Subscription：✅ 内置支持（5分）- 原生支持，通过 `subscriptionType()` 和 `subscriptionFields()`
+- Context：✅ 内置支持（5分）- 原生支持，通过 SchemaTypes 的 Context 类型支持
+- Middleware：⚠️ 插件/额外实现（2分）- 通过插件的 `wrapResolve` 方法实现
+- Query Complexity：⚠️ 插件/额外实现（2分）- 通过 `plugin-complexity` 官方插件提供
+- Depth Limiting：⚠️ 插件/额外实现（2分）- 通过 `plugin-complexity` 官方插件提供
+
+**总分：30/45 = 3.3/5.0**
 
 **评分依据**：
 - 核心功能完善：Context、Subscriptions、Custom Scalars 原生支持
@@ -1347,7 +1360,7 @@ export class AppModule {}
 - 架构模式：**5.0**
 - 类型定义：<-待评分->
 - 解析器与验证：<-待评分->
-- 内置功能：<-待评分->
+- 内置功能：**3.3**
 - 生态集成：<-待评分->
 
 ### 核心优势

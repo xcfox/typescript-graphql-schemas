@@ -17,7 +17,7 @@
 | **1. 架构模式**     | **4.0**    | Builder 模式 + 代码生成，极简配置，完全中立                     |
 | **2. 类型定义**     | **3.0**    | Builder API + 代码生成，显式声明较多，类型安全良好              |
 | **3. 解析器与验证** | <-待评分-> | 模块化优秀，类型安全良好，但验证和 DataLoader 需手动实现        |
-| **4. 内置功能**     | <-待评分-> | 核心功能完善，高级功能通过插件实现，DataLoader 和深度限制不支持 |
+| **4. 内置功能**     | **3.2**    | 核心功能完善，高级功能通过插件实现，DataLoader 和深度限制不支持 |
 | **5. 生态集成**     | <-待评分-> | GraphQL Server 和 Web 框架兼容性优秀，ORM 和验证库集成有限      |
 
 ---
@@ -1250,7 +1250,20 @@ t.field('posts', {
 | **查询复杂度分析**             | ⚠️ 插件/额外实现 | 通过 `queryComplexityPlugin` 插件实现        |
 | **深度限制（Depth Limiting）** | ⛔ 无法实现      | 无内置支持，需要通过 GraphQL Server 插件实现 |
 
-**综合评分：<-待评分->**
+**综合评分：3.2**
+
+**评分依据**：
+- Directives：✅ 内置支持（5分）- 通过 `directive()` API 定义，支持 Schema 和 Request 指令
+- Extensions：✅ 内置支持（5分）- 通过 `extensions` 配置支持 GraphQL Extensions
+- DataLoader：⛔ 无法实现（0分）- 无内置支持，需要手动创建 DataLoader 实例
+- Scalars：✅ 内置支持（5分）- 通过 `scalarType()` API 定义，支持 `asNexusMethod` 扩展
+- Subscription：✅ 内置支持（5分）- 通过 `subscriptionType()` 和 `subscriptionField()` API
+- Context：✅ 内置支持（5分）- 通过 `contextType` 配置，类型通过代码生成自动推断
+- Middleware：⚠️ 插件/额外实现（2分）- 通过插件系统的 `onCreateFieldResolver` 钩子实现
+- Query Complexity：⚠️ 插件/额外实现（2分）- 通过 `queryComplexityPlugin` 插件实现
+- Depth Limiting：⛔ 无法实现（0分）- 无内置支持，需要通过 GraphQL Server 插件实现
+
+**总分：29/45 = 3.2/5.0**
 
 **评分依据**：
 - 核心功能支持良好：Context、Subscriptions、Custom Scalars、Directives、Extensions 都提供原生支持
@@ -1545,7 +1558,7 @@ export default yoga
 | **1. 架构模式**     | **4.0**    | Builder 模式 + 代码生成，极简配置，完全中立                     |
 | **2. 类型定义**     | **3.0**    | Builder API + 代码生成，显式声明较多，类型安全良好              |
 | **3. 解析器与验证** | <-待评分-> | 模块化优秀，类型安全良好，但验证和 DataLoader 需手动实现        |
-| **4. 内置功能**     | <-待评分-> | 核心功能完善，高级功能通过插件实现，DataLoader 和深度限制不支持 |
+| **4. 内置功能**     | **3.2**    | 核心功能完善，高级功能通过插件实现，DataLoader 和深度限制不支持 |
 | **5. 生态集成**     | <-待评分-> | GraphQL Server 和 Web 框架兼容性优秀，ORM 和验证库集成有限      |
 
 **总分：<-待评分->**

@@ -23,18 +23,6 @@ import {
   orderMutationResolvers,
 } from './resolvers/order.ts'
 
-const Query = g.type('Query', {
-  ...userQueryFields,
-  ...menuQueryFields,
-  ...orderQueryFields,
-})
-
-const Mutation = g.type('Mutation', {
-  ...userMutationFields,
-  ...menuMutationFields,
-  ...orderMutationFields,
-})
-
 const resolvers = {
   Query: {
     ...userQueryResolvers.UserQuery,

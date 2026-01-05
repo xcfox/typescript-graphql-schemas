@@ -1,6 +1,6 @@
 # GQLoom Evaluation Report (January 2026)
 
-> This report is generated based on actual business code (`typescript-graphql-schemas/gqloom/src`) and official examples (`@gqloom/examples`).
+> This report is generated based on [example business code](https://github.com/xcfox/typescript-graphql-schemas/tree/main/gqloom/src) and [official examples](https://github.com/modevol-com/gqloom/tree/main/examples).
 
 ## 📋 Basic Information
 | Item              | Content                               |

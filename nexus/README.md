@@ -1,6 +1,6 @@
 # Nexus Evaluation Report (January 2026)
 
-> This report is generated based on actual business code (`typescript-graphql-schemas/nexus/src`) and official examples (`@nexus/examples`).
+> This report is generated based on [example business code](https://github.com/xcfox/typescript-graphql-schemas/tree/main/nexus/src) and [official examples](https://github.com/graphql-nexus/nexus/tree/main/examples).
 
 ## 📋 Basic Information
 | Project             | Content                                |

@@ -1,6 +1,6 @@
 # GQLoom 评估报告 (2026 年 1 月)
 
-> 本报告基于实际业务代码 (`typescript-graphql-schemas/gqloom/src`) 及官方示例 (`@gqloom/examples`) 生成。
+> 本报告基于[示例业务代码](https://github.com/xcfox/typescript-graphql-schemas/tree/main/gqloom/src)及[官方示例](https://github.com/modevol-com/gqloom/tree/main/examples)生成。
 
 ## 📋 基本信息
 | 项目         | 内容                                  |

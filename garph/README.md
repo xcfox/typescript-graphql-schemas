@@ -1,6 +1,6 @@
 # Garph Evaluation Report (January 2026)
 
-> This report is generated based on actual business code (`typescript-graphql-schemas/garph/src`) and official examples (`@garph/examples`).
+> This report is generated based on [example business code](https://github.com/xcfox/typescript-graphql-schemas/tree/main/garph/src) and [official examples](https://github.com/stepci/garph/tree/main/examples).
 
 ## 📋 Basic Information
 | Project             | Content                         |

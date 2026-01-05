@@ -1,24 +1,24 @@
 # TypeGraphQL Evaluation Report (January 2026)
 
-> This report is generated based on actual business code (`typescript-graphql-schemas/typegraphql/src`) and official examples (`@type-graphql/examples`).
+> This report is generated based on [example business code](https://github.com/xcfox/typescript-graphql-schemas/tree/main/typegraphql/src) and [official examples](https://github.com/MichalLytek/type-graphql/tree/master/examples).
 
 ## 📋 Basic Information
-| Item         | Content                                        |
-| :----------- | :------------------------------------------ |
+| Item                | Content                                     |
+| :------------------ | :------------------------------------------ |
 | **Current Version** | 2.0.0-rc.2                                  |
-| **GitHub**   | https://github.com/MichalLytek/type-graphql |
+| **GitHub**          | https://github.com/MichalLytek/type-graphql |
 | **Documentation**   | https://typegraphql.com                     |
-| **First Commit** | 2018-01-09                                  |
-| **Latest Commit** | 2026-01-01                                  |
+| **First Commit**    | 2018-01-09                                  |
+| **Latest Commit**   | 2026-01-01                                  |
 
 ## 📊 Overall Score
-| Dimension                | Score (1-5) | Brief Review                                                    |
-| :------------------ | :--------- | :------------------------------------------------------ |
-| **1. Architecture**     | **3.0**    | Decorator pattern, moderate dependencies, lightweight build, feature-dependent, good integration      |
-| **2. Type Definition**     | **2.0**    | Logical association, explicit registration, logical resolution, strong binding, extensive explicit declarations    |
-| **3. Resolvers & Validation** | **2.6**    | Natural domain modularization, but extensive explicit declarations, no built-in DataLoader support   |
-| **4. Built-in Features**     | **3.6**    | Core features complete, but DataLoader and depth limiting have no built-in support        |
-| **5. Ecosystem Integration**     | **3.5**    | GraphQL Server fully compatible, validation library deeply integrated, ORM requires manual configuration |
+| Dimension                     | Score (1-5) | Brief Review                                                                                                    |
+| :---------------------------- | :---------- | :-------------------------------------------------------------------------------------------------------------- |
+| **1. Architecture**           | **3.0**     | Decorator pattern, moderate dependencies, lightweight build, feature-dependent, good integration                |
+| **2. Type Definition**        | **2.0**     | Logical association, explicit registration, logical resolution, strong binding, extensive explicit declarations |
+| **3. Resolvers & Validation** | **2.6**     | Natural domain modularization, but extensive explicit declarations, no built-in DataLoader support              |
+| **4. Built-in Features**      | **3.6**     | Core features complete, but DataLoader and depth limiting have no built-in support                              |
+| **5. Ecosystem Integration**  | **3.5**     | GraphQL Server fully compatible, validation library deeply integrated, ORM requires manual configuration        |
 
 ---
 
@@ -933,17 +933,17 @@ TypeGraphQL provides rich built-in feature support. Core features (Directives, E
 
 ### Feature Support Details Table
 
-| Feature                               | Support Status        | Implementation Method                            | Evidence/Explanation                                                                                                                                       |
-| :--------------------------------- | :-------------- | :---------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Directives**             | ✅ Built-in Support      | `@Directive` decorator                 | `type-graphql/src/decorators/Directive.ts` (lines 5-43) provides `@Directive()` decorator, supports use on classes, fields, parameters, API is concise and type-safe              |
-| **Extensions**             | ✅ Built-in Support      | `@Extensions` decorator                | `type-graphql/src/decorators/Extensions.ts` (lines 6-27) provides `@Extensions()` decorator, can declare query complexity, execution time and other extension information, API is intuitive          |
-| **Batch Loading (DataLoader)**         | ⛔ Cannot Implement      | Requires manual integration                        | Provides no built-in dataloader support, requires manual DataLoader instance creation, Context type definition, Context injection configuration, lots of boilerplate                            |
-| **Custom Scalars**          | ✅ Built-in Support      | `scalarsMap` configuration                   | `type-graphql/src/utils/buildSchema.ts` (line 55) supports `scalarsMap` configuration, `type-graphql/src/scalars/index.ts` (line 2) exports common scalars           |
-| **Subscriptions**           | ✅ Built-in Support      | `@Subscription` decorator              | `type-graphql/src/decorators/Subscription.ts` (lines 27-51) provides `@Subscription()` decorator, uses `@graphql-yoga/subscription` package to support real-time data push |
-| **Context Injection**          | ✅ Built-in Support      | `@Ctx()` decorator                     | `type-graphql/src/decorators/Ctx.ts` (lines 5-19) provides `@Ctx()` decorator, context type inference is complete, IDE hints are good, no manual type declarations needed                    |
-| **Middleware**           | ✅ Built-in Support      | `@UseMiddleware` decorator             | `type-graphql/src/decorators/UseMiddleware.ts` (lines 7-37) provides `@UseMiddleware()` decorator, supports injecting logic before and after Resolver execution, API is concise          |
-| **Query Complexity** | ⚠️ Plugin/Additional Implementation | Manual integration of `graphql-query-complexity` | `type-graphql/examples/query-complexity/index.ts` (lines 5, 34-66) demonstrates manual integration of `graphql-query-complexity` library, requires additional configuration and custom logic         |
-| **Depth Limiting**     | ⛔ Cannot Implement      | No built-in support                          | Completely does not support depth limiting, cannot prevent depth query attacks, requires manual implementation or use of third-party libraries                                                                            |
+| Feature                        | Support Status                     | Implementation Method                            | Evidence/Explanation                                                                                                                                                                         |
+| :----------------------------- | :--------------------------------- | :----------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Directives**                 | ✅ Built-in Support                 | `@Directive` decorator                           | `type-graphql/src/decorators/Directive.ts` (lines 5-43) provides `@Directive()` decorator, supports use on classes, fields, parameters, API is concise and type-safe                         |
+| **Extensions**                 | ✅ Built-in Support                 | `@Extensions` decorator                          | `type-graphql/src/decorators/Extensions.ts` (lines 6-27) provides `@Extensions()` decorator, can declare query complexity, execution time and other extension information, API is intuitive  |
+| **Batch Loading (DataLoader)** | ⛔ Cannot Implement                 | Requires manual integration                      | Provides no built-in dataloader support, requires manual DataLoader instance creation, Context type definition, Context injection configuration, lots of boilerplate                         |
+| **Custom Scalars**             | ✅ Built-in Support                 | `scalarsMap` configuration                       | `type-graphql/src/utils/buildSchema.ts` (line 55) supports `scalarsMap` configuration, `type-graphql/src/scalars/index.ts` (line 2) exports common scalars                                   |
+| **Subscriptions**              | ✅ Built-in Support                 | `@Subscription` decorator                        | `type-graphql/src/decorators/Subscription.ts` (lines 27-51) provides `@Subscription()` decorator, uses `@graphql-yoga/subscription` package to support real-time data push                   |
+| **Context Injection**          | ✅ Built-in Support                 | `@Ctx()` decorator                               | `type-graphql/src/decorators/Ctx.ts` (lines 5-19) provides `@Ctx()` decorator, context type inference is complete, IDE hints are good, no manual type declarations needed                    |
+| **Middleware**                 | ✅ Built-in Support                 | `@UseMiddleware` decorator                       | `type-graphql/src/decorators/UseMiddleware.ts` (lines 7-37) provides `@UseMiddleware()` decorator, supports injecting logic before and after Resolver execution, API is concise              |
+| **Query Complexity**           | ⚠️ Plugin/Additional Implementation | Manual integration of `graphql-query-complexity` | `type-graphql/examples/query-complexity/index.ts` (lines 5, 34-66) demonstrates manual integration of `graphql-query-complexity` library, requires additional configuration and custom logic |
+| **Depth Limiting**             | ⛔ Cannot Implement                 | No built-in support                              | Completely does not support depth limiting, cannot prevent depth query attacks, requires manual implementation or use of third-party libraries                                               |
 
 ### Detailed Analysis
 
@@ -1620,13 +1620,13 @@ module.exports = {
 
 ### Overall Score: 2.9/5.0
 
-| Dimension         | Score | Description                                                    |
-| ------------ | ---- | ------------------------------------------------------- |
-| Architecture     | 3.0  | Decorator pattern, moderate dependencies, lightweight build, feature-dependent, good integration      |
-| Type Definition     | 2.0  | Logical association, explicit registration, logical resolution, strong binding, extensive explicit declarations    |
-| Resolvers & Validation | 2.6  | Natural domain modularization, but extensive explicit declarations, no built-in DataLoader support   |
-| Built-in Features     | 3.6  | Core features complete, but DataLoader and depth limiting have no built-in support        |
-| Ecosystem Integration     | 3.5  | GraphQL Server fully compatible, validation library deeply integrated, ORM requires manual configuration |
+| Dimension              | Score | Description                                                                                                     |
+| ---------------------- | ----- | --------------------------------------------------------------------------------------------------------------- |
+| Architecture           | 3.0   | Decorator pattern, moderate dependencies, lightweight build, feature-dependent, good integration                |
+| Type Definition        | 2.0   | Logical association, explicit registration, logical resolution, strong binding, extensive explicit declarations |
+| Resolvers & Validation | 2.6   | Natural domain modularization, but extensive explicit declarations, no built-in DataLoader support              |
+| Built-in Features      | 3.6   | Core features complete, but DataLoader and depth limiting have no built-in support                              |
+| Ecosystem Integration  | 3.5   | GraphQL Server fully compatible, validation library deeply integrated, ORM requires manual configuration        |
 
 ### Overall Evaluation
 

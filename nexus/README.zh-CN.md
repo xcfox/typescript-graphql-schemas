@@ -1,6 +1,6 @@
 # Nexus 评估报告 (2026 年 1 月)
 
-> 本报告基于实际业务代码 (`typescript-graphql-schemas/nexus/src`) 及官方示例 (`@nexus/examples`) 生成。
+> 本报告基于[示例业务代码](https://github.com/xcfox/typescript-graphql-schemas/tree/main/nexus/src)及[官方示例](https://github.com/graphql-nexus/nexus/tree/main/examples)生成。
 
 ## 📋 基本信息
 | 项目         | 内容                                   |

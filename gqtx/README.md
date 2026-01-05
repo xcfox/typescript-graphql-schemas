@@ -1,24 +1,24 @@
 # gqtx Evaluation Report (January 2026)
 
-> This report is generated based on actual business code (`typescript-graphql-schemas/gqtx/src`) and official examples (`@gqtx/examples`).
+> This report is generated based on [example business code](https://github.com/xcfox/typescript-graphql-schemas/tree/main/gqtx/src) and [official examples](https://github.com/sikanhe/gqtx/tree/master/examples).
 
 ## 📋 Basic Information
-| Item         | Content                            |
-| :----------- | :------------------------------ |
+| Item                | Content                         |
+| :------------------ | :------------------------------ |
 | **Current Version** | 0.9.3                           |
-| **GitHub**   | https://github.com/sikanhe/gqtx |
+| **GitHub**          | https://github.com/sikanhe/gqtx |
 | **Documentation**   | GitHub README                   |
-| **First Commit** | 2019-10-12                      |
-| **Latest Commit** | 2024-01-05                      |
+| **First Commit**    | 2019-10-12                      |
+| **Latest Commit**   | 2024-01-05                      |
 
 ## 📊 Overall Score
-| Dimension                | Score (1-5) | Brief Review                                              |
-| :------------------ | :--------- | :------------------------------------------------ |
-| **1. Architecture**     | **5.0**    | Minimal dependencies, pure runtime build, zero magic, fully neutral          |
-| **2. Type Definition**     | **1.5**    | Logical association, explicit registration, requires manual synchronization              |
-| **3. Resolvers & Validation** | **1.8**    | Parameter types can be inferred, but no modularity, no validation, no DataLoader |
-| **4. Built-in Features**     | **2.8**    | Core features are complete, but advanced features are missing                      |
-| **5. Ecosystem Integration**     | **2.5**    | GraphQL Server compatibility is good, but ORM and validation library integration is missing  |
+| Dimension                     | Score (1-5) | Brief Review                                                                                |
+| :---------------------------- | :---------- | :------------------------------------------------------------------------------------------ |
+| **1. Architecture**           | **5.0**     | Minimal dependencies, pure runtime build, zero magic, fully neutral                         |
+| **2. Type Definition**        | **1.5**     | Logical association, explicit registration, requires manual synchronization                 |
+| **3. Resolvers & Validation** | **1.8**     | Parameter types can be inferred, but no modularity, no validation, no DataLoader            |
+| **4. Built-in Features**      | **2.8**     | Core features are complete, but advanced features are missing                               |
+| **5. Ecosystem Integration**  | **2.5**     | GraphQL Server compatibility is good, but ORM and validation library integration is missing |
 
 ---
 
@@ -151,12 +151,12 @@ const yoga = createYoga({ schema })
 
 ### 1.6 Architecture Summary
 
-| Evaluation Item         | Score    | Description                                   |
-| :------------- | :------ | :------------------------------------- |
-| **Dependency Complexity** | **5.0** | Only depends on `graphql`, zero runtime overhead         |
-| **Build Flow**   | **5.0** | Pure runtime build, no code generation             |
-| **Config & Magic**   | **5.0** | Zero magic, fully conforms to native TS practices           |
-| **Ecosystem Integration**   | **5.0** | Fully neutral, can integrate with any GraphQL Server |
+| Evaluation Item           | Score   | Description                                          |
+| :------------------------ | :------ | :--------------------------------------------------- |
+| **Dependency Complexity** | **5.0** | Only depends on `graphql`, zero runtime overhead     |
+| **Build Flow**            | **5.0** | Pure runtime build, no code generation               |
+| **Config & Magic**        | **5.0** | Zero magic, fully conforms to native TS practices    |
+| **Ecosystem Integration** | **5.0** | Fully neutral, can integrate with any GraphQL Server |
 
 **Overall Score: 5.0**
 
@@ -425,13 +425,13 @@ export function Field<Key extends string, Src, Out, Arg extends object = {}>({
 
 ### 2.5 Type Definition Summary
 
-| Evaluation Item         | Score    | Description                                                       |
-| :------------- | :------ | :--------------------------------------------------------- |
+| Evaluation Item            | Score   | Description                                                                                     |
+| :------------------------- | :------ | :---------------------------------------------------------------------------------------------- |
 | **Single Source of Truth** | **2.0** | TypeScript types and GraphQL types are logically associated, but require manual synchronization |
-| **Enum Support**   | **2.0** | Requires explicit registration, no auto-inference                               |
-| **Interface Inheritance**   | **2.0** | Supports interfaces, but requires manual field repetition                           |
-| **Union Types**   | **2.0** | Supports Union, but requires manual resolveType implementation                     |
-| **Type Inference**   | **2.0** | Parameter types can be inferred, field types need explicit declaration                       |
+| **Enum Support**           | **2.0** | Requires explicit registration, no auto-inference                                               |
+| **Interface Inheritance**  | **2.0** | Supports interfaces, but requires manual field repetition                                       |
+| **Union Types**            | **2.0** | Supports Union, but requires manual resolveType implementation                                  |
+| **Type Inference**         | **2.0** | Parameter types can be inferred, field types need explicit declaration                          |
 
 **Overall Score: 1.5**
 
@@ -743,13 +743,13 @@ Gql.Field({
 
 ### 3.6 Resolvers & Validation Summary
 
-| Evaluation Item              | Score       | Description                                             |
-| :------------------ | :--------- | :----------------------------------------------- |
-| **Developer Experience**        | <-待评分-> | Moderate code volume, parameter types can be inferred, but need explicit field definition   |
-| **Modular Design**      | <-待评分-> | No modularity consideration, completely organized by operation type, no enforced module boundaries |
-| **Parameter Definition**        | <-待评分-> | Parameter types mostly auto-inferred, IDE hints complete             |
-| **Input Validation**        | <-待评分-> | No built-in validation, requires complete manual implementation, validation logic scattered       |
-| **DataLoader Integration** | <-待评分-> | No built-in support, requires lots of boilerplate                     |
+| Evaluation Item            | Score      | Description                                                                                        |
+| :------------------------- | :--------- | :------------------------------------------------------------------------------------------------- |
+| **Developer Experience**   | <-待评分-> | Moderate code volume, parameter types can be inferred, but need explicit field definition          |
+| **Modular Design**         | <-待评分-> | No modularity consideration, completely organized by operation type, no enforced module boundaries |
+| **Parameter Definition**   | <-待评分-> | Parameter types mostly auto-inferred, IDE hints complete                                           |
+| **Input Validation**       | <-待评分-> | No built-in validation, requires complete manual implementation, validation logic scattered        |
+| **DataLoader Integration** | <-待评分-> | No built-in support, requires lots of boilerplate                                                  |
 
 **Overall Score: <-待评分->**
 
@@ -772,17 +772,17 @@ Gql.Field({
 
 ### Feature Support Details Table
 
-| Feature                               | Support Status   | Implementation Method | Evidence/Description                                                                                                         |
-| :--------------------------------- | :--------- | :------- | :---------------------------------------------------------------------------------------------------------------- |
-| **Directives**             | ✅ Built-in Support | Native Built-in | `gqtx/src/types.ts` (line 219) and `src/build.ts` (line 43) support passing `GraphQLDirective[]` via `directives` parameter  |
-| **Extensions**             | ✅ Built-in Support | Native Built-in | `gqtx/src/define.ts` (lines 25-32) and `src/build.ts` (lines 203, 209) support defining extensions on Field and ObjectType       |
-| **DataLoader**         | ⛔ Cannot Implement | Not Supported   | Already evaluated in Phase 4, no built-in support, requires manual implementation                                                                   |
-| **Custom Scalars**          | ✅ Built-in Support | Native Built-in | `gqtx/src/define.ts` (lines 79-102) defined via `Gql.Scalar()`, API is intuitive and type-safe                                  |
-| **Subscription**           | ✅ Built-in Support | Native Built-in | `gqtx/src/define.ts` (lines 377-424) and `test/simple.spec.ts` (lines 604-668) native support, implemented via async generator |
-| **Context**              | ✅ Built-in Support | Native Built-in | `gqtx/src/types.ts` (line 6) implements global Context type via module augmentation of `GqlContext` interface, type inference is complete                                        |
-| **Middleware**           | ⛔ Cannot Implement | Not Supported   | No related support found, cannot inject middleware logic before/after Resolver execution                                                            |
-| **Query Complexity** | ⛔ Cannot Implement | Not Supported   | No related support found, cannot prevent complex query attacks                                                                              |
-| **Depth Limiting**     | ⛔ Cannot Implement | Not Supported   | No related support found, needs to be implemented via GraphQL Server middleware or plugins                                                        |
+| Feature              | Support Status     | Implementation Method | Evidence/Description                                                                                                                      |
+| :------------------- | :----------------- | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Directives**       | ✅ Built-in Support | Native Built-in       | `gqtx/src/types.ts` (line 219) and `src/build.ts` (line 43) support passing `GraphQLDirective[]` via `directives` parameter               |
+| **Extensions**       | ✅ Built-in Support | Native Built-in       | `gqtx/src/define.ts` (lines 25-32) and `src/build.ts` (lines 203, 209) support defining extensions on Field and ObjectType                |
+| **DataLoader**       | ⛔ Cannot Implement | Not Supported         | Already evaluated in Phase 4, no built-in support, requires manual implementation                                                         |
+| **Custom Scalars**   | ✅ Built-in Support | Native Built-in       | `gqtx/src/define.ts` (lines 79-102) defined via `Gql.Scalar()`, API is intuitive and type-safe                                            |
+| **Subscription**     | ✅ Built-in Support | Native Built-in       | `gqtx/src/define.ts` (lines 377-424) and `test/simple.spec.ts` (lines 604-668) native support, implemented via async generator            |
+| **Context**          | ✅ Built-in Support | Native Built-in       | `gqtx/src/types.ts` (line 6) implements global Context type via module augmentation of `GqlContext` interface, type inference is complete |
+| **Middleware**       | ⛔ Cannot Implement | Not Supported         | No related support found, cannot inject middleware logic before/after Resolver execution                                                  |
+| **Query Complexity** | ⛔ Cannot Implement | Not Supported         | No related support found, cannot prevent complex query attacks                                                                            |
+| **Depth Limiting**   | ⛔ Cannot Implement | Not Supported         | No related support found, needs to be implemented via GraphQL Server middleware or plugins                                                |
 
 ### Detailed Analysis
 
@@ -1016,17 +1016,17 @@ Gql.Field({
 
 ### 4.10 Built-in Features Summary
 
-| Feature                               | Support Status   | Description                                                   |
-| :--------------------------------- | :--------- | :----------------------------------------------------- |
-| **Directives**             | ✅ Built-in Support | Native support, but need to manually create `GraphQLDirective` instances       |
-| **Extensions**             | ✅ Built-in Support | Native support, can define extension information on Field and ObjectType      |
-| **DataLoader**         | ⛔ Cannot Implement | No built-in support, requires manual implementation                               |
-| **Custom Scalars**          | ✅ Built-in Support | Native support, API is intuitive and type-safe                           |
-| **Subscription**           | ✅ Built-in Support | Native support, implements real-time data push via async generator        |
-| **Context**              | ✅ Built-in Support | Native support, implements global types via module augmentation, type inference is complete       |
-| **Middleware**           | ⛔ Cannot Implement | No built-in support, cannot inject logic before/after Resolver execution           |
+| Feature              | Support Status     | Description                                                                                 |
+| :------------------- | :----------------- | :------------------------------------------------------------------------------------------ |
+| **Directives**       | ✅ Built-in Support | Native support, but need to manually create `GraphQLDirective` instances                    |
+| **Extensions**       | ✅ Built-in Support | Native support, can define extension information on Field and ObjectType                    |
+| **DataLoader**       | ⛔ Cannot Implement | No built-in support, requires manual implementation                                         |
+| **Custom Scalars**   | ✅ Built-in Support | Native support, API is intuitive and type-safe                                              |
+| **Subscription**     | ✅ Built-in Support | Native support, implements real-time data push via async generator                          |
+| **Context**          | ✅ Built-in Support | Native support, implements global types via module augmentation, type inference is complete |
+| **Middleware**       | ⛔ Cannot Implement | No built-in support, cannot inject logic before/after Resolver execution                    |
 | **Query Complexity** | ⛔ Cannot Implement | No built-in support, needs to be implemented via external libraries                         |
-| **Depth Limiting**     | ⛔ Cannot Implement | No built-in support, needs to be implemented via GraphQL Server middleware or plugins |
+| **Depth Limiting**   | ⛔ Cannot Implement | No built-in support, needs to be implemented via GraphQL Server middleware or plugins       |
 
 **Comprehensive Assessment:**
 - ✅ **Core features complete**: Context, Subscriptions, Custom Scalars, Directives, Extensions all have native support
@@ -1252,12 +1252,12 @@ app.listen(5000);
 
 ### 5.5 Ecosystem Integration Summary
 
-| Evaluation Item                    | Score       | Description                                                                      |
-| :------------------------ | :--------- | :------------------------------------------------------------------------ |
-| **ORM Integration Depth**          | <-待评分-> | Weak integration, no official plugins, requires lots of glue code, type synchronization requires manual maintenance                  |
-| **Validation Library Integration**            | <-待评分-> | Weak integration, no official plugins, validation logic separated from Schema definition, requires lots of boilerplate          |
-| **GraphQL Server Compatibility** | <-待评分-> | Standard compatible, fully compatible with standard GraphQL.js, can integrate with any GraphQL Server       |
-| **Toolchain Integration**            | <-待评分-> | TypeScript native support, Node.js explicitly supported, other runtimes not verified, build tool integration missing |
+| Evaluation Item                    | Score      | Description                                                                                                            |
+| :--------------------------------- | :--------- | :--------------------------------------------------------------------------------------------------------------------- |
+| **ORM Integration Depth**          | <-待评分-> | Weak integration, no official plugins, requires lots of glue code, type synchronization requires manual maintenance    |
+| **Validation Library Integration** | <-待评分-> | Weak integration, no official plugins, validation logic separated from Schema definition, requires lots of boilerplate |
+| **GraphQL Server Compatibility**   | <-待评分-> | Standard compatible, fully compatible with standard GraphQL.js, can integrate with any GraphQL Server                  |
+| **Toolchain Integration**          | <-待评分-> | TypeScript native support, Node.js explicitly supported, other runtimes not verified, build tool integration missing   |
 
 **Overall Score: 2.5**
 
@@ -1278,13 +1278,13 @@ app.listen(5000);
 
 ### Overall Score: 2.3/5.0
 
-| Dimension         | Score | Description                                              |
-| ------------ | ---- | ------------------------------------------------- |
-| Architecture     | 5.0  | Minimal dependencies, pure runtime build, zero magic, fully neutral          |
-| Type Definition     | 1.5  | Logical association, explicit registration, requires manual synchronization              |
-| Resolvers & Validation | 1.8  | Parameter types can be inferred, but no modularity, no validation, no DataLoader |
-| Built-in Features     | 2.8  | Core features are complete, but advanced features are missing                      |
-| Ecosystem Integration     | 2.5  | GraphQL Server compatibility is good, but ORM and validation library integration is missing  |
+| Dimension              | Score | Description                                                                                 |
+| ---------------------- | ----- | ------------------------------------------------------------------------------------------- |
+| Architecture           | 5.0   | Minimal dependencies, pure runtime build, zero magic, fully neutral                         |
+| Type Definition        | 1.5   | Logical association, explicit registration, requires manual synchronization                 |
+| Resolvers & Validation | 1.8   | Parameter types can be inferred, but no modularity, no validation, no DataLoader            |
+| Built-in Features      | 2.8   | Core features are complete, but advanced features are missing                               |
+| Ecosystem Integration  | 2.5   | GraphQL Server compatibility is good, but ORM and validation library integration is missing |
 
 ### Overall Evaluation
 

@@ -1,6 +1,6 @@
 # Pylon Evaluation Report (January 2026)
 
-> This report is generated based on actual business code (`typescript-graphql-schemas/pylon/src`) and official examples (`@pylon/examples`).
+> This report is generated based on [example business code](https://github.com/xcfox/typescript-graphql-schemas/tree/main/pylon/src) and [official examples](https://github.com/getcronit/pylon/tree/main/examples).
 
 ## 📋 Basic Information
 | Project          | Content                            |

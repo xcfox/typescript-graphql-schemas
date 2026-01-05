@@ -1,6 +1,10 @@
 # Garph 评估报告 (2026 年 1 月)
 
 > 本报告基于[示例业务代码](https://github.com/xcfox/typescript-graphql-schemas/tree/main/garph/src)及[官方示例](https://github.com/stepci/garph/tree/main/examples)生成。
+> 文中评分由 AI 进行横向比较后给出。
+> **评估日期**：2026年1月  
+> **评估版本**：garph@0.6.8  
+> **评估方法**：基于示例业务代码和官方示例的深度源码审计
 
 ## 📋 基本信息
 | 项目         | 内容                            |
@@ -1085,9 +1089,3 @@ Garph 采用 Builder 模式，实现了零魔法、即写即用的设计理念�
 3. **提供 Directives 和 Middleware 支持**：满足高级功能需求
 4. **提供 ORM 和验证库的官方插件**：减少胶水代码，提高集成度
 5. **减少显式类型注解需求**：通过更好的类型推断减少 `InferResolvers` 注解
-
----
-
-**评估日期**：2026年1月  
-**评估版本**：garph@0.6.8  
-**评估方法**：基于实际业务代码和官方示例的深度源码审计

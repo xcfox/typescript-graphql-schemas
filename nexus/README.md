@@ -1,6 +1,10 @@
 # Nexus Evaluation Report (January 2026)
 
 > This report is generated based on [example business code](https://github.com/xcfox/typescript-graphql-schemas/tree/main/nexus/src) and [official examples](https://github.com/graphql-nexus/nexus/tree/main/examples).
+> Scores in this report are given by AI after horizontal comparison.
+> **Evaluation Date**: January 2026  
+> **Evaluation Version**: nexus@1.3.0  
+> **Evaluation Method**: Deep source code audit based on example business code and official examples
 
 ## 📋 Basic Information
 | Project             | Content                                |

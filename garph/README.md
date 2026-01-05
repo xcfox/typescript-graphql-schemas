@@ -1,6 +1,10 @@
 # Garph Evaluation Report (January 2026)
 
 > This report is generated based on [example business code](https://github.com/xcfox/typescript-graphql-schemas/tree/main/garph/src) and [official examples](https://github.com/stepci/garph/tree/main/examples).
+> Scores in this report are given by AI after horizontal comparison.
+> **Evaluation Date**: January 2026  
+> **Evaluation Version**: garph@0.6.8  
+> **Evaluation Method**: Deep source code audit based on example business code and official examples
 
 ## 📋 Basic Information
 | Project             | Content                         |
@@ -1085,9 +1089,3 @@ Garph adopts the Builder pattern, achieving a zero magic, write-and-use-immediat
 3. **Provide Directives and Middleware support**: Meet advanced feature requirements
 4. **Provide official plugins for ORM and validation libraries**: Reduce glue code, improve integration
 5. **Reduce explicit type annotation requirements**: Reduce `InferResolvers` annotations through better type inference
-
----
-
-**Evaluation Date**: January 2026  
-**Evaluation Version**: garph@0.6.8  
-**Evaluation Method**: Deep source code audit based on actual business code and official examples

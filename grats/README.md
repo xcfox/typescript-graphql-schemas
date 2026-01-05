@@ -1,6 +1,10 @@
 # Grats Evaluation Report (January 2026)
 
 > This report is generated based on [example business code](https://github.com/xcfox/typescript-graphql-schemas/tree/main/grats/src) and [official examples](https://github.com/captbaritone/grats/tree/main/examples).
+> Scores in this report are given by AI after horizontal comparison.
+> **Evaluation Date**: January 2026  
+> **Evaluation Version**: grats@0.0.34  
+> **Evaluation Method**: Deep source code audit based on example business code and official examples
 
 ## 📋 Basic Information
 | Item                | Content                               |

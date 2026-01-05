@@ -1,6 +1,10 @@
 # GQLoom Evaluation Report (January 2026)
 
 > This report is generated based on [example business code](https://github.com/xcfox/typescript-graphql-schemas/tree/main/gqloom/src) and [official examples](https://github.com/modevol-com/gqloom/tree/main/examples).
+> Scores in this report are given by AI after horizontal comparison.
+> **Evaluation Date**: January 2026  
+> **Evaluation Version**: @gqloom/core@0.15.0  
+> **Evaluation Method**: Deep source code audit based on example business code and official examples
 
 ## 📋 Basic Information
 | Item              | Content                               |

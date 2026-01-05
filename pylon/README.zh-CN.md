@@ -1,6 +1,10 @@
 # Pylon 评估报告 (2026 年 1 月)
 
 > 本报告基于[示例业务代码](https://github.com/xcfox/typescript-graphql-schemas/tree/main/pylon/src)及[官方示例](https://github.com/getcronit/pylon/tree/main/examples)生成。
+> 文中评分由 AI 进行横向比较后给出。
+> **评估日期**：2026年1月  
+> **评估版本**：@getcronit/pylon@2.9.6  
+> **评估方法**：基于示例业务代码和官方示例的深度源码审计
 
 ## 📋 基本信息
 | 项目         | 内容                               |

@@ -1,6 +1,10 @@
 # Pylon Evaluation Report (January 2026)
 
 > This report is generated based on [example business code](https://github.com/xcfox/typescript-graphql-schemas/tree/main/pylon/src) and [official examples](https://github.com/getcronit/pylon/tree/main/examples).
+> Scores in this report are given by AI after horizontal comparison.
+> **Evaluation Date**: January 2026  
+> **Evaluation Version**: @getcronit/pylon@2.9.6  
+> **Evaluation Method**: Deep source code audit based on example business code and official examples
 
 ## 📋 Basic Information
 | Project          | Content                            |

@@ -1,4 +1,4 @@
-# TypeScript GraphQL Schema Framework Comparison: Which is the Best Choice?
+# TypeScript GraphQL Schema Framework Comparison
 
 > This article provides an in-depth comparison of 8 mainstream TypeScript GraphQL Schema building frameworks, comprehensively evaluating them across five dimensions: architecture patterns, type definitions, resolvers and validation, built-in features, and ecosystem integration, helping you find the framework that best fits your project.
 

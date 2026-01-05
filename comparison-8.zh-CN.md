@@ -1,4 +1,4 @@
-# TypeScript GraphQL Schema 框架横向对比：谁是最佳选择？
+# TypeScript GraphQL Schema 框架横向对比
 
 > 本文深度对比 8 个主流 TypeScript GraphQL Schema 构建框架，从架构模式、类型定义、解析器与验证、内置功能、生态集成五个维度进行全面评估，帮你找到最适合项目的框架。
 

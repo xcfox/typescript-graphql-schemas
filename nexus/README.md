@@ -16,13 +16,13 @@
 | **Last Commit**     | 2023-03-16                             |
 
 ## 📊 Overall Score
-| Dimension                     | Score (1-5)      | Brief Comment                                                                                            |
-| :---------------------------- | :--------------- | :------------------------------------------------------------------------------------------------------- |
-| **1. Architecture**           | **4.0**          | Builder pattern + code generation, minimal configuration, fully neutral                                  |
-| **2. Type Definition**        | **3.0**          | Builder API + code generation, more explicit declarations, good type safety                              |
-| **3. Resolvers & Validation** | <-To be scored-> | Excellent modularity, good type safety, but validation and DataLoader require manual implementation      |
-| **4. Built-in Features**      | **3.2**          | Core features complete, advanced features via plugins, DataLoader and depth limiting not supported       |
-| **5. Ecosystem Integration**  | **3.5**          | Excellent GraphQL Server and Web framework compatibility, limited ORM and validation library integration |
+| Dimension                     | Score (1-5) | Brief Comment                                                                                            |
+| :---------------------------- | :---------- | :------------------------------------------------------------------------------------------------------- |
+| **1. Architecture**           | **4.0**     | Builder pattern + code generation, minimal configuration, fully neutral                                  |
+| **2. Type Definition**        | **3.0**     | Builder API + code generation, more explicit declarations, good type safety                              |
+| **3. Resolvers & Validation** | **3.0**     | Excellent modularity, good type safety, but validation and DataLoader require manual implementation      |
+| **4. Built-in Features**      | **3.2**     | Core features complete, advanced features via plugins, DataLoader and depth limiting not supported       |
+| **5. Ecosystem Integration**  | **3.5**     | Excellent GraphQL Server and Web framework compatibility, limited ORM and validation library integration |
 
 ---
 
@@ -663,7 +663,7 @@ export const User = objectType({
 
 ### 3.2 Modular Design (Domain-Driven Development Support)
 
-**Score: <-To be scored->**
+**Score: 4.0**
 
 **Implementation Method**:
 - **extendType API**: Supports organizing code by domain modules through `extendType()` (`src/definitions/extendType.ts:91-93`)
@@ -1298,7 +1298,7 @@ Nexus adopts **standard GraphQL Schema output + plugin system** strategy. Output
 
 ### 5.1 ORM Integration Depth (ORM Integration Depth)
 
-**Score: <-To be scored->**
+**Score: 3.0**
 
 **Implementation Method**:
 - **Plugin Support**: Provides `nexus-plugin-prisma` plugin (`docs/content/030-plugins/050-prisma/010-overview.mdx`)
@@ -1377,7 +1377,7 @@ export type Context = {
 
 ### 5.2 Validation Library Integration (Validation Library Integration)
 
-**Score: <-To be scored->**
+**Score: 2.0**
 
 **Implementation Method**:
 - **No Built-in Validation Support**: Nexus does not provide built-in validation functionality
@@ -1434,7 +1434,7 @@ t.nonNull.field('createUser', {
 
 ### 5.3 GraphQL Server Compatibility (Server Compatibility)
 
-**Score: <-To be scored->**
+**Score: 5.0**
 
 **Implementation Method**:
 - **Standard GraphQL Schema Output**: Outputs standard `GraphQLSchema` instance through `makeSchema()`
@@ -1482,7 +1482,7 @@ const yoga = createYoga({ schema })  // Directly use standard GraphQLSchema
 
 ### 5.4 Toolchain Integration (Toolchain Integration)
 
-**Score: <-To be scored->**
+**Score: 3.0**
 
 #### TypeScript/JavaScript Support
 
@@ -1721,12 +1721,12 @@ it('should build the esbuild', async () => {
 
 ### Ecosystem Integration Summary
 
-| Evaluation Item                    | Score            | Description                                                                                                                         |
-| :--------------------------------- | :--------------- | :---------------------------------------------------------------------------------------------------------------------------------- |
-| **ORM Integration Depth**          | <-To be scored-> | Supports integrating Prisma through plugins or manually, requires more configuration and boilerplate code                           |
-| **Validation Library Integration** | <-To be scored-> | Can only use validation libraries manually, requires lots of boilerplate code                                                       |
-| **GraphQL Server Compatibility**   | <-To be scored-> | Fully compatible, outputs standard GraphQLSchema, no adapter needed                                                                 |
-| **Toolchain Integration**          | <-To be scored-> | Supports TypeScript and JavaScript, primarily supports Node.js, supports tsc and esbuild, other build tools need self-configuration |
+| Evaluation Item                    | Score   | Description                                                                                                                         |
+| :--------------------------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------- |
+| **ORM Integration Depth**          | **3.0** | Supports integrating Prisma through plugins or manually, requires more configuration and boilerplate code                           |
+| **Validation Library Integration** | **2.0** | Can only use validation libraries manually, requires lots of boilerplate code                                                       |
+| **GraphQL Server Compatibility**   | **5.0** | Fully compatible, outputs standard GraphQLSchema, no adapter needed                                                                 |
+| **Toolchain Integration**          | **3.0** | Supports TypeScript and JavaScript, primarily supports Node.js, supports tsc and esbuild, other build tools need self-configuration |
 
 **Overall Score: 3.5**
 
